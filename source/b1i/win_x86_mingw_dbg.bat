@@ -15,6 +15,8 @@ mkdir ..\..\bin\win\x86
 mkdir ..\..\bin\win\x86\mingw
 mkdir ..\..\bin\win\x86\mingw\dbg
 
+call get_git_rev.bat
+
 cd ..\..\build\win\x86\mingw\dbg\%project_name%
 cmake -DCMAKE_BUILD_TYPE=Debug ..\..\..\..\..\..\source\%project_name% -G "MinGW Makefiles"
 cmake --build . --target %project_name%

@@ -15,6 +15,8 @@ mkdir ..\..\bin\win\x86
 mkdir ..\..\bin\win\x86\msvc10
 mkdir ..\..\bin\win\x86\msvc10\dbg
 
+call get_git_rev.bat
+
 cd ..\..\build\win\x86\msvc10\dbg\%project_name%
 cmake -A Win32 ..\..\..\..\..\..\source\%project_name%
 cmake --build . --target %project_name% --config Debug

@@ -18,6 +18,8 @@
 #include "b1int.h"
 #include "b1err.h"
 
+#include "gitrev.h"
+
 
 extern B1_T_ERROR b1_ex_prg_set_prog_file(const char *prog_file);
 
@@ -95,6 +97,11 @@ static void b1_print_version(FILE *fstr)
 	fputs("MIT license\n", fstr);
 	fputs("Version: ", fstr);
 	fputs(version, fstr);
+#ifdef B1_GIT_REVISION
+	fputs(" (", fstr);
+	fputs(B1_GIT_REVISION, fstr);
+	fputs(")", fstr);
+#endif
 	fputs("\n", fstr);
 }
 
