@@ -44,7 +44,7 @@
 - optional LET statement  
 - case-insensitive statement, variable and function names  
 - one- and two-dimensional arrays  
-- relational operators can be used with string type  
+- relational operators can be used with strings  
 - automatic numeric to string conversion  
 - functions: ABS, INT, RND, SGN, LEN, ASC, CHR$, STR$, VAL  
 - more functions: IIF, IIF$, ATN, COS, EXP, LOG, PI, SIN, SQR, TAN  
