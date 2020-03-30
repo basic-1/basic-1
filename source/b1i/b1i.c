@@ -114,6 +114,7 @@ int main(int argc, char **argv)
 	clock_t start, end;
 	int print_err_desc = 0;
 	int print_version = 0;
+	int print_short_version = 0;
 
 	if(argc <= 1)
 	{
@@ -168,12 +169,29 @@ int main(int argc, char **argv)
 			print_version = 1;
 			break;
 		}
+
+		// print interpreter short version
+		if((argv[i][0] == '-' || argv[i][0] == '/') &&
+			(argv[i][1] == 'S' || argv[i][1] == 's') &&
+			(argv[i][2] == 'V' || argv[i][2] == 'v') &&
+			argv[i][3] == 0)
+		{
+			print_short_version = 1;
+			break;
+		}
 	}
 
 	if(print_version)
 	{
 		// just print version and stop executing
 		b1_print_version(stdout);
+		return 0;
+	}
+
+	if(print_short_version)
+	{
+		// just print version and stop executing
+		fputs(version, stdout);
 		return 0;
 	}
 

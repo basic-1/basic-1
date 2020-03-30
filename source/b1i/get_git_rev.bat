@@ -1,16 +1,15 @@
+setlocal enabledelayedexpansion
+
 del gitrev.tmp
 del gitrev.h
-
-echo #define B1_GIT_REVISION ^"> gitrev.tmp
 
 git rev-list --count --first-parent HEAD >>gitrev.tmp
 if errorlevel 1 goto _fail
 
-for /f "delims=" %%L in ('type gitrev.tmp') do (
-  set /p "X=%%L" 0<nul >>gitrev.h
-)
+set /p rev=<gitrev.tmp
+if "%~1"=="next" (set /a rev+=1)
 
-echo ^">>gitrev.h
+echo #define B1_GIT_REVISION ^"%rev%^">>gitrev.h
 
 goto _success
 

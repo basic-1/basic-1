@@ -65,12 +65,14 @@ Examples:
 # Project directories structure  
 - `./bin` - binary modules go here  
 - `./build` - a directory for generated project files, objects and other build stuff  
+- `./distr` - distributives  
 - `./samples` - some basic samples  
 - `./source` - source directory  
 - `./source/b1i` - source files of a simple command-line interpreter  
 - `./source/common` - common source files  
 - `./source/core` - interpreter core source files  
 - `./source/ext` - a separate directory for environment-specific source files  
+- `./source/setup` - setup source files  
 - `./LICENSE` - MIT license text file  
 - `./README.md` - this file  
   
