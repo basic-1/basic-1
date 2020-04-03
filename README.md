@@ -66,6 +66,7 @@ Examples:
 - `./bin` - binary modules go here  
 - `./build` - a directory for generated project files, objects and other build stuff  
 - `./distr` - distributives (only zip archives are available at the moment)  
+- `./docs` - documentation directory  
 - `./samples` - some basic samples  
 - `./source` - source directory  
 - `./source/b1i` - source files of a simple command-line interpreter  

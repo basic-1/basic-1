@@ -15,10 +15,15 @@ set out_file_path=..\..\distr\%1_win_%2_%3%version%.zip
 rem delete temp. directories
 rmdir /s /q samples
 rmdir /s /q bin
+rmdir /s /q docs
 
 rem create samples temp. directory and copy sample files there
 mkdir samples
 copy ..\..\samples\*.* samples
+
+rem create docs temp. directory and copy document files there
+mkdir docs
+copy ..\..\docs\*.* docs
 
 rem create temp. bin directory and copy binaries
 mkdir bin
@@ -30,9 +35,10 @@ del %out_file_path%
 rem create distr directory
 mkdir ..\..\distr
 
-rem move temp. bin and samples directories to the archive
+rem move temp. bin, docs and samples directories to the archive
 %path_to_7z% a -sdel -tZIP -- %out_file_path% bin
 %path_to_7z% a -sdel -tZIP -- %out_file_path% samples
+%path_to_7z% a -sdel -tZIP -- %out_file_path% docs
 
 rem add LICENSE and README.md files to the archive
 %path_to_7z% a -tZIP -- %out_file_path% ..\..\LICENSE
