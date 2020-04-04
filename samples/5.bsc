@@ -1,4 +1,7 @@
 REM Solving a system of linear equations
+REM Copyright (c) 2020 Nikolay Pletnev
+REM MIT license
+
 GOSUB 1000
 GOSUB 2000
 GOSUB 3000

@@ -29,7 +29,7 @@ float b1_ex_rnd_rand()
 
 void b1_ex_rnd_randomize()
 {
-	srand((unsigned int)time(NULL) - rand());
+	srand((unsigned int)time(NULL) * rand());
 }
 #endif
 #endif

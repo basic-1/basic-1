@@ -1,15 +1,18 @@
 10  REM Solving quadratic equation
-20  PRINT "Solving quadratic equation a*x^2 + b*x + c = 0"
-30  INPUT "Enter a: ", a
-40  IF a <> 0 THEN GOTO 70
-50  PRINT "Not a quadratic equation, repeat input"
-60  GOTO 30
-70  INPUT "Enter b: ", b
-80  INPUT "Enter c: ", c
-90  LET D = b*b - 4*a*c
-100 IF D >= 0 THEN GOTO 130
-110 PRINT "Discriminant is negative, no real roots"
-120 GOTO 150
-130 PRINT "Roots: ";
-140 PRINT "x1 = "; STR$((-b + SQR(D)) / (2*a)); ", x2 = "; STR$((-b - SQR(D)) / (2*a))
-150 END
+20  REM Copyright (c) 2020 Nikolay Pletnev
+30  REM MIT license
+
+40  PRINT "Solving quadratic equation a*x^2 + b*x + c = 0"
+50  INPUT "Enter a: ", a
+60  IF a <> 0 THEN GOTO 90
+70  PRINT "Not a quadratic equation, repeat input"
+80  GOTO 50
+90  INPUT "Enter b: ", b
+100 INPUT "Enter c: ", c
+110 LET D = b*b - 4*a*c
+120 IF D >= 0 THEN GOTO 150
+130 PRINT "Discriminant is negative, no real roots"
+140 GOTO 170
+150 PRINT "Roots: ";
+160 PRINT "x1 = "; STR$((-b + SQR(D)) / (2*a)); ", x2 = "; STR$((-b - SQR(D)) / (2*a))
+170 END

@@ -1,4 +1,7 @@
 ' Solving quadratic equation
+' Copyright (c) 2020 Nikolay Pletnev
+' MIT license
+
 PRINT "Solving quadratic equation a*x^2 + b*x + c = 0"
 INPUT "Enter a: ", a
 INPUT "Enter b: ", b

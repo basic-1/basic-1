@@ -1,16 +1,19 @@
 10   REM Sort values of numeric array
-20   PRINT "Sorting values of numeric array"
-30   INPUT "Enter array size: ", N
-40   DIM A(N - 1)
-50   PRINT "Enter numbers to sort:"
-60   FOR i = 1 TO N
-70   PRINT i;
-80   INPUT A(i - 1)
-90   NEXT i
-100  GOSUB 1000
-110  GOSUB 2000
-120  INPUT "Press <Enter> to quit...", s$
-130  END
+20   REM Copyright (c) 2020 Nikolay Pletnev
+30   REM MIT license
+
+40   PRINT "Sorting values of numeric array"
+50   INPUT "Enter array size: ", N
+60   DIM A(N - 1)
+70   PRINT "Enter numbers to sort:"
+80   FOR i = 1 TO N
+90   PRINT i;
+100  INPUT A(i - 1)
+110  NEXT i
+120  GOSUB 1000
+130  GOSUB 2000
+140  INPUT "Press <Enter> to quit...", s$
+150  END
 
 1000 REM Sort array A of size 0 .. N - 1
 1010 FOR i = 0 TO N - 2
