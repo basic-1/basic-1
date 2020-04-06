@@ -1,7 +1,9 @@
 # BASIC1  
+  
 *just one more BASIC interpreter*  
   
 # Brief  
+  
 - supports classic BASIC dialect with various extensions  
 - simple line-by-line interpreter  
 - configurable language features/extensions  
@@ -10,11 +12,13 @@
 - licensed under MIT license  
   
 # Data types  
+  
 - STRING  
 - SINGLE (32-bit floating point)  
 - INT (32-bit integer)  
   
 # Statements  
+  
 - DATA  
 - DEF  
 - DIM  
@@ -40,6 +44,7 @@
 - SET MARGIN | ZONEWIDTH | INPUTECHO  
   
 # More features  
+  
 - optional line numbers  
 - optional LET statement  
 - case-insensitive statement, variable and function names  
@@ -51,18 +56,22 @@
 - more functions: MID$, INSTR, LTRIM$, RTRIM$, LEFT$, RIGHT$, LSET$, RSET$, UCASE$, LCASE$  
   
 # Building and usage  
+  
 ## Building  
+  
 Use CMake 3.0 tools to build the project with MinGW-W64 or MSVC compilers. To build **b1i** simple command-line interpreter go to `./source/b1i` directory and run corresponding batch file depending on your compiler: `win_x86_mingw_rel.bat` for MinGW-W64, `win_x86_msvc10_rel.bat` for MSVC10, etc.  
   
 **Important note:** the batch files mentioned above run `win_x86_mingw_env.bat` and `win_x86_msvc10_env.bat` files if they exist to set compiler-specific environment variables(PATH, INCLUDE, LIB, etc.). Create them if necessary before building the project.  
   
 ## Usage  
+  
 **b1i** executable file name of the interpreter for Windows is `b1i.exe`. After successful project building the file can be found in `./bin` directory. The command-line interpreter usage syntax: `b1i.exe [options] <filename>` where `<filename>` is relative or absolute path of a BASIC program file. Possible options: `-d` - print not only error code but textual description too, `-e` - enable input echo (redirects all the text receiving with INPUT statement to output stream), `-t` - print program execution time.  
 Examples:  
 `b1i.exe sample1.bsc`  
 `b1i.exe -e sample2.bsc <input.txt`  
   
 # Project directories structure  
+  
 - `./bin` - binary modules go here  
 - `./build` - a directory for generated project files, objects and other build stuff  
 - `./distr` - distributives (only zip archives are available at the moment)  
