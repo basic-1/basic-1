@@ -1,10 +1,10 @@
-# BASIC1 language syntax (not finished yet)  
+# BASIC1 language reference (not finished yet)  
   
 ## Introduction  
   
 BASIC1 language program is a sequence of text strings (program lines). The interpreter starts executing program from the first line consecutively. Every program line consists of line number, a single BASIC language statement and `EOL` sequence. Line number or statement or both can be absent.  
   
-Line number is a number in the range [1 .. 65535]  
+Line number is a number in the range [1 .. 65530]  
   
 Statement is one of the next BASIC1 language staetments: `DATA`, `DEF`, `DIM`, `ELSE`, `ELSEIF`, `ERASE`, `FOR`, `GOTO`, `GOSUB`, `IF`, `INPUT`, `LET`, `NEXT`, `ON`, `OPTION`, `PRINT`, `RANDOMIZE`, `READ`, `REM`, `RESTORE`, `RETURN`, `SET` and implicit assignment statement (with omitted `LET` keyword). Every statement should start from statement keyword except for the implicit assignment.  
   
@@ -32,7 +32,7 @@ There are two types of comments supported by the interpreter: full-line comments
   
 ## Constants  
   
-Constant is an element of every BASIC program representing a number or text string. String constants are embraced in double quote characters. All double quote characters withing string constants have to be doubled for the interpreter to distinguish them from the embracing characters. Numeric constants can be written in normal or exponential form. Numeric constants allow type specifying character addition at the end. See **Data type specifiers** chapter for details.  
+Constant is an element of every BASIC program representing a number or text string. String constants are embraced in double-quote characters. All double-quote characters withing string constants have to be doubled for the interpreter to distinguish them from the embracing characters. Numeric constants can be written in normal or exponential form. Numeric constants allow type specifying character addition at the end. See **Data type specifiers** chapter for details.  
   
 **Examples of constants:**  
 `"this is a string constant"`  
@@ -56,7 +56,7 @@ Data types supported by the interpreter:
 - `SINGLE` - single precision floating point (32-bit)  
 - `INT` - 32-bit integer type  
   
-Every constant, variable, function or function argument is processed according to its data type. Default numeric data type is `SINGLE`. String constants are enclosed in double quotes and string variables names, names of functions returning string values or names of function string arguments must end with `$` character. BASIC1 interpreter automatically converts operands to the common data type when evaluating every operator. The common data type is selected according to data types priority: `STRING` data type has the highest priority and `INT` - the lowest. When assigning values to variables they are converted to variable data type if possibly.  
+Every constant, variable, function or function argument is processed according to its data type. Default numeric data type is `SINGLE`. String constants are enclosed in double-quotes and string variables names, names of functions returning string values or names of function string arguments must end with `$` character. BASIC1 interpreter automatically converts operands to the common data type when evaluating every operator. The common data type is selected according to data types priority: `STRING` data type has the highest priority and `INT` - the lowest. When assigning values to variables they are converted to variable data type if possibly.  
   
 **Examples of data types:**  
 `s$ = "text"` - assign string constant to the `s$` string variable  
@@ -187,3 +187,68 @@ There are two types of functions in BASIC1: built-in functions and user-defined 
   
 ## Statements  
   
+### `DATA`, `READ`, `RESTORE` statements  
+  
+`DATA`, `READ` and `RESTORE` statements can be used for storing large number of numeric and textual values in BASIC program code and reading them successively.  
+  
+**Usage:**  
+`DATA <value1>, <value2>, ... <valueN>`  
+`READ <var1>, <var2>, ... <varM>`  
+`RESTORE [<line_number>]`  
+  
+`DATA` statement specifies a set of comma-delimited constant values. Textual constants can be enclosed in double-quotes: such values have to meet the rules of BASIC regular string constants definition. The interpreter ignores all blank characters before and after values. A program can have multiple `DATA` statements, the order of the statements in the program determines the order of the values. BASIC1 interpreter has internal next value pointer: at the program execution start it points to the first value defined with `DATA` statements. Every reading operation changes the pointer making it referring the next value. `READ` statement reads values specified with `DATA` statements. `READ` keyword must be followed by either one variable name or comma-separated list of variable names to store values in. `RESTORE` statement sets the next value pointer to the first value of a `DATA` statement identified with the line number coming after `RESTORE` statemenr keyword. `RESTORE` statement without line number sets the pointer to the first value in the program (like at the program execution start).  
+  
+**Examples:**  
+`10 DATA a, b, c` 'three textual constants consisting of single `a`, `b` and `c` letters  
+`20 DATA "a", "b", "c"` 'the same as previous  
+`30 DATA 1, 2, 3` 'three numeric or textual constants  
+`40 DATA " a ", " b""", " c,"` 'three textual constants containing spaces, double-quote and comma  
+`50 READ a$, b$, c$` 'read first three constants into `a$`, `b$` and `c$` variables  
+`60 READ a$, b$, c$` ' read the next three constants  
+`70 READ a$, b$, c$` 'read `1`, `2` and `3` constants as strings  
+`80 RESTORE 30` 'restore the next value pointer to line number 30  
+`90 READ a%, b%, c%` 'read `1`, `2` and `3` constants as integer values  
+`100 READ a$, b$, c$` 'read textual constants with spaces and other special characters: ` a `, ` b"` and ` c,`  
+`110 END`  
+  
+### `DEF` statement  
+`DEF` statement creates a user-defined function. 
+
+**Usage**  
+`DEF <function_name> = <function_expression>` - creating user-defined function without arguments  
+`DEF <function_name>(<arg1>, <arg2>, ... <argN>) = <function_expression>` - creating user-defined function with arguments  
+  
+A user-defined function must be defined before being used. Function arguments are temporary variables existing only when the function is called. They differ from program variables with the same names defined outside the function (so such variables cannot be accessed with the function expression).  
+  
+**Examples:**  
+`DEF RND100 = RND * 100` 'returns a random value from within a range (0, 100)  
+`DEF MIN(A, B) = IIF(A > B, B, A)` 'returns a minimum of the two values specified with arguments  
+`DEF CIRCAREA(R) = PI * R ^ 2` 'area of circle with radius R  
+`DEF ROUND%(A) = A` 'converts floating-point value to integer  
+`DEF CONCAT3$(S1$, S2$, S3$) = S1$ + S2$ + S3$` 'concatenates three string values  
+  
+### `DIM` and `ERASE` statements  
+  
+### `IF`, `ELSE`, `ELSEIF` statements  
+  
+### `FOR`, `NEXT` statements  
+  
+### `GOTO` statement  
+  
+### `GOSUB` and `RETURN` statements  
+  
+### `INPUT` statement  
+  
+### `LET` statement  
+  
+### `ON` ... `GOTO`|`GOSUB` statements  
+  
+### `OPTION` statement  
+  
+### `PRINT` statement  
+  
+### `RANDOMIZE` statement  
+  
+### `REM` statement  
+  
+### `SET` statement  

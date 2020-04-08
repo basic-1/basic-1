@@ -37,8 +37,8 @@
 
 #define B1_T_PROG_LINE_CNT_MAX_VALUE (UINT16_MAX)
 #define B1_T_LINE_NUM_MIN_VALUE ((B1_T_LINE_NUM)1)
-// 3 reserved values
-#define B1_T_LINE_NUM_MAX_VALUE ((B1_T_LINE_NUM)((UINT16_MAX) - 3))
+// 5 reserved values
+#define B1_T_LINE_NUM_MAX_VALUE ((B1_T_LINE_NUM)((UINT16_MAX) - 5))
 
 #define B1_T_MEM_BLOCK_DESC_INVALID ((B1_T_MEM_BLOCK_DESC)NULL)
 
