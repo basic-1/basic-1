@@ -4,9 +4,9 @@
   
 BASIC1 language program is a sequence of text strings (program lines). The interpreter starts executing program from the first line consecutively. Every program line consists of line number, a single BASIC language statement and `EOL` sequence. Line number or statement or both can be absent.  
   
-Line number is a number in the range [1 .. 65530]  
+Line number is a number in the range [1 ... 65530]  
   
-Statement is one of the next BASIC1 language staetments: `DATA`, `DEF`, `DIM`, `ELSE`, `ELSEIF`, `ERASE`, `FOR`, `GOTO`, `GOSUB`, `IF`, `INPUT`, `LET`, `NEXT`, `ON`, `OPTION`, `PRINT`, `RANDOMIZE`, `READ`, `REM`, `RESTORE`, `RETURN`, `SET` and implicit assignment statement (with omitted `LET` keyword). Every statement should start from statement keyword except for the implicit assignment.  
+Statement is one of the next BASIC1 language statements: `DATA`, `DEF`, `DIM`, `ELSE`, `ELSEIF`, `ERASE`, `FOR`, `GOTO`, `GOSUB`, `IF`, `INPUT`, `LET`, `NEXT`, `ON`, `OPTION`, `PRINT`, `RANDOMIZE`, `READ`, `REM`, `RESTORE`, `RETURN`, `SET` and implicit assignment statement (with omitted `LET` keyword). Every statement should start from statement keyword except for the implicit assignment.  
   
 **Examples of program lines:**  
 `10 REM RANDOMIZE statement`  
@@ -192,8 +192,8 @@ There are two types of functions in BASIC1: built-in functions and user-defined 
 `DATA`, `READ` and `RESTORE` statements can be used for storing large number of numeric and textual values in BASIC program code and reading them successively.  
   
 **Usage:**  
-`DATA <value1>, <value2>, ... <valueN>`  
-`READ <var1>, <var2>, ... <varM>`  
+`DATA <value1>[, <value2>, ... <valueN>]`  
+`READ <var_name1>[, <var_name2>, ... <var_nameM>]`  
 `RESTORE [<line_number>]`  
   
 `DATA` statement specifies a set of comma-delimited constant values. Textual constants can be enclosed in double-quotes: such values have to meet the rules of BASIC regular string constants definition. The interpreter ignores all blank characters before and after values. A program can have multiple `DATA` statements, the order of the statements in the program determines the order of the values. BASIC1 interpreter has internal next value pointer: at the program execution start it points to the first value defined with `DATA` statements. Every reading operation changes the pointer making it referring the next value. `READ` statement reads values specified with `DATA` statements. `READ` keyword must be followed by either one variable name or comma-separated list of variable names to store values in. `RESTORE` statement sets the next value pointer to the first value of a `DATA` statement identified with the line number coming after `RESTORE` statemenr keyword. `RESTORE` statement without line number sets the pointer to the first value in the program (like at the program execution start).  
@@ -214,9 +214,9 @@ There are two types of functions in BASIC1: built-in functions and user-defined 
 ### `DEF` statement  
 `DEF` statement creates a user-defined function. 
 
-**Usage**  
+**Usage:**  
 `DEF <function_name> = <function_expression>` - creating user-defined function without arguments  
-`DEF <function_name>(<arg1>, <arg2>, ... <argN>) = <function_expression>` - creating user-defined function with arguments  
+`DEF <function_name>(<arg_name1>[, <arg_name2>, ... <arg_nameN>]) = <function_expression>` - creating user-defined function with arguments  
   
 A user-defined function must be defined before being used. Function arguments are temporary variables existing only when the function is called. They differ from program variables with the same names defined outside the function (so such variables cannot be accessed with the function expression).  
   
@@ -228,8 +228,47 @@ A user-defined function must be defined before being used. Function arguments ar
 `DEF CONCAT3$(S1$, S2$, S3$) = S1$ + S2$ + S3$` 'concatenates three string values  
   
 ### `DIM` and `ERASE` statements  
+`DIM` statement allocates memory for variable(-s) and `ERASE` statement frees memory occupied by variable(-s). By default BASIC1 interpreter creates a variable when meets it first in an expression. The behavior can be changed by specifying `OPTION EXPLICIT` statement in the beginning of a program. If the explicit variables declaration option is turned on every variable must be created with `DIM` statement before usage.  
+  
+**Usage:**  
+`<var_decl> = <var_name>[([<subs1_lower> TO ]<subs1_upper>[, [<subs2_lower> TO ]<subs2_upper>])][AS <type_name>]`  
+`DIM <var_decl1>[, <var_decl2>, ... <var_declN>]`  
+`ERASE <var_name1>[, <var_name2>, ... <var_nameM>]`  
+  
+`<subs1_lower>`, `<subs1_upper>`, `<subs2_lower>`, `<subs2_upper>` must be numeric expressions responsible to variable subscripts. If a lower subscript is omitted it is taken equal to zero. The default lower subscript value can be changed with `OPTION BASE` statement. Now BASIC1 interpreter supports only one- and two-dimensional subscripted variables (arrays).  Optional variable type `<var_type>` must be one of the types described in the **Data types** chapter above. The type must correspond to the variable's data type specifier if it is present. If both data type specifier and data type name are omitted the statement creates variable of default numeric type (`SINGLE`).  
+  
+**Examples:**  
+`DIM I%, I AS INT` 'declare two integer variables  
+`DIM I1% AS INT` 'declare `I1%` integer variable  
+`DIM A, A!, B AS SINGLE, B! AS SINGLE` 'declare floating-point variables  
+`DIM S1$, S2$ AS STRING` 'declare two string variables  
+`DIM IARR(25) AS INT` 'declare one-dimensional integer array with valid subscript range [0 ... 25]  
+`DIM IARR1%(-10 TO 10)` 'integer array with subscript range [-10 ... 10]  
+`DIM MAP(0 TO 10, 0 TO 10), MSG$(10)` 'two-dimensional floating-point array and one-dimensional string array  
+`ERASE MAP, MSG$` 'free memory occupied by `MAP` and `MSG$` variables  
+`ERASE I%, I, I1%` 'delete three variables  
   
 ### `IF`, `ELSE`, `ELSEIF` statements  
+`IF`, `ELSE`, `ELSEIF` statements allow executing other statements conditionaly depending on logical expression result.  
+  
+**Usage**:  
+`IF <logical_expr1> THEN <statement1> | <line_number1>`  
+`ELSEIF <logical_expr2> THEN <statement2> | <line_number2>`  
+`...`  
+`ELSEIF <logical_exprN> THEN <statementN> | <line_numberN>`  
+`ELSE <statementE> | <line_numberE>`  
+  
+`IF` statement must be the first statement in every `IF`, `ELSE`, `ELSEIF` statements group and `ELSE` statement must be the last. `ELSE` and `ELSEIF` statements are optional. BASIC interpreter evaluates every logical expression one by one and tests their resulting values: the first expression that evaluates to TRUE value causes corresponding statement execution. The rest of `ELSEIF` and `ELSE` statements are skipped. `ELSE` statement is executed only if all logical expressions of preceding `IF` and `ELSEIF` statements evaluate to FALSE. `IF`, `ELSE`, `ELSEIF` statements allow specifing line numbers after `THEN` and `ELSE` keywords (instead of the statements to execute): in this case interpreter just changes order of statements execution and goes to processing of a program line identified with the line number.  
+  
+**Examples:**  
+`10 A = 10`  
+`20 B = 20`  
+`30 IF A < B THEN S$ = "A < B"` '`A < B` evaluates to TRUE so `S$ = "A < B"` will be executed  
+`40 ELSEIF A > B THEN S$ = "A = B"` 'this statement will be skipped  
+`50 ELSE S$ = "A = B"` 'skipped too  
+`60 IF B > 5 THEN 80` '`B > 5` evaluates to TRUE so interpreter goes executing statement on line 80  
+`70 A = B` 'this statement will not be executed  
+`80 END`  
   
 ### `FOR`, `NEXT` statements  
   
