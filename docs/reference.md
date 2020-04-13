@@ -212,6 +212,7 @@ There are two types of functions in BASIC1: built-in functions and user-defined 
 `110 END`  
   
 ### `DEF` statement  
+  
 `DEF` statement creates a user-defined function. 
 
 **Usage:**  
@@ -228,6 +229,7 @@ A user-defined function must be defined before being used. Function arguments ar
 `DEF CONCAT3$(S1$, S2$, S3$) = S1$ + S2$ + S3$` 'concatenates three string values  
   
 ### `DIM` and `ERASE` statements  
+  
 `DIM` statement allocates memory for variable(-s) and `ERASE` statement frees memory occupied by variable(-s). By default BASIC1 interpreter creates a variable when meets it first in an expression. The behavior can be changed by specifying `OPTION EXPLICIT` statement in the beginning of a program. If the explicit variables declaration option is turned on every variable must be created with `DIM` statement before usage.  
   
 **Usage:**  
@@ -249,6 +251,7 @@ A user-defined function must be defined before being used. Function arguments ar
 `ERASE I%, I, I1%` 'delete three variables  
   
 ### `IF`, `ELSE`, `ELSEIF` statements  
+  
 `IF`, `ELSE`, `ELSEIF` statements allow executing other statements conditionaly depending on logical expression result.  
   
 **Usage**:  
@@ -273,6 +276,20 @@ A user-defined function must be defined before being used. Function arguments ar
 ### `FOR`, `NEXT` statements  
   
 ### `GOTO` statement  
+  
+`GOTO` statement changes normal program line execution order, interpreter goes to a program line specified with line number coming after `GOTO` keyword.  
+
+**Usage:**  
+`GOTO <line_number>`  
+  
+**Examples:**  
+`10 A = 10`  
+`20 GOTO 40`  
+`30 A = 20` 'this line will never be executed  
+`40 PRINT A` 'here `A` variable is equal to 10  
+`50 END`  
+  
+`10 GOTO 10` 'an infinite loop  
   
 ### `GOSUB` and `RETURN` statements  
   
