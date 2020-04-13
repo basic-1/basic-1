@@ -7,12 +7,16 @@
 ]]
 
 
+if(UNIX)
+ set(CMAKE_CXX_STANDARD 11)
+endif()
+
 # set project (target) name
 set(B1_PROJECT_NAME b1i)
 
 project(${B1_PROJECT_NAME} LANGUAGES C CXX)
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
 
 set(B1_CORE_SRC_DIR ../core)
 set(B1_EXT_SRC_DIR ../ext)
