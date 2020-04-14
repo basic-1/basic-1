@@ -49,6 +49,8 @@ Identifier is a program element representing function or variable. Identifier na
 `a` - can be a numeric variable name or a function returning numeric value  
 `s$`, `s1$`, `text$` - string variables or functions names  
   
+## Variables  
+  
 ## Data types  
   
 Data types supported by the interpreter:  
@@ -275,6 +277,46 @@ A user-defined function must be defined before being used. Function arguments ar
   
 ### `FOR`, `NEXT` statements  
   
+`FOR` and `NEXT` statements are used to organize loops allowing statements to be executed repeatedly.  
+  
+**Usage:**  
+`FOR <loop_var_name> = <init_value> TO <end_value> [STEP <incr_value>]`  
+`<statement_to_repeat1>`  
+` ... `  
+`<statement_to_repeatN>`  
+`NEXT [<loop_var_name>]`  
+  
+Here `<loop_var_name>` is a loop control numeric variable name, `<init_value>` and `<end_value>` are numeric expressions specifying initial and ending variable values and optional `<incr_value>` is a numeric expression specifying the value at which the variable is incremented on each loop iteration. If `STEP <incr_value>` clause is omitted the interpreter assumes the value is equal to 1. All three values are evaluated only once on the loop initialization stage. The loop terminates when the control variable's value reaches the ending value of the loop. Statements within `FOR` - `NEXT` loop can include another loop called inner or nested.  
+  
+**Samples:**  
+`A = 0`  
+`B = 1`  
+`FOR I = 1 TO 10` '`I` variable changes from 1 to 10 within the loop, increment value is 1  
+`A = A + I`  
+`B = B * I`  
+`NEXT I`  
+`PRINT I, A, B`' here `I` = 11, `A` = 55, `B` = 3628800  
+`END`  
+  
+`A = 0`  
+`B = 1`  
+`FOR I = -1 TO -10 STEP -1` '`I` variable changes from -1 to -10 within the loop, increment value is -1  
+`A = A + I`  
+`B = B * I`  
+`NEXT` '`NEXT` statement allows omitting variable name  
+`PRINT I, A, B`' here `I` = -11, `A` = -55, `B` = 3628800  
+`END`  
+  
+`REM nested loop sample`  
+`A = 0`  
+`FOR I = -1 TO -10 STEP -0.5` 'outer loop, increment can be a fractional value  
+`FOR J = 1 TO 10` 'inner or nested loop  
+`A = A + I * J`  
+`NEXT` 'loop control variable name is omitted: `J` variable is assumed  
+`NEXT` '`I` loop control variable is assumed  
+`PRINT I, J, A` 'here `I` = -10.5, `J` = 11, `A` = -5747.5  
+`END`  
+  
 ### `GOTO` statement  
   
 `GOTO` statement changes normal program line execution order, interpreter goes to a program line specified with line number coming after `GOTO` keyword.  
@@ -296,6 +338,18 @@ A user-defined function must be defined before being used. Function arguments ar
 ### `INPUT` statement  
   
 ### `LET` statement  
+  
+`LET` statement assignes result of an expression evaluation to a variable.  
+  
+**Usage:**  
+`LET <var_name> = <expression>`  
+  
+The expression has to evaluate to a numeric or string value and type of the variable has to be compatible with the value's type. BASIC1 interpreter implicitly converts any numeric value to a string and different numeric data types between each other (even with data loss). `LET` statement has a simplified form with omitted `LET` keyword. So the interpreter treats a program line without statement keyword as `LET` statement.  
+  
+**Examples:**  
+`10 LET A = 10` 'assign value 10 to `A` variable  
+`20 LET A = A * A + RND` 'more complex expression sample on the right side of the assignment operator  
+`30 A = A + 1` 'implicit `LET` statement (with omitted keyword)  
   
 ### `ON` ... `GOTO`|`GOSUB` statements  
   
