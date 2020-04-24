@@ -3,9 +3,9 @@
 unlink gitrev.h
 touch gitrev.h
 
-if git_rev=$(git rev-list --count --first-parent HEAD)
+if git_rev=`git rev-list --count --first-parent HEAD`
 then
-  if [ "$1" = "next" ]
+  if [ "$1" == "next" ]
   then
     ((git_rev++))
   fi
