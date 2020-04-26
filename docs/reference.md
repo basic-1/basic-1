@@ -335,7 +335,39 @@ Here `<loop_var_name>` is a loop control numeric variable name, `<init_value>` a
   
 ### `GOSUB` and `RETURN` statements  
   
+`GOSUB` and `RETURN` statements can be used to organize subroutine calls. `GOSUB` statement changes program line execution order similar to `GOTO` statement but it saves its program line pointer and then `RETURN` statement goes back to execution of a statement following the line saved by `GOSUB`.  
+  
+**Usage:**  
+`GOSUB <subroutine_line_number>`  
+`RETURN`  
+  
+**Examples:**  
+`10 A = 1`  
+`20 GOSUB 1000` 'go to a subroutine on line 1000  
+`30 PRINT A` 'here `A` is equal to 2  
+`40 GOSUB 1000` 'go to the subroutine a time more  
+`50 PRINT A` 'here `A` isd equal to 3  
+`60 GOSUB 1000`  
+`70 PRINT A` 'here `A` is equal to 4  
+`80 END`  
+`1000 A = A + 1` ' the subroutine increments `A` variable  
+`1010 RETURN` 'return from the subroutine  
+  
 ### `INPUT` statement  
+  
+`INPUT` statement reads user input data from keyboard and stores it in variables.  
+  
+**Usage:**  
+`INPUT [<prompt>,] <var_name1>[, <var_name2>, ... <var_nameN>]`  
+  
+Here `<prompt>` is an optional string constant displaying to user before reading input data. Default user prompt string is "? ". After displaying the prompt the statement starts reading values from keyboard and assigning them to specified variables one by one. Input values must be separated with commas and the values number must be equal to the number of specified variables. The interpreter repeats the input if it fails with parsing of entered data.  
+  
+**Examples:**  
+`INPUT A, B, C` 'input three numeric values  
+`INPUT A%, B%, C%` 'input three integer values  
+`INPUT A$` 'input a text value  
+`INPUT "Enter your age: ", AGE` 'enter one numeric value with prompt  
+`IF AGE > 100 THEN PRINT "You're so old"`  
   
 ### `LET` statement  
   
