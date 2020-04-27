@@ -43,13 +43,21 @@ Constant is an element of every BASIC program representing a number or text stri
   
 ## Identifiers  
   
-Identifier is a program element representing function or variable. Identifier name must start from a Latin letter, can consist of Lating letters and digits, can end with a type specifier and must not be longer than 31 character. Type specifier character is mandatory for names of identifiers representing string variables or functions returing string values. String type specifier is `$` character. Numeric type specifiers are optional. Identifier names are case-insensitive so identifiers `var1`, `Var1` and `VAR1` all refer to the same function or variable.  
+Identifier is a text string representing function or variable. Identifier must start from a Latin letter, can consist of Lating letters and digits, can end with a type specifier and must not be longer than 31 character. Type specifier character is mandatory for identifiers representing string variables or functions returing string values. String type specifier is `$` character. Numeric type specifiers are optional. Identifier are case-insensitive so identifiers `var1`, `Var1` and `VAR1` all refer to the same function or variable.  
   
 **Examples of identifiers:**  
 `a` - can be a numeric variable name or a function returning numeric value  
 `s$`, `s1$`, `text$` - string variables or functions names  
   
 ## Variables  
+  
+Variable is a named program object used for storing values. In BASIC program variables are represented with identifiers. Every variable has data type which determines the values that the variable can contain. BASIC1 data types are described below (see **Data types** chapter). There are two types of variables supported by BASIC1 interpreter: simple variables and subscripted variables. A simple variable can contain a single value only and a subscripted variable can contain multiple values, each identified with subscript(-s). Subscripted variables are often called arrays. BASIC1 interpreter supports one- and two-dimensional arrays. Interpreter creates a variable when it meets it in the program for the first time. Right after creation a variable gets a value choosen as default value for its data type: zero for numeric data types and empty string for textual one. Simple and subscripted variables can be created explicitly using `DIM` statement. Subscripted variables created implicitly get minimum subscript value equal to 0 and maximum subscript value equal to 10. Minimum subscript value can be changed with `OPTION BASE` statement. **limits.md** document lists data type, subscript and other interpreter limitations.  
+  
+**Examples:**  
+`A = 10` 'here `A` is a numeric variable  
+`SV(1) = 10` '`SV` is a numeric subscripted variable (numeric array)  
+`SV2(10, 10) = 100` '`SV2` is a numeric two-dimensional subscripted variable  
+`S$ = "a string of text"` '`S$` is a simple string variable  
   
 ## Data types  
   
@@ -138,7 +146,7 @@ Operator precedence determines the order of operators evaluation in one expressi
   
 ## Functions  
   
-Function is a named block of code that can be reused multiple times calling it by the name in expressions. Usually functions take one or more arguments and return some value. A function call in expression consists of the function name and the function arguments list enclosed in parentheses. Arguments must be delimited from each other with commas. Some functions allows omitting arguments.  
+Function is a named block of code that can be reused multiple times by calling it by its name in expressions. Usually functions take one or more arguments and return some value. A function call in expression consists of the function name and the function arguments list enclosed in parentheses. Arguments must be delimited from each other with commas. Some functions allows omitting arguments.  
   
 **Examples of function calls:**  
 `A = SIN(X)` - calling `SIN` function accepting one argument  
@@ -384,6 +392,25 @@ The expression has to evaluate to a numeric or string value and type of the vari
 `30 A = A + 1` 'implicit `LET` statement (with omitted keyword)  
   
 ### `ON` ... `GOTO`|`GOSUB` statements  
+  
+The statements are similar to `GOTO` and `GOSUB` statements: they change normal program line execution order but allow selecting destination program line number from list of line numbers.  
+  
+**Usage:**  
+`ON <numeric_expression> GOTO <line_number1>[, <line_number2>, ... <line_numberN>]`  
+`ON <numeric_expression> GOSUB <line_number1>[, <line_number2>, ... <line_numberN>]`  
+  
+BASIC1 interpreter evaluates an expression `<numeric_expression>` and then selects line number to proceed with `GOTO` or `GOSUB` according to the expression result: if the result is 1 it takes the first line number from the list, if the result is 2 - the second, etc. If the result is less than one or greater than the number of line numbers in the list an error is reported.  
+  
+**Examples:**  
+`10 A = 2`  
+`20 ON A - 1 GOSUB 100, 200, 300` 'the first line number from the list will be selected  
+`30 END`  
+`100 PRINT "first"` 'this subroutine will be called with `ON ... GOSUB` statement  
+`110 RETURN`  
+`200 PRINT "second"`  
+`210 RETURN`  
+`300 PRINT "third"`  
+`310 RETURN`  
   
 ### `OPTION` statement  
   
