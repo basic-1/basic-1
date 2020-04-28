@@ -1,6 +1,12 @@
 #!/bin/bash
 # <project_name> <platform> <compiler> <configuration> <cmake1_options> <is_next_revision>
 
+if [ "$1" = "" ] || [ "$2" = "" ] || [ "$3" = "" ] || [ "$4" = "" ] || [ "$5" = "" ]
+then
+  echo "invalid arguments"
+  exit 1
+fi
+
 project_name=$1
 platform=$2
 compiler=$3

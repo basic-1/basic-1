@@ -76,7 +76,7 @@ fakeroot dpkg-deb --build $project_name
 rm -r ./$project_name
 
 #delete package with the same name from distr directory
-rm ../../distr/${project_name}_lnx_${lnx_arch}_${version}-*.deb
+rm ../../distr/${project_name}_lnx_${lnx_arch}_${compiler}_${version}-*.deb
 
 #move the package to distr directory
-mv $project_name.deb ../../distr/${project_name}_lnx_${lnx_arch}_${version}-${build_num}.deb
+mv $project_name.deb ../../distr/${project_name}_lnx_${lnx_arch}_${compiler}_${version}-${build_num}.deb
