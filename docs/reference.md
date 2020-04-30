@@ -1,4 +1,4 @@
-# BASIC1 language reference (not finished yet)  
+# BASIC1 language reference  
   
 ## Introduction  
   
@@ -247,7 +247,7 @@ A user-defined function must be defined before being used. Function arguments ar
 `DIM <var_decl1>[, <var_decl2>, ... <var_declN>]`  
 `ERASE <var_name1>[, <var_name2>, ... <var_nameM>]`  
   
-`<subs1_lower>`, `<subs1_upper>`, `<subs2_lower>`, `<subs2_upper>` must be numeric expressions responsible to variable subscripts. If a lower subscript is omitted it is taken equal to zero. The default lower subscript value can be changed with `OPTION BASE` statement. Now BASIC1 interpreter supports only one- and two-dimensional subscripted variables (arrays).  Optional variable type `<var_type>` must be one of the types described in the **Data types** chapter above. The type must correspond to the variable's data type specifier if it is present. If both data type specifier and data type name are omitted the statement creates variable of default numeric type (`SINGLE`).  
+`<subs1_lower>`, `<subs1_upper>`, `<subs2_lower>`, `<subs2_upper>` must be numeric expressions responsible to lower and upper boundaries of variable subscripts. If a lower boundary of subscript is omitted it is taken equal to zero. The default value of lower boundary of subscripts can be changed with `OPTION BASE` statement. Now BASIC1 interpreter supports only one- and two-dimensional subscripted variables (arrays).  Optional variable type `<var_type>` must be one of the types described in the **Data types** chapter above. The type must correspond to the variable's data type specifier if it is present. If both data type specifier and data type name are omitted the statement creates variable of default numeric type (`SINGLE`).  
   
 **Examples:**  
 `DIM I%, I AS INT` 'declare two integer variables  
@@ -296,7 +296,7 @@ A user-defined function must be defined before being used. Function arguments ar
   
 Here `<loop_var_name>` is a loop control numeric variable name, `<init_value>` and `<end_value>` are numeric expressions specifying initial and ending variable values and optional `<incr_value>` is a numeric expression specifying the value at which the variable is incremented on each loop iteration. If `STEP <incr_value>` clause is omitted the interpreter assumes the value is equal to 1. All three values are evaluated only once on the loop initialization stage. The loop terminates when the control variable's value reaches the ending value of the loop. Statements within `FOR` - `NEXT` loop can include another loop called inner or nested.  
   
-**Samples:**  
+**Examples:**  
 `A = 0`  
 `B = 1`  
 `FOR I = 1 TO 10` '`I` variable changes from 1 to 10 within the loop, increment value is 1  
@@ -414,10 +414,65 @@ BASIC1 interpreter evaluates an expression `<numeric_expression>` and then selec
   
 ### `OPTION` statement  
   
+`OPTION` is a special statement that changes interpreter's behavior. The statement affects on entire program and all `OPTION` statements must precede any significant statement of a program (`REM` is the only statement which can be used prior to `OPTION`). There are two options supported by BASIC1 interpreter: `OPTION BASE` and `OPTION EXPLICIT`.  
+  
+**Usage:**  
+`OPTION BASE 0 | 1`  
+`OPTION EXPLICIT [ON | OFF]`  
+  
+`OPTION BASE` statement specifies default value of lower boundary of variable subscripts. At the program execution beginning the value is set to zero. The statement allows changing it to 1.  
+  
+`OPTION EXPLICIT` is used to turn on the explicit mode of variables creation. If the mode is enabled every variable must be created with `DIM` statement prior to usage. At the program execution beginning the explicit mode is disabled. Omitting `ON` and `OFF` keywords is interpreted as enabling the mode.  
+  
+**Examples:**:  
+`10 OPTION BASE 1`  
+`20 DIM IARR(25) AS INT` 'declare one-dimensional integer array with valid subscript range [1 ... 25]  
+`30 ARR(1, 1) = 10` 'here interpreter will create two-dimensional `ARR` array with subscripts ranges [1 ... 10]  
+  
+`10 OPTION EXPLICIT` 'the same as `OPTION EXPLICIT ON`  
+`20 DIM A, B, C` 'explicit variables creation: every variable must be created using `DIM` statement  
+  
 ### `PRINT` statement  
+  
+The statement writes textual data to an output device (usually it is display).  
+  
+**Usage:**  
+`PRINT <expression1> [, | ; <expression2> , | ; ... <expressionN>] [, | ;]`  
+  
+Interpreter evaluates expressions specified with `PRINT` statement and writes result values to output device one by one. Textual values are written as is and numeric values are first converted to textual representation. Comma expression separator makes the interpreter write the next value in the next print zone and semicolon separator allows writing values one after another. Finally `PRINT` statement writes end-of-line sequence if the expressions list does not terminate with semicolon. Putting semicolon at the end of the statement makes interpreter leave cursor on the current line.  Entire print area is assumed to be divided into print zones. `PRINT` statement writes a value starting from the next print zone if the expression is separated from previous one with comma. The interpreter uses two special values to locate the next print zone: `MARGIN` and `ZONEWIDTH`. `MARGIN` is the maximum width of output device (in characters) and `ZONEWIDTH` is a width of one print zone. Default margin value is set to 80 characters and zone width is set to 10 characters so there are 8 print zones in a single line. Margin and zone width values can be changed with `SET MARGIN` and `SET ZONEWIDTH` statements.  
+  
+**Examples:**  
+`PRINT` 'just go to the new line  
+`PRINT A, B, C` 'print values of `A`, `B` and `C` variables, each in its separate print zone  
+`PRINT A, B, C;` 'the same as previous but without moving cursor on new line  
+`PRINT A$; B$; C$` 'print values of `A$`, `B$` and `C$` variables one right after another  
+`PRINT "0"; TAB(6); "5"; TAB(11); "A"; TAB(16); "F"` 'prints "0    5    A    F" text  
+`PRINT "0"; SPC(4); "5"; SPC(4); "A"; SPC(4); "F"` 'another way to print "0    5    A    F" text  
   
 ### `RANDOMIZE` statement  
   
+`RANDOMIZE` statement initializes random-sequence generator making it start a new random values sequence. See also `RND` function description.  
+  
+**Usage:**  
+`RANDOMIZE`  
+  
 ### `REM` statement  
   
+The statement is used to write remarks or comments in program text. Interpreter ignores all the text between the statement and the end of the line. `REM` is the only statement that can precede `OPTION` statements in a program.  
+  
+**Usage:**  
+`REM [<comment_text>]`  
+  
 ### `SET` statement  
+  
+`SET` is similar to `OPTION` statement because it changes interpreter behavior but in contrast to `OPTION` statement it can be used in any part of a program. Now the statement allows changing the next parameters `MARGIN` and `ZONEWIDTH`, both of them have effect on `PRINT` statement.  
+  
+**Usage:**  
+`SET MARGIN <new_margin>`  
+`SET ZONEWIDTH <new_zonewidth>`  
+  
+`<new_margin>` and `<new_zonewidth>` must be integer constants designating print area margin and print zone width (see `PRINT` statement description for details).  
+  
+**Examples:**  
+`SET MARGIN 80`  
+`SET ZONEWIDTH 10`  

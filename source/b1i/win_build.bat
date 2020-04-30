@@ -2,6 +2,19 @@ rem usage: win_build.bat <project_name> <platform> <compiler> <configuration> <c
 rem sample: win_build.bat b1i x86 msvc19 rel "-G ""Visual Studio 16 2019"" "--config Release" ".\Release" "next"
 rem sample: win_build.bat b1i x64 mingw dbg "-G ""MinGW Makefiles"" -DCMAKE_BUILD_TYPE=Debug" " " "." " "
 
+if "%~1"=="" goto _invargs
+if "%~2"=="" goto _invargs
+if "%~3"=="" goto _invargs
+if "%~4"=="" goto _invargs
+if "%~7"=="" goto _invargs
+goto _argsok
+
+:_invargs
+echo invalid arguments
+goto _exit
+
+:_argsok
+
 rem remove embracing double-quotes and replace doubled double-quotes with single ones
 set cm1_opts=%~5
 if not "%cm1_opts%"=="" (set cm1_opts=%cm1_opts:""="%)
