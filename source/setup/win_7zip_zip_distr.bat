@@ -34,7 +34,11 @@ del gitrev.tmp
 if "%~4"=="next" (set /a build_num+=1)
 
 rem get interpreter version
-for /f %%L in ('..\..\bin\win\%platform%\%compiler%\rel\%project_name%.exe /sv') do set version=%%L
+set /p version=<..\%project_name%\version.h
+set version=%version:#define=%
+set version=%version:B1_INT_VERSION=%
+set version=%version:"=%
+set version=%version: =%
 
 rem archive file name and path
 set out_file_path=..\..\distr\%project_name%_win_%platform%_%compiler%_%version%

@@ -12,12 +12,16 @@ lnx_arch=$3
 compiler=$4
 depends=$5
 
-version=`../../bin/lnx/$platform/$compiler/rel/$project_name /sv`
+version=$(cat "../$project_name/version.h" | tr -d '\r' | tr -d '\n')
 if [ $? -ne 0 ]
 then
   echo "get version error"
   exit 1
 fi
+version=${version/"#define"/}
+version=${version/"B1_INT_VERSION"/}
+version=${version// /}
+version=${version//'"'/}
 
 build_num=`git rev-list --count --first-parent HEAD`
 if [ $? -ne 0 ]
@@ -26,7 +30,10 @@ then
   exit 1
 fi
 
-((build_num++))
+if [ "$6" = "next" ]
+then
+  ((build_num++))
+fi
 
 #create directories for deb package
 mkdir -p ./$project_name

@@ -18,13 +18,14 @@
 #include "b1int.h"
 #include "b1err.h"
 
+#include "version.h"
 #include "gitrev.h"
 
 
 extern B1_T_ERROR b1_ex_prg_set_prog_file(const char *prog_file);
 
 
-static const char *version = "1.0.0";
+static const char *version = B1_INT_VERSION;
 
 static const char *err_msgs[] =
 {
@@ -114,7 +115,6 @@ int main(int argc, char **argv)
 	clock_t start, end;
 	int print_err_desc = 0;
 	int print_version = 0;
-	int print_short_version = 0;
 
 	if(argc <= 1)
 	{
@@ -169,29 +169,12 @@ int main(int argc, char **argv)
 			print_version = 1;
 			break;
 		}
-
-		// print interpreter short version
-		if((argv[i][0] == '-' || argv[i][0] == '/') &&
-			(argv[i][1] == 'S' || argv[i][1] == 's') &&
-			(argv[i][2] == 'V' || argv[i][2] == 'v') &&
-			argv[i][3] == 0)
-		{
-			print_short_version = 1;
-			break;
-		}
 	}
 
 	if(print_version)
 	{
 		// just print version and stop executing
 		b1_print_version(stdout);
-		return 0;
-	}
-
-	if(print_short_version)
-	{
-		// just print version and stop executing
-		fputs(version, stdout);
 		return 0;
 	}
 
