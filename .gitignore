@@ -1,3 +1,4 @@
 bin/
 build/
 source/b1i/*_env.bat
+source/b1i/*_env.sh

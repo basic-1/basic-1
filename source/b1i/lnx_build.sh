@@ -27,6 +27,11 @@ mkdir ../../bin/lnx/$platform/$compiler/$configuration
 
 ./get_git_rev.sh "$6"
 
+if [ -f "./lnx_${platform}_${compiler}_env.sh" ]
+then
+  . ./lnx_${platform}_${compiler}_env.sh
+fi
+
 cd ../../build/lnx/$platform/$compiler/$configuration/$project_name
 
 cmake ../../../../../../source/$project_name $5

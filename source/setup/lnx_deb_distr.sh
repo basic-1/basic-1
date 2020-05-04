@@ -69,7 +69,7 @@ cp ../../docs/changelog ./$project_name/usr/share/doc/$project_name/changelog
 gzip -9 -n -S.Debian.gz ./$project_name/usr/share/doc/$project_name/changelog
 
 #strip copied executable
-strip --strip-all ./$project_name/usr/bin/$project_name
+${7}strip --strip-all ./$project_name/usr/bin/$project_name
 
 #correct file attributes
 chmod 755 `find ./$project_name -type d`

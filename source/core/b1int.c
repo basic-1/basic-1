@@ -202,7 +202,7 @@ B1_T_ERROR b1_int_reset()
 
 #ifdef B1_FEATURE_FUNCTIONS_MATH_BASIC
 #ifdef B1_FRACTIONAL_TYPE_EXISTS
-	b1_ex_rnd_randomize();
+	b1_ex_rnd_randomize(1);
 #endif
 #endif
 
@@ -2814,7 +2814,7 @@ static B1_T_ERROR b1_int_interpret_stmt(uint8_t stmt, B1_T_LINE_NUM *linen)
 #ifdef B1_FRACTIONAL_TYPE_EXISTS
 	if(stmt == B1_INT_STMT_RANDOMIZE)
 	{
-		b1_ex_rnd_randomize();
+		b1_ex_rnd_randomize(0);
 		return B1_RES_OK;
 	}
 #endif

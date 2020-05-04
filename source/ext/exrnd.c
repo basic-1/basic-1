@@ -27,9 +27,12 @@ float b1_ex_rnd_rand()
 	return ((float)r) / (float)(RAND_MAX);
 }
 
-void b1_ex_rnd_randomize()
+void b1_ex_rnd_randomize(uint8_t init)
 {
-	srand((unsigned int)time(NULL) * rand());
+	srand(init ?
+		(unsigned int)0 :
+		((unsigned int)time(NULL) * rand())
+		);
 }
 #endif
 #endif
