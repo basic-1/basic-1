@@ -1,6 +1,14 @@
+b1i (1.0.0-30) unstable; urgency=low
+
+  * Linux armv7l (armhf) architecture support added
+  * minor changes in memory allocation and variables cache functions
+  * embedding.md document continued (not finished yet)
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Thu, 07 May 2020 18:12:00 +0300
+
 b1i (1.0.0-29) unstable; urgency=low
 
-  * changed RND statement behavior: now it should return the same sequence
+  * changed RND function behavior: now it should return the same sequence
     on every interpreter start
   * embedding.md document started
 

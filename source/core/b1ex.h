@@ -21,8 +21,8 @@ extern B1_T_ERROR b1_ex_mem_release(const B1_T_MEM_BLOCK_DESC mem_desc);
 extern B1_T_ERROR b1_ex_mem_free(const B1_T_MEM_BLOCK_DESC mem_desc);
 
 extern B1_T_ERROR b1_ex_var_init();
-extern B1_T_ERROR b1_ex_var_alloc(B1_T_IDHASH name_hash, uint8_t new_var_flags, B1_NAMED_VAR **var);
-extern B1_T_ERROR b1_ex_var_free(B1_NAMED_VAR *var);
+extern B1_T_ERROR b1_ex_var_alloc(B1_T_IDHASH name_hash, B1_NAMED_VAR **var);
+extern B1_T_ERROR b1_ex_var_free(B1_T_IDHASH name_hash);
 
 // prints one character
 extern B1_T_ERROR b1_ex_io_print_char(B1_T_CHAR c);

@@ -206,7 +206,7 @@ B1_T_ERROR b1_int_reset()
 #endif
 #endif
 
-	// initialize FD memory
+	// initialize memory manager
 	return b1_ex_mem_init();
 }
 
@@ -1543,7 +1543,7 @@ static B1_T_ERROR b1_int_st_erase(B1_T_INDEX offset)
 		}
 
 		// release variable memory
-		b1_ex_var_free(var);
+		b1_ex_var_free(name_hash);
 
 		if(!next) break;
 	}
@@ -1922,7 +1922,7 @@ static B1_T_ERROR b1_int_st_for_get_intvar(uint8_t var_hash_base, uint8_t var_op
 	else
 	if(var_op == B1_INT_ST_FOR_INTVAR_FREE)
 	{
-		b1_ex_var_free(var);
+		b1_ex_var_free(var_hash_base);
 	}
 
 	return B1_RES_OK;

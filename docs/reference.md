@@ -4,7 +4,7 @@
   
 BASIC1 language program is a sequence of text strings (program lines). The interpreter starts executing program from the first line consecutively. Every program line consists of line number, a single BASIC language statement and `EOL` sequence. Line number or statement or both can be absent.  
   
-Line number is a number in the range [1 ... 65530]  
+Line number is a number in the range \[1 ... 65530\]  
   
 Statement is one of the next BASIC1 language statements: `DATA`, `DEF`, `DIM`, `ELSE`, `ELSEIF`, `ERASE`, `FOR`, `GOTO`, `GOSUB`, `IF`, `INPUT`, `LET`, `NEXT`, `ON`, `OPTION`, `PRINT`, `RANDOMIZE`, `READ`, `REM`, `RESTORE`, `RETURN`, `SET` and implicit assignment statement (with omitted `LET` keyword). Every statement should start from statement keyword except for the implicit assignment.  
   
@@ -254,8 +254,8 @@ A user-defined function must be defined before being used. Function arguments ar
 `DIM I1% AS INT` 'declare `I1%` integer variable  
 `DIM A, A!, B AS SINGLE, B! AS SINGLE` 'declare floating-point variables  
 `DIM S1$, S2$ AS STRING` 'declare two string variables  
-`DIM IARR(25) AS INT` 'declare one-dimensional integer array with valid subscript range [0 ... 25]  
-`DIM IARR1%(-10 TO 10)` 'integer array with subscript range [-10 ... 10]  
+`DIM IARR(25) AS INT` 'declare one-dimensional integer array with valid subscript range \[0 ... 25\]  
+`DIM IARR1%(-10 TO 10)` 'integer array with subscript range \[-10 ... 10\]  
 `DIM MAP(0 TO 10, 0 TO 10), MSG$(10)` 'two-dimensional floating-point array and one-dimensional string array  
 `ERASE MAP, MSG$` 'free memory occupied by `MAP` and `MSG$` variables  
 `ERASE I%, I, I1%` 'delete three variables  
@@ -426,8 +426,8 @@ BASIC1 interpreter evaluates an expression `<numeric_expression>` and then selec
   
 **Examples:**:  
 `10 OPTION BASE 1`  
-`20 DIM IARR(25) AS INT` 'declare one-dimensional integer array with valid subscript range [1 ... 25]  
-`30 ARR(1, 1) = 10` 'here interpreter will create two-dimensional `ARR` array with subscripts ranges [1 ... 10]  
+`20 DIM IARR(25) AS INT` 'declare one-dimensional integer array with valid subscript range \[1 ... 25\]  
+`30 ARR(1, 1) = 10` 'here interpreter will create two-dimensional `ARR` array with subscripts ranges \[1 ... 10\]  
   
 `10 OPTION EXPLICIT` 'the same as `OPTION EXPLICIT ON`  
 `20 DIM A, B, C` 'explicit variables creation: every variable must be created using `DIM` statement  

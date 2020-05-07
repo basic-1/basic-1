@@ -329,10 +329,13 @@ B1_T_ERROR b1_var_create(B1_T_IDHASH name_hash, uint8_t type, uint8_t argnum, co
 		return B1_RES_EWSUBSCNT;
 	}
 
-	err = b1_ex_var_alloc(name_hash, B1_IDENT_FLAGS_SET_VAR(argnum), &newvar);
+	err = b1_ex_var_alloc(name_hash, &newvar);
 	
 	if(err == B1_RES_OK)
 	{
+		(*newvar).id.name_hash = name_hash;
+		(*newvar).id.flags = B1_IDENT_FLAGS_SET_VAR(argnum);
+
 		err = b1_var_init_empty(B1_TYPE_GET(type), argnum, subs_bounds, &(*newvar).var);
 		if(err != B1_RES_OK)
 		{
@@ -509,7 +512,7 @@ B1_T_ERROR b1_var_get(B1_NAMED_VAR *src_var, B1_VAR *dst_var, B1_VAR_REF *src_va
 			arrsize *= ((B1_T_MEMOFFSET)ubound) - *arrdata + 1;
 		}
 
-		// invalid FD memory block descriptor means non-allocated array
+		// invalid memory block descriptor means non-allocated array
 		if(!src_var_ref && arrdatadesc == B1_T_MEM_BLOCK_DESC_INVALID)
 		{
 			// just return initial value even without memory allocation

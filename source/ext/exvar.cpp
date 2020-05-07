@@ -27,43 +27,29 @@ extern "C" B1_T_ERROR b1_ex_var_init()
 	return B1_RES_OK;
 }
 
-// creates new variable, fills B1_ID structure only (hash, arg. num)
-extern "C" B1_T_ERROR b1_ex_var_alloc(B1_T_IDHASH name_hash, uint8_t new_var_flags, B1_NAMED_VAR **var)
+// allocates memory for B1_NAMED_VAR structure or returns pointer to existing one (indicating this with B1_RES_EIDINUSE return code)
+extern "C" B1_T_ERROR b1_ex_var_alloc(B1_T_IDHASH name_hash, B1_NAMED_VAR **var)
 {
-	B1_T_ERROR err = B1_RES_OK;
-	B1_NAMED_VAR *newvar;
 	auto var_it = b1_ex_vars.find(name_hash);
 	
-	if(var_it != b1_ex_vars.end())
+	if(var_it == b1_ex_vars.end())
 	{
-		newvar = &var_it->second;
-		err = B1_RES_EIDINUSE;
-	}
-	else
-	{
-		newvar = &b1_ex_vars[name_hash];
-		newvar->id.flags = new_var_flags;
-		newvar->id.name_hash = name_hash;
+		*var = &b1_ex_vars[name_hash];
+		return B1_RES_OK;
 	}
 
-	if(var != NULL)
-	{
-		*var = newvar;
-	}
-
-	return err;
+	*var = &var_it->second;
+	return B1_RES_EIDINUSE;
 }
 
 // frees memory occupied by B1_NAMED_VAR structure
-extern "C" B1_T_ERROR b1_ex_var_free(B1_NAMED_VAR *var)
+extern "C" B1_T_ERROR b1_ex_var_free(B1_T_IDHASH name_hash)
 {
-	for(auto var_it = b1_ex_vars.begin(); var_it != b1_ex_vars.end(); var_it++)
+	auto var_it = b1_ex_vars.find(name_hash);
+
+	if(var_it != b1_ex_vars.end())
 	{
-		if(var_it->first == var->id.name_hash)
-		{
-			b1_ex_vars.erase(var_it);
-			break;
-		}
+		b1_ex_vars.erase(var_it);
 	}
 
 	return B1_RES_OK;

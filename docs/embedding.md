@@ -1,4 +1,4 @@
-# Embedding BASIC1 interpreter  
+# Embedding BASIC1 interpreter core (not finished yet)  
   
 ## Preamble  
   
@@ -6,10 +6,26 @@ BASIC1 interpreter core can be embedded into existing application or an alternat
   
 ## Typical embedding scenario  
   
-1) add core source files to hosting application project;  
-2) implement all external functions necessary for the core to act;  
-3) implement BASIC program loading mechanism;  
-4) call the interpreter initialization and run functions.  
+1) add core source files from `./source/core` directory to hosting application project;  
+2) copy `.source/common/feat.h` file to the project direcory and change it if necessary;  
+3) implement all external functions necessary for the core to act;  
+4) implement BASIC program loading;  
+5) call the interpreter initialization and run functions.  
+  
+## Choose interpreter's features  
+  
+## Interpreter's global variables and functions  
+  
+`b1_int_progline`  
+`b1_int_curr_prog_line_cnt`  
+`b1_int_curr_prog_line_offset`  
+`b1_int_data_curr_line_cnt`  
+`b1_int_data_curr_line_offset`  
+`extern const B1_RPNREC *b1_rpn;`  
+  
+`B1_T_ERROR b1_int_reset();`  
+`B1_T_ERROR b1_int_prerun();`  
+`B1_T_ERROR b1_int_run();`  
   
 ## External functions needed for the interpreter core  
   
@@ -54,4 +70,55 @@ Possible return codes for the functions: `B1_RES_OK` (success), `B1_RES_EEOF` (n
   
 The simplest functions implementation: `./source/ext/exio.c` (sdandard C input/output).  
   
-to be continued...
+### Variables cache functions  
+  
+`extern B1_T_ERROR b1_ex_var_init();`  
+`b1_ex_var_init` function should initilize variables store or reset it removing all existing variables.  
+  
+`extern B1_T_ERROR b1_ex_var_alloc(B1_T_IDHASH name_hash, B1_NAMED_VAR **var);`  
+`b1_ex_var_alloc` function is used for new variable creation or searching for already existing variable in the cache. A variable is represented with `B1_NAMED_VAR` structure and is identified with special hash value (generated from the variable name). If the memory is successfully allocated the function should return `B1_RES_OK` value, if the variable already exists it should return `B1_RES_EIDINUSE` code. In any case the function must return pointer to the structure in `var` parameter.  
+  
+`extern B1_T_ERROR b1_ex_var_free(B1_T_IDHASH name_hash);`  
+The function has to free the memory allocated for `B1_NAMED_VAR` structure of a variable identified with `name_hash` hash value.  
+  
+Possible return codes for the functions: `B1_RES_OK` (success), `B1_RES_ENOMEM` (not enough memory), `B1_RES_EIDINUSE` (variable already exists).  
+  
+The simplest functions implementation: `./source/ext/exvar.cpp` (with C++ standard library).  
+  
+### Random values generator functions  
+  
+`extern void b1_ex_rnd_randomize(uint8_t init);`  
+`b1_ex_rnd_randomize` function should either reset random values generator to its initial state (if `init` is not zero) or initialize it with some random value for `RND` function to start to return new random values sequence if (`init` is zero).  
+  
+`extern float b1_ex_rnd_rand();`  
+Returns new random value in range \[0 ... 1). The interpreter calls the function when processing `RND` function call.  
+  
+See `./source/ext/exrnd.c` file for possible functions implementation.  
+  
+### Program navigation functions  
+  
+The functions are called by interpreter to navigate through program lines when executing a program.  
+  
+`extern B1_T_ERROR b1_ex_prg_cache_curr_line_num(B1_T_LINE_NUM curr_line_num, uint8_t stmt);`  
+The function is called by the interpreter during the idle program run (see `b1_int_prerun` function description for details) allowing caching line numbers of every program line. The cached values can be used then with other navigation functions to make program line search faster. `curr_line_num` argument value is a program line number of the current program line (identified with a value of `b1_int_curr_prog_line_cnt` global variable). If a program line does not have line number the argument variable is set to `B1_T_LINE_NUM_ABSENT` value. `stmt` argument variable identifies the current program line statement and can be one of the `B1_INT_STMT_XXXX` values defined in `./source/core/b1int.h` file.  
+  
+`extern B1_T_ERROR b1_ex_prg_get_prog_line(B1_T_LINE_NUM next_line_num);`  
+`b1_ex_prg_get_prog_line` function is called by the interpreter to navigate to another program line depending on `next_line_num` argument variable value: `B1_T_LINE_NUM_FIRST` and `B1_T_LINE_NUM_NEXT` special values corresponds to the first line of the program and to the line coming after the current one. Other values are line numbers identifying program lines (e.g. the interpreter calls this function when executing `GOTO` statement). The function should return `B1_RES_ELINENNOTFND` code if the line number is not found and `B1_RES_EPROGUNEND` code if it reached the end of the program and the next program line does not exist. If the requested program line is found the function has to change `b1_int_progline`, `b1_int_curr_prog_line_cnt` and `b1_int_curr_prog_line_offset` properly.  
+  
+`extern B1_T_ERROR b1_ex_prg_for_go_next();`  
+The function should find program line counter of a `NEXT` statement corresponding to the current `FOR` statement (identified with `b1_int_curr_prog_line_cnt` variable value). The resulting line counter should be written to the same `b1_int_curr_prog_line_cnt` variable. If the program line is not found the function should return `B1_RES_EFORWONXT` value.  
+  
+`extern B1_T_ERROR b1_ex_prg_data_go_next(B1_T_LINE_NUM next_line_num);`  
+The function is called by the interpreter when processing `READ` statement and all the data of the current `DATA` statement is already read or when processing `RESTORE` statement. `next_line_num` argument variable can be equal to either `B1_T_LINE_NUM_FIRST` and `B1_T_LINE_NUM_NEXT` values or to a program line number identifing a program line with `DATA` statement. `B1_T_LINE_NUM_FIRST` and `B1_T_LINE_NUM_NEXT` constants correspond to the first and the next program lines with `DATA` statements. The function should return `B1_RES_ELINENNOTFND` code if the line number is not found and `B1_RES_EDATAEND` if there's no more `DATA` statements in the program. If the program line is found the function has to change `b1_int_data_curr_line_cnt` and `b1_int_data_curr_line_offset` variables properly. Note that the function should work with `b1_int_data_curr_line_xxx` global variables not with `b1_int_curr_prog_line_xxx` ones.  
+  
+See `./source/ext/exprg.cpp` file for possible functions implementation.  
+  
+### Expressions postfix notation caching functions  
+  
+BASIC1 interpreter transforms every expression to its prefix notation or reverse Polish notation (RPN) before evaluation. Building an expression's RPN is not a fast operation so it's very desirable to cache expressions already converted to RPN. Enable `B1_FEATURE_RPN_CACHING` macro definition in `feat.h` file to turn the caching functions usage on.  
+  
+`extern B1_T_ERROR b1_ex_prg_rpn_cache(B1_T_INDEX offset, B1_T_INDEX continue_offset);`  
+The function should copy expression from `b1_rpn` variable and `continue_offset` value to the cache. The cache record identifier should consist from values of `b1_int_curr_prog_line_cnt` and `offset` variables. `b1_rpn` is a pointer to array of `B1_RPNREC` strucures, the last structure in the array has `flags` member set to zero value. The function should copy entire array including the termionating structure.  
+  
+`extern B1_T_ERROR b1_ex_prg_rpn_get_cached(B1_T_INDEX offset, B1_T_INDEX *continue_offset);`  
+  

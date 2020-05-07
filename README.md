@@ -26,7 +26,7 @@
 - ELSE  
 - ELSEIF ... THEN  
 - ERASE  
-- FOR ... TO ... [STEP]  
+- FOR ... TO ... \[STEP\]  
 - GOTO  
 - GOSUB  
 - IF ... THEN  
