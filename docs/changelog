@@ -1,3 +1,11 @@
+b1i (1.0.0-31) unstable; urgency=low
+
+  * Linux armv7l (armhf) binary module rebuild to avoid segmentation fault
+  * embedding.md document finished
+  * minor code and documentation improvements
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Fri, 08 May 2020 20:15:00 +0300
+
 b1i (1.0.0-30) unstable; urgency=low
 
   * Linux armv7l (armhf) architecture support added

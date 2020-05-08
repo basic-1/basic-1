@@ -9,7 +9,7 @@
 - configurable language features/extensions  
 - interpreter core written in C  
 - embeddable: memory functions, input/output and caching detached from core  
-- command-line interpreter built for Windows x86, Windows x64, Linux i386, Linux amd64  
+- command-line interpreter built for Windows x86, Windows x64, Linux i386, Linux amd64, Linux armhf  
 - licensed under MIT license  
   
 # Data types  
@@ -94,5 +94,6 @@ Examples:
   
 [BASIC1 language reference](./docs/reference.md)  
 [BASIC1 interpreter limitations](./docs/limits.md)  
+[BASIC1 interpreter core embedding](./docs/embedding.md)  
 [Change log](./docs/changelog)  
   

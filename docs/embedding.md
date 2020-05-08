@@ -1,4 +1,4 @@
-# Embedding BASIC1 interpreter core (not finished yet)  
+# Embedding BASIC1 interpreter core  
   
 ## Preamble  
   
@@ -7,25 +7,56 @@ BASIC1 interpreter core can be embedded into existing application or an alternat
 ## Typical embedding scenario  
   
 1) add core source files from `./source/core` directory to hosting application project;  
-2) copy `.source/common/feat.h` file to the project direcory and change it if necessary;  
+2) copy `./source/common/feat.h` file to the project direcory and change it if necessary;  
 3) implement all external functions necessary for the core to act;  
 4) implement BASIC program loading;  
 5) call the interpreter initialization and run functions.  
   
 ## Choose interpreter's features  
+Some interpreter's features can be turned on or off by editing application's `feat.h` file. Comment corresponding macro definition to disable a feature.  
+  
+`B1_FEATURE_STMT_ERASE`: enables `ERASE` statement.  
+`B1_FEATURE_STMT_DATA_READ`: enables `DATA`, `READ` and `RESTORE` statements. If the feature is disabled `b1_ex_prg_data_go_next` function is not needed.  
+`B1_FEATURE_FUNCTIONS_STANDARD`: enables `LEN`, `ASC`, `CHR$`, `STR$`, `VAL`, `IIF`, `IIF$` functions.  
+`B1_FEATURE_FUNCTIONS_MATH_BASIC`: enables `ABS`, `INT`, `RND`, `SGN` functions and `RANDOMIZE` statement. No need to implement `b1_ex_rnd_randomize` and `b1_ex_rnd_rand` functions if the feature is disabled.  
+`B1_FEATURE_FUNCTIONS_MATH_EXTRA`: enables `ATN`, `COS`, `EXP`, `LOG`, `PI`, `SIN`, `SQR`, `TAN` functions.  
+`B1_FEATURE_FUNCTIONS_STRING`: enables `MID$`, `INSTR`, `LTRIM$`, `RTRIM$`, `LEFT$`, `RIGHT$`, `LSET$`, `RSET$`, `UCASE$`, `LCASE$` functions.  
+`B1_FEATURE_FUNCTIONS_USER`: enables `DEF` statement and user defined functions.  
+`B1_FEATURE_TYPE_SINGLE`: enables `SINGLE` data type. `B1_FEATURE_FUNCTIONS_MATH_EXTRA` feature is not allowed without `SINGLE` type enabled. Also disabling floating-pont data types turns off random generator feature.  
+`B1_FEATURE_RPN_CACHING`: enables expression postfix notation caching. `b1_ex_prg_rpn_cache` and `b1_ex_prg_rpn_get_cached` functions have to be implemented to do the caching if enabled.  
   
 ## Interpreter's global variables and functions  
   
-`b1_int_progline`  
-`b1_int_curr_prog_line_cnt`  
-`b1_int_curr_prog_line_offset`  
-`b1_int_data_curr_line_cnt`  
-`b1_int_data_curr_line_offset`  
-`extern const B1_RPNREC *b1_rpn;`  
+Hosting application can control the interpreter core by reading/writing special global variables and calling some functions. The most of them are described below.  
   
-`B1_T_ERROR b1_int_reset();`  
-`B1_T_ERROR b1_int_prerun();`  
-`B1_T_ERROR b1_int_run();`  
+`extern const B1_T_CHAR *b1_int_progline;`  
+The variable should point to zero terminated string representing the currently executing program line. The interpreter core calls `b1_ex_prg_get_prog_line` function for the application to set the pointer.  
+  
+`extern B1_T_PROG_LINE_CNT b1_int_curr_prog_line_cnt;`  
+One-based counter of the current program line. `b1_ex_prg_get_prog_line` and `b1_ex_prg_for_go_next` functions should change the variable by the interpreter's request. Zero value is reserved for the program before execution state.  
+  
+`extern B1_T_INDEX b1_int_curr_prog_line_offset;`  
+The variable is used along with the previous one to specify an offset withing the current program line. The variable can be read and stored by `b1_ex_prg_cache_curr_line_num` function to return it with `b1_ex_prg_data_go_next` function call in `b1_int_data_curr_line_offset` variable.  
+  
+`extern B1_T_PROG_LINE_CNT b1_int_data_curr_line_cnt;`  
+One-based counter of the current `DATA` statement program line. `b1_ex_prg_data_go_next` function should set the variable for it to point to the proper program line containing `DATA` statement.  
+  
+`extern B1_T_INDEX b1_int_data_curr_line_offset;`  
+Zero-based offset the next `DATA` statement value. The value can bne read with the next `READ` statement. The variable has to be set by `b1_ex_prg_data_go_next` function and the value can be previously stored by `b1_ex_prg_cache_curr_line_num` function.
+  
+`extern const B1_RPNREC *b1_rpn;`  
+The variable should be used by `b1_ex_prg_rpn_cache` and `b1_ex_prg_rpn_get_cached` function to cache expressions' postfix notation.  
+  
+`extern B1_T_ERROR b1_int_reset();`  
+The function reset the interpreter core to its initial state. Has to be called before `b1_int_prerun` function to initialize the interpreter or after `b1_int_run` function to free resources.  
+  
+`extern B1_T_ERROR b1_int_prerun();`  
+The function performs the first idle program run to check line numbers, proper `FOR` and `NEXT` statements placement, etc. Also the function calls `b1_ex_prg_cache_curr_line_num` function for every program line.  
+  
+`extern B1_T_ERROR b1_int_run();`  
+Runs the program.  
+  
+`b1_rpn` variable is declared in `./source/core/b1rpn.h` file and the `b1_int_xxx` variables and functions are declared in `./source/core/b1int.h` file.  
   
 ## External functions needed for the interpreter core  
   
@@ -103,7 +134,7 @@ The functions are called by interpreter to navigate through program lines when e
 The function is called by the interpreter during the idle program run (see `b1_int_prerun` function description for details) allowing caching line numbers of every program line. The cached values can be used then with other navigation functions to make program line search faster. `curr_line_num` argument value is a program line number of the current program line (identified with a value of `b1_int_curr_prog_line_cnt` global variable). If a program line does not have line number the argument variable is set to `B1_T_LINE_NUM_ABSENT` value. `stmt` argument variable identifies the current program line statement and can be one of the `B1_INT_STMT_XXXX` values defined in `./source/core/b1int.h` file.  
   
 `extern B1_T_ERROR b1_ex_prg_get_prog_line(B1_T_LINE_NUM next_line_num);`  
-`b1_ex_prg_get_prog_line` function is called by the interpreter to navigate to another program line depending on `next_line_num` argument variable value: `B1_T_LINE_NUM_FIRST` and `B1_T_LINE_NUM_NEXT` special values corresponds to the first line of the program and to the line coming after the current one. Other values are line numbers identifying program lines (e.g. the interpreter calls this function when executing `GOTO` statement). The function should return `B1_RES_ELINENNOTFND` code if the line number is not found and `B1_RES_EPROGUNEND` code if it reached the end of the program and the next program line does not exist. If the requested program line is found the function has to change `b1_int_progline`, `b1_int_curr_prog_line_cnt` and `b1_int_curr_prog_line_offset` properly.  
+`b1_ex_prg_get_prog_line` function is called by the interpreter to navigate to another program line depending on `next_line_num` argument variable value: `B1_T_LINE_NUM_FIRST` and `B1_T_LINE_NUM_NEXT` special values corresponds to the first line of the program and to the line coming after the current one. Other values are line numbers identifying program lines (e.g. the interpreter calls this function when executing `GOTO` statement). The function should return `B1_RES_ELINENNOTFND` code if the line number is not found and `B1_RES_EPROGUNEND` code if it reached the end of the program and the next program line does not exist. If the requested program line is found the function has to change `b1_int_progline` and `b1_int_curr_prog_line_cnt` variables properly.  
   
 `extern B1_T_ERROR b1_ex_prg_for_go_next();`  
 The function should find program line counter of a `NEXT` statement corresponding to the current `FOR` statement (identified with `b1_int_curr_prog_line_cnt` variable value). The resulting line counter should be written to the same `b1_int_curr_prog_line_cnt` variable. If the program line is not found the function should return `B1_RES_EFORWONXT` value.  
@@ -115,10 +146,13 @@ See `./source/ext/exprg.cpp` file for possible functions implementation.
   
 ### Expressions postfix notation caching functions  
   
-BASIC1 interpreter transforms every expression to its prefix notation or reverse Polish notation (RPN) before evaluation. Building an expression's RPN is not a fast operation so it's very desirable to cache expressions already converted to RPN. Enable `B1_FEATURE_RPN_CACHING` macro definition in `feat.h` file to turn the caching functions usage on.  
+BASIC1 interpreter transforms every expression to its postfix notation or reverse Polish notation (RPN) before evaluation. Building an expression's RPN is not a fast operation so it's very desirable to cache expressions already converted to RPN. The caching can make executing programs faster if there are many repeating code blocks such as subroutines and loops. Enable `B1_FEATURE_RPN_CACHING` macro definition in `feat.h` file to turn the caching functions usage on.  
   
 `extern B1_T_ERROR b1_ex_prg_rpn_cache(B1_T_INDEX offset, B1_T_INDEX continue_offset);`  
-The function should copy expression from `b1_rpn` variable and `continue_offset` value to the cache. The cache record identifier should consist from values of `b1_int_curr_prog_line_cnt` and `offset` variables. `b1_rpn` is a pointer to array of `B1_RPNREC` strucures, the last structure in the array has `flags` member set to zero value. The function should copy entire array including the termionating structure.  
+The function should copy expression from `b1_rpn` variable and `continue_offset` value to the cache. The cache record identifier should consist from values of `b1_int_curr_prog_line_cnt` and `offset` variables. `b1_rpn` is a pointer to array of `B1_RPNREC` structures, the last structure in the array has `flags` member set to zero value. The function should copy entire array including the termionating structure.  
   
 `extern B1_T_ERROR b1_ex_prg_rpn_get_cached(B1_T_INDEX offset, B1_T_INDEX *continue_offset);`  
+The function is called by interpreter before building expression's RPN. The expression is identified with values of `b1_int_curr_prog_line_cnt` and `offset` variables and the function should provide data previously stored with `b1_ex_prg_rpn_cache` function call: expression continue offset value should be written at the address `continue_offset` pointer points at and `b1_rpn` global variable should be changed to point to the expression data (`B1_RPNREC` structures array). If the expression is not found in the cache the pointers have to be left unmodified.  
+  
+See `./source/ext/exprg.cpp` file for possible functions implementation.  
   

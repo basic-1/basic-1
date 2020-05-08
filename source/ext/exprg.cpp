@@ -136,7 +136,6 @@ static B1_T_ERROR b1_ex_prg_get_next_prog_line()
 
 	b1_int_progline = b1_ex_prg_lines[line_cnt].data();
 	b1_int_curr_prog_line_cnt = line_cnt + 1;
-	b1_int_curr_prog_line_offset = 0;
 	
 	return B1_RES_OK;
 }
@@ -202,7 +201,6 @@ extern "C" B1_T_ERROR b1_ex_prg_get_prog_line(B1_T_LINE_NUM next_line_num)
 
 	b1_int_progline = b1_ex_prg_lines[line_it->second].data();
 	b1_int_curr_prog_line_cnt = line_it->second + 1;
-	b1_int_curr_prog_line_offset = 0;
 
 	return B1_RES_OK;
 }

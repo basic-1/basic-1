@@ -975,7 +975,6 @@ static B1_T_ERROR b1_int_stmt_init(B1_T_LINE_NUM *linen, uint8_t *stmt)
 	{
 		if(!b1_t_strcmpi(b1_int_stmt_names[i], b1_int_progline + offset, len))
 		{
-			// DATA statement
 			*stmt = b1_int_stmts[i];
 			b1_int_curr_prog_line_offset = offset + len;
 			break;
@@ -2929,6 +2928,8 @@ B1_T_ERROR b1_int_prerun()
 			}
 		}
 #endif
+
+		b1_int_curr_prog_line_offset = 0;
 	}
 
 	if(for_nest != 0)
@@ -2939,7 +2940,6 @@ B1_T_ERROR b1_int_prerun()
 	}
 
 	b1_int_curr_prog_line_cnt = 0;
-	b1_int_curr_prog_line_offset = 0;
 
 	return B1_RES_OK;
 }
