@@ -288,8 +288,8 @@ B1_T_ERROR b1_t_strtoi32(const B1_T_CHAR *cs, int32_t *value)
 B1_T_ERROR b1_t_strtoi32(const B1_T_CHAR *cs, int32_t *value)
 {
 	B1_T_CHAR c;
-	int8_t neg;
-	int32_t val;
+	int8_t neg, n;
+	int32_t val, mval;
 
 	val = 0;
 	neg = 0;
@@ -297,6 +297,11 @@ B1_T_ERROR b1_t_strtoi32(const B1_T_CHAR *cs, int32_t *value)
 	while(1)
 	{
 		c = *cs++;
+
+		if(B1_T_ISCSTRTERM(c))
+		{
+			break;
+		}
 
 		if(neg == 0)
 		{
@@ -316,42 +321,64 @@ B1_T_ERROR b1_t_strtoi32(const B1_T_CHAR *cs, int32_t *value)
 
 		if(B1_T_ISDIGIT(c))
 		{
-			val = val * 10 - B1_T_CHAR2NUM(c);
+			n = B1_T_CHAR2NUM(c);
 
-			if(val > 0)
+			if(neg == 1)
 			{
-				return B1_RES_ENUMOVF;
+				mval = INT32_MIN;
+
+				if(val < INT32_MIN / 10)
+				{
+					return B1_RES_ENUMOVF;
+				}
 			}
+			else
+			{
+				mval = INT32_MAX;
+
+				if(val > INT32_MAX / 10)
+				{
+					return B1_RES_ENUMOVF;
+				}
+			}
+
+			val *= 10;
+
+			mval -= val;
+
+			if(neg == 1)
+			{
+				n = -n;
+
+				if(mval > n)
+				{
+					return B1_RES_ENUMOVF;
+				}
+			}
+			else
+			{
+				if(mval < n)
+				{
+					return B1_RES_ENUMOVF;
+				}
+			}
+
+			val += n;
 
 			continue;
 		}
 
-		if(B1_T_ISCSTRTERM(c))
-		{
-			if(neg == 0)
-			{
-				return B1_RES_EINVNUM;
-			}
-
-			if(neg == (int8_t)-1)
-			{
-				if(val == ((uint32_t)INT32_MIN))
-				{
-					return B1_RES_ENUMOVF;
-				}
-
-				val = -val;
-			}
-
-			if(value != NULL)
-			{
-				*value = val;
-			}
-
-			break;
-		}
-
 		return B1_RES_EINVNUM;
+	}
+
+	if(neg == 0)
+	{
+		return B1_RES_EINVNUM;
+	}
+
+	if(value != NULL)
+	{
+		*value = val;
 	}
 
 	return B1_RES_OK;
@@ -365,7 +392,7 @@ B1_T_ERROR b1_t_i32tostr(int32_t value, B1_T_CHAR *sbuf, B1_T_INDEX buflen)
 		return B1_RES_EBUFSMALL;
 	}
 
-	*sbuf = (B1_T_CHAR)sprintf((char *)(sbuf + 1), "%ld", value);
+	*sbuf = (B1_T_CHAR)sprintf((char *)(sbuf + 1), "%ld", (long int)value);
 
 	return B1_RES_OK;
 #else
@@ -646,7 +673,7 @@ B1_T_ERROR b1_t_singletostr(float value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, uin
 	if(signbit(value))
 #else
 	// IEEE 754 single precision fp value
-	if(*((long *)&value) < 0)
+	if(*((int32_t *)&value) < 0)
 #endif
 	{
 		neg++;

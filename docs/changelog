@@ -1,3 +1,10 @@
+b1i (1.0.0-32) unstable; urgency=low
+
+  * a bug in floating-point to string conversion function fixed (long -> int32_t)
+  * string to integer conversion function improved
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Wed, 13 May 2020 18:25:00 +0300
+
 b1i (1.0.0-31) unstable; urgency=low
 
   * Linux armv7l (armhf) binary module rebuild to avoid segmentation fault
