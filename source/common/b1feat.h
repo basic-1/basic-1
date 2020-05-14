@@ -39,6 +39,17 @@
 #define B1_FEATURE_RPN_CACHING
 
 
+// type size for array subscripts (if no one macro is enabled 16 bit type is used)
+//#define B1_FEATURE_SUBSCRIPT_8BIT
+//#define B1_FEATURE_SUBSCRIPT_12BIT
+//#define B1_FEATURE_SUBSCRIPT_16BIT
+//#define B1_FEATURE_SUBSCRIPT_24BIT
+
+// type size for pointer offsets and memory block sizes (if no one macro is define 32 bit type is used)
+//#define B1_FEATURE_MEMOFFSET_16BIT
+//#define B1_FEATURE_MEMOFFSET_32BIT
+
+
 // constraints and memory usage
 #define B1_MAX_PROGLINE_LEN 255
 #define B1_MAX_STRING_LEN (B1_MAX_PROGLINE_LEN / 2)

@@ -25,6 +25,10 @@ Some interpreter's features can be turned on or off by editing application's `fe
 `B1_FEATURE_TYPE_SINGLE`: enables `SINGLE` data type. `B1_FEATURE_FUNCTIONS_MATH_EXTRA` feature is not allowed without `SINGLE` type enabled. Also disabling floating-pont data types turns off random generator feature.  
 `B1_FEATURE_RPN_CACHING`: enables expression postfix notation caching. `b1_ex_prg_rpn_cache` and `b1_ex_prg_rpn_get_cached` functions have to be implemented to do the caching if enabled.  
   
+`B1_FEATURE_SUBSCRIPT_XXBIT`, where `XX` can be `8`, `12`, `16`, `24`: selects type and range of interpreter's array subscript. Enabling two or more macros of the group is not allowed. The macro determines signed integer data type for internal subscript value representation and subscript range (minimal and maximal values). Default subscript type (if no one macro is enabled) is 16-bit.  
+  
+`B1_FEATURE_MEMOFFSET_XXBIT`, where `XX` can be `16` or `32`: selects data type for internal memory offset representation. The type should be at least 4 bits larger than subscript data type.  Default type is 32-bit.  
+  
 ## Interpreter's global variables and functions  
   
 Hosting application can control the interpreter core by reading/writing special global variables and calling some functions. The most of them are described below.  

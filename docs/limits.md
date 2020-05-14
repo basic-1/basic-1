@@ -19,5 +19,5 @@ Default subscript upper boundary value: 10
 Integer data type range: \[−2147483648 ... 2147483647\]  
 Floating-point data type range: \[±1.1754943e−38 ... ±3.4028234e38\]  
 Character type range: \[0 ... 255\]  
-Subscript range: \[-32768 ... 32767\]  
+Subscript range: \[-8388608 ... 8388607\]  
   
