@@ -38,6 +38,8 @@
 // enable RPN caching
 #define B1_FEATURE_RPN_CACHING
 
+// locales support (for LCASE$, UCASE$, INSTR functions and string comparison operators)
+#define B1_FEATURE_LOCALES
 
 // type size for array subscripts (if no one macro is enabled 16 bit type is used)
 //#define B1_FEATURE_SUBSCRIPT_8BIT
@@ -48,7 +50,6 @@
 // type size for pointer offsets and memory block sizes (if no one macro is define 32 bit type is used)
 //#define B1_FEATURE_MEMOFFSET_16BIT
 #define B1_FEATURE_MEMOFFSET_32BIT
-
 
 // constraints and memory usage
 #define B1_MAX_PROGLINE_LEN 255

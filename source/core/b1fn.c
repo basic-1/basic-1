@@ -547,7 +547,11 @@ static B1_T_ERROR b1_fn_bltin_instr(B1_VAR *parg1)
 	len++;
 	while(len-- != 0)
 	{
+#ifdef B1_FEATURE_LOCALES
+		if(b1_t_strcmp_l(b1_tmp_buf1, b1_tmp_buf + start, *b1_tmp_buf1) == 0)
+#else
 		if(b1_t_strcmpi(b1_tmp_buf1, b1_tmp_buf + start, *b1_tmp_buf1) == 0)
+#endif
 		{
 			(*parg1).value.i32val = start;
 			return B1_RES_OK;
@@ -793,7 +797,11 @@ static B1_T_ERROR b1_fn_bltin_ucase(B1_VAR *parg1)
 	for(len = *b1_tmp_buf; len != 0; len--)
 	{
 		c = *(b1_tmp_buf + len);
+#ifdef B1_FEATURE_LOCALES
+		*(b1_tmp_buf + len) = b1_t_toupper_l(c);
+#else
 		*(b1_tmp_buf + len) = B1_T_TOUPPER(c);
+#endif
 	}
 
 	err = b1_var_str2var(b1_tmp_buf, parg1);
@@ -820,7 +828,11 @@ static B1_T_ERROR b1_fn_bltin_lcase(B1_VAR *parg1)
 	for(len = *b1_tmp_buf; len != 0; len--)
 	{
 		c = *(b1_tmp_buf + len);
+#ifdef B1_FEATURE_LOCALES
+		*(b1_tmp_buf + len) = b1_t_tolower_l(c);
+#else
 		*(b1_tmp_buf + len) = B1_T_TOLOWER(c);
+#endif
 	}
 
 	err = b1_var_str2var(b1_tmp_buf, parg1);

@@ -401,7 +401,11 @@ B1_T_ERROR b1_eval_cmp(B1_VAR *pvar1, B1_T_CHAR c, B1_T_CHAR c1, uint8_t optype)
 			return err;
 		}
 
+#ifdef B1_FEATURE_LOCALES
+		scmp = b1_t_strcmp_l(b1_tmp_buf, b1_tmp_buf1 + 1, *b1_tmp_buf1);
+#else
 		scmp = b1_t_strcmpi(b1_tmp_buf, b1_tmp_buf1 + 1, *b1_tmp_buf1);
+#endif
 	}
 	else
 	{

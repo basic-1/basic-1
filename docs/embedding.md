@@ -27,7 +27,9 @@ Some interpreter's features can be turned on or off by editing application's `fe
   
 `B1_FEATURE_SUBSCRIPT_XXBIT`, where `XX` can be `8`, `12`, `16`, `24`: selects type and range of interpreter's array subscript. Enabling two or more macros of the group is not allowed. The macro determines signed integer data type for internal subscript value representation and subscript range (minimal and maximal values). Default subscript type (if no one macro is enabled) is 16-bit.  
   
-`B1_FEATURE_MEMOFFSET_XXBIT`, where `XX` can be `16` or `32`: selects data type for internal memory offset representation. The type should be at least 4 bits larger than subscript data type.  Default type is 32-bit.  
+`B1_FEATURE_MEMOFFSET_XXBIT`, where `XX` can be `16` or `32`: selects data type for internal memory offset representation. The type should be at least 4 bits larger than subscript data type. Default type is 32-bit.  
+  
+`B1_FEATURE_LOCALES`: makes the interpreter core use locale-specific functions for built-in `UCASE$`, `LCASE$` and `INSTR` functions and string comparison operators. The locale-specific functions are not a part of the interpreter core and have to be implemented when embedding the core. The functions are: `b1_t_toupper_l`, `b1_t_tolower_l` and `b1_t_strcmp_l`.  
   
 ## Interpreter's global variables and functions  
   
@@ -147,6 +149,21 @@ The function should find program line counter of a `NEXT` statement correspondin
 The function is called by the interpreter when processing `READ` statement and all the data of the current `DATA` statement is already read or when processing `RESTORE` statement. `next_line_num` argument variable can be equal to either `B1_T_LINE_NUM_FIRST` and `B1_T_LINE_NUM_NEXT` values or to a program line number identifing a program line with `DATA` statement. `B1_T_LINE_NUM_FIRST` and `B1_T_LINE_NUM_NEXT` constants correspond to the first and the next program lines with `DATA` statements. The function should return `B1_RES_ELINENNOTFND` code if the line number is not found and `B1_RES_EDATAEND` if there's no more `DATA` statements in the program. If the program line is found the function has to change `b1_int_data_curr_line_cnt` and `b1_int_data_curr_line_offset` variables properly. Note that the function should work with `b1_int_data_curr_line_xxx` global variables not with `b1_int_curr_prog_line_xxx` ones.  
   
 See `./source/ext/exprg.cpp` file for possible functions implementation.  
+  
+### Localized string functions  
+  
+The functions are called if `B1_FEATURE_LOCALES` feature is enabled to perform locale-specific textual data transformations, search and comparison.  
+  
+`extern B1_T_CHAR b1_t_toupper_l(B1_T_CHAR c);`  
+The function is called to convert a character to upper case. Non-alphabetic characters should be returned as is.  
+  
+`extern B1_T_CHAR b1_t_tolower_l(B1_T_CHAR c);`  
+The function is called to convert a character to lower case. Non-alphabetic characters should be returned as is.  
+  
+`extern int8_t b1_t_strcmp_l(const B1_T_CHAR *s1, const B1_T_CHAR *s2data, B1_T_INDEX s2len);`  
+The function should perform lexicographical case-insensitive strings comparison. The first string is represented with `s1` argument and the second with `s2data`, `s2len` arguments. Note that `s1` pointer is not a null character terminated C text string but a string in internal BASIC-1 interpreter format: the first character of the data stands for the string characters number and the textual data itself comes right after it (so entire data block size is 1 + `<string_length>` characters). `s2data` argument is a pointer to character sequence of the second string and `s2len` is the second string length in characters. The function should return zero if both strings are equal, a negative value if the first string is less than the second and a positive value if the first string is greater than the second.  
+  
+See `./source/ext/ext.cpp` file for possible functions implementation.  
   
 ### Expressions postfix notation caching functions  
   

@@ -24,6 +24,13 @@ extern B1_T_ERROR b1_ex_var_init();
 extern B1_T_ERROR b1_ex_var_alloc(B1_T_IDHASH name_hash, B1_NAMED_VAR **var);
 extern B1_T_ERROR b1_ex_var_free(B1_T_IDHASH name_hash);
 
+// localized string functions
+#ifdef B1_FEATURE_LOCALES
+extern B1_T_CHAR b1_t_toupper_l(B1_T_CHAR c);
+extern B1_T_CHAR b1_t_tolower_l(B1_T_CHAR c);
+extern int8_t b1_t_strcmp_l(const B1_T_CHAR *s1, const B1_T_CHAR *s2data, B1_T_INDEX s2len);
+#endif
+
 // prints one character
 extern B1_T_ERROR b1_ex_io_print_char(B1_T_CHAR c);
 // prints new line sequence

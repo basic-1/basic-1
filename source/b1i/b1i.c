@@ -115,6 +115,10 @@ int main(int argc, char **argv)
 	clock_t start, end;
 	int print_err_desc = 0;
 	int print_version = 0;
+#ifdef B1_FEATURE_LOCALES
+	int get_locale = 0, ss, se;
+	char *locale = NULL;
+#endif
 
 	if(argc <= 1)
 	{
@@ -126,6 +130,9 @@ int main(int argc, char **argv)
 		fputs("options:\n", stderr);
 		fputs("-d or /d - print error description\n", stderr);
 		fputs("-e or /e - echo input\n", stderr);
+#ifdef B1_FEATURE_LOCALES
+		fputs("-l <locale_name> or /l <locale_name> - set program locale\n", stderr);
+#endif
 		fputs("-t or /t - print program execution time\n", stderr);
 		fputs("-v or /v - show interpreter version\n", stderr);
 		return -1;
@@ -134,6 +141,37 @@ int main(int argc, char **argv)
 	// options
 	for(i = 1; i < argc; i++)
 	{
+#ifdef B1_FEATURE_LOCALES
+		if(get_locale)
+		{
+			get_locale = 0;
+
+			if(argv[i][0] != '-' && argv[i][0] != '/')
+			{
+				ss = 0;
+				se = (int)strlen(argv[i]) - 1;
+				
+				if(argv[i][0] == '\"' || argv[i][0] == '\'')
+				{
+					ss++;
+				}
+
+				if(argv[i][se] == '\"' || argv[i][se] == '\'')
+				{
+					se--;
+				}
+
+				if(ss <= se)
+				{
+					locale = (char *)malloc(se - ss + 2);
+					strncpy(locale, argv[i] + ss, se - ss + 1);
+					locale[se - ss + 1] = 0;
+					continue;
+				}
+			}
+		}
+#endif
+
 		// echo on
 		if((argv[i][0] == '-' || argv[i][0] == '/') &&
 			(argv[i][1] == 'E' || argv[i][1] == 'e') &&
@@ -142,6 +180,17 @@ int main(int argc, char **argv)
 			b1_int_input_echo = 1;
 			continue;
 		}
+
+#ifdef B1_FEATURE_LOCALES
+		// locale
+		if((argv[i][0] == '-' || argv[i][0] == '/') &&
+			(argv[i][1] == 'L' || argv[i][1] == 'l') &&
+			argv[i][2] == 0)
+		{
+			get_locale = 1;
+			continue;
+		}
+#endif
 
 		// print program execution time
 		if((argv[i][0] == '-' || argv[i][0] == '/') &&
@@ -171,15 +220,24 @@ int main(int argc, char **argv)
 		}
 	}
 
+#ifdef B1_FEATURE_LOCALES
+	// set locale for toupper, tolower, strcoll, towupper, towlower and wcscoll functions to work properly
+	setlocale(LC_ALL, locale == NULL ? "" : locale);
+	if(locale != NULL)
+	{
+		free(locale);
+	}
+#endif
+
+	// set numeric properties from C locale for sprintf to use dot as decimal delimiter
+	setlocale(LC_NUMERIC, "C");
+
 	if(print_version)
 	{
 		// just print version and stop executing
 		b1_print_version(stdout);
 		return 0;
 	}
-
-	// set numeric properties from C locale for sprintf to use dot as decimal delimiter
-	setlocale(LC_NUMERIC, "C");
 
 	err = b1_ex_prg_set_prog_file(argv[argc - 1]);
 	if(err != B1_RES_OK)

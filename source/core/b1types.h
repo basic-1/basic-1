@@ -149,6 +149,17 @@
 #endif
 
 
+#ifdef B1_FEATURE_LOCALES
+#define B1_T_TOUPPER_L(C) b1_t_toupper_l(C)
+#define B1_T_TOLOWER_L(C) b1_t_tolower_l(C)
+#define B1_T_STRCMP_L(BSTR1, STR2DATA, STR2LEN) b1_t_strcmp_l(BSTR1, STR2DATA, STR2LEN)
+#else
+#define B1_T_TOUPPER_L(C) B1_T_TOUPPER(C)
+#define B1_T_TOLOWER_L(C) B1_T_TOLOWER(C)
+#define B1_T_STRCMP_L(BSTR1, STR2DATA, STR2LEN) b1_t_strcmpi(BSTR1, STR2DATA, STR2LEN)
+#endif
+
+
 extern const B1_T_CHAR _EQ[];
 extern const B1_T_CHAR _THEN[];
 extern const B1_T_CHAR _GO[];
@@ -249,7 +260,7 @@ extern int8_t b1_t_strcmpi(const B1_T_CHAR *s1, const B1_T_CHAR *s2data, B1_T_IN
 #error B1_MAX_FN_ARGS_NUM must not be greater than 7
 #endif
 
-#if ((B1_T_MEMOFFSET_MIN_VALUE / 4) > B1_T_SUBSCRIPT_MIN_VALUE) || ((B1_T_MEMOFFSET_MAX_VALUE / 4) < B1_T_SUBSCRIPT_MAX_VALUE) // 4 here stands for max. user type size
+#if ((B1_T_MEMOFFSET_MIN_VALUE >> 4) > B1_T_SUBSCRIPT_MIN_VALUE) || ((B1_T_MEMOFFSET_MAX_VALUE >> 4) < B1_T_SUBSCRIPT_MAX_VALUE)
 #error inappropriate B1_T_SUBSCRIPT or B1_T_MEMOFFSET type: B1_T_MEMOFFSET type should allow addressing any array element
 #endif
 

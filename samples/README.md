@@ -12,3 +12,7 @@ The directory contains example programs written in BASIC. Some of the examples s
 - 4.bsc - quadratic equation solver (using some BASIC1-specific features)  
 - 5.bsc - solve a system of linear equations (Gaussian elimination algorithm)  
 - 6.bsc - "Xs and Os" simple game ("Tic-tac-toe")  
+- 7.bsc - locales support: sorting letters of Greek alphabet (Windows-1253 or ISO-8859-7 code pages)  
+- 8.bsc - locales support: sorting letters of Russian alphabet (Windows-1251 code page)  
+- 9.bsc - locales support: sorting letters of Russian alphabet (DOS866 code page)  
+  

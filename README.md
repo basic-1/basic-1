@@ -60,15 +60,22 @@
   
 ## Building  
   
-Use CMake 3.1 tools to build **b1i** simple command-line interpreter. At the moment the next compilers were tested: MinGW-W64 (x86 and x64) for Windows, MSVC 2010 (x86 and x64) for Windows, MSVC 2019 (x86 and x64) for Windows, gcc/g++ (x86 and x64) for Linux.  
+Use CMake 3.1 tools to build **b1i** simple command-line interpreter. At the moment the next compilers were tested: MinGW-W64 (x86 and x64) for Windows, MSVC 2010 (x86 and x64) for Windows, MSVC 2019 (x86 and x64) for Windows, gcc/g++ (x86, x64 and armhf) for Linux.  
   
-To build the interpreter in Windows go to `./source/b1i` directory and run corresponding batch file depending on your compiler and target platform: `win_x86_mingw_rel.bat` and `win_x64_mingw_rel.bat` for MinGW-W64, `win_x86_msvc10_rel.bat` and `win_x64_msvc10_rel.bat` for MSVC10, etc. Under Linux the procedure is the same but shell script names are `lnx_x86_gcc_rel.bat` and `lnx_x64_gcc_rel.bat`.  
+To build the interpreter in Windows go to `./source/b1i` directory and run corresponding batch file depending on your compiler and target platform: `win_x86_mingw_rel.bat` and `win_x64_mingw_rel.bat` for MinGW-W64, `win_x86_msvc10_rel.bat` and `win_x64_msvc10_rel.bat` for MSVC10, etc. Under Linux the procedure is the same but shell script names are `lnx_x86_gcc_rel.bat`, `lnx_x64_gcc_rel.bat` and `lnx_armhf_gcc_rel.bat`.  
   
 **Important note:** The batch files mentioned above run corresponding `<platform_name>_env.bat` files if they exist to set compiler-specific environment variables(PATH, INCLUDE, LIB, etc.). So the file names are: `win_x86_mingw_env.bat`, `win_x64_mingw_env.bat`, `win_x86_msvc10_env.bat`, etc. Create them if necessary before building the project.  
   
 ## Usage  
   
-Executable file name of the interpreter is `b1i.exe` for Windows anf `b1i` for Linux. After successful project building the file can be found in `./bin` directory. The command-line interpreter usage syntax: `b1i [options] <filename>` where `<filename>` is relative or absolute path of a BASIC program file. Possible options: `-d` - print not only error code but textual description too, `-e` - enable input echo (redirects all the text receiving with INPUT statement to output stream), `-t` - print program execution time.  
+Executable file name of the interpreter is `b1i.exe` for Windows anf `b1i` for Linux. After successful project building the file can be found in `./bin` directory. The command-line interpreter usage syntax: `b1i [options] <filename>` where `<filename>` is relative or absolute path of a BASIC program file.  
+  
+Possible options:  
+- `-d` - print not only error code but textual description too  
+- `-e` - enable input echo (redirects all the text receiving with INPUT statement to output stream)  
+- `-l <local_name>` - set `<local_name>` locale for the program (the locale should be available on your system)  
+- `-t` - print program execution time  
+- `-v` - just print interpreter version  
   
 Examples:  
 `./b1i sample1.bsc`  

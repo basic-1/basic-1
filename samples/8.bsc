@@ -1,0 +1,41 @@
+' Case-insensitive sorting of Russian letters, Windows-1251 encoding
+'
+' Set proper Windows console code page prior to the program start: compatible
+' code page is Windows-1251. Commands to run the program under Windows:
+' chcp 1251
+' b1i -l .1251 8.bsc
+'
+' Under Linux (possible command, depends on installed locales):
+' b1i -l ru_RU.cp1251 8.bsc
+
+10  DATA à,á,â,ã,ä,å,æ,ç,è,é,ê,ë,ì,í,î,ï,ð,ñ,ò,ó,ô,õ,ö,÷,ø,ù,ü,û,ú,ý,þ,ÿ,¸
+20  DATA À,Á,Â,Ã,Ä,Å,Æ,Ç,È,É,Ê,Ë,Ì,Í,Î,Ï,Ð,Ñ,Ò,Ó,Ô,Õ,Ö,×,Ø,Ù,Ü,Û,Ú,Ý,Þ,ß,¨
+30
+40  N% = 66
+50  DIM alpha$(N% - 1%)
+60
+70  FOR i% = 0% TO N% - 1%
+80    READ alpha$(i%)
+90  NEXT
+100
+110 GOSUB 1000
+120
+130 FOR i% = 0% TO N% - 1%
+140   PRINT alpha$(i%);
+150 NEXT
+160 PRINT
+170 END
+
+1000 REM Sort array alpha$ of size 0 .. N% - 1
+1010 FOR i% = 0% TO N% - 2%
+1020   m$ = alpha$(i%)
+1030   mi% = i%
+1040   FOR j% = i% + 1% TO N% - 1%
+1050     IF m$ <= alpha$(j%) THEN 1080
+1060     m$ = alpha$(j%)
+1070     mi% = j%
+1080   NEXT
+1090   alpha$(mi%) = alpha$(i%)
+1100   alpha$(i%) = m$
+1110 NEXT
+1120 RETURN
