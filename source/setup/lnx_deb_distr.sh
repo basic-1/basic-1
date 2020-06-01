@@ -6,12 +6,18 @@ then
   exit 1
 fi
 
+#temporary directory to build package in
+#tmp_dir=./
+tmp_dir=/tmp/
+
+#get command line arguments
 project_name=$1
 platform=$2
 lnx_arch=$3
 compiler=$4
 depends=$5
 
+#get interpreter version
 version=$(cat "../$project_name/version.h" | tr -d '\r' | tr -d '\n')
 if [ $? -ne 0 ]
 then
@@ -23,6 +29,7 @@ version=${version/"B1_INT_VERSION"/}
 version=${version// /}
 version=${version//'"'/}
 
+#get build number
 build_num=`git rev-list --count --first-parent HEAD`
 if [ $? -ne 0 ]
 then
@@ -36,54 +43,53 @@ then
 fi
 
 #create directories for deb package
-mkdir -p ./$project_name
-mkdir -p ./$project_name/DEBIAN
-mkdir -p ./$project_name/usr
-mkdir -p ./$project_name/usr/bin
-mkdir -p ./$project_name/usr/share
-mkdir -p ./$project_name/usr/share/doc
-mkdir -p ./$project_name/usr/share/doc/$project_name
+mkdir -p -m 775 $tmp_dir$project_name
+mkdir -p -m 775 $tmp_dir$project_name/DEBIAN
+mkdir -p -m 775 $tmp_dir$project_name/usr
+mkdir -p -m 775 $tmp_dir$project_name/usr/bin
+mkdir -p -m 775 $tmp_dir$project_name/usr/share
+mkdir -p -m 775 $tmp_dir$project_name/usr/share/doc
+mkdir -p -m 775 $tmp_dir$project_name/usr/share/doc/$project_name
 
 #copy executable modules, samples, docs and README
-cp -a ../../bin/lnx/$platform/$compiler/rel/. ./$project_name/usr/bin/
-cp -a ../../docs ./$project_name/usr/share/doc/$project_name/
-cp -a ../../samples ./$project_name/usr/share/doc/$project_name/
-cp ../../README.md ./$project_name/usr/share/doc/$project_name/
+cp -a ../../bin/lnx/$platform/$compiler/rel/. $tmp_dir$project_name/usr/bin/
+cp -a ../../docs $tmp_dir$project_name/usr/share/doc/$project_name/
+cp -a ../../samples $tmp_dir$project_name/usr/share/doc/$project_name/
+cp ../../README.md $tmp_dir$project_name/usr/share/doc/$project_name/
 
 #create deb package control file
-echo "Package: $project_name" >./$project_name/DEBIAN/control
-echo "Version: $version-$build_num" >>./$project_name/DEBIAN/control
-echo "Maintainer: Nikolay Pletnev <b1justomore@gmail.com>" >>./$project_name/DEBIAN/control
-echo "Architecture: $lnx_arch" >>./$project_name/DEBIAN/control
-echo "Section: misc" >>./$project_name/DEBIAN/control
-echo "Depends: $depends" >>./$project_name/DEBIAN/control
-echo "Priority: optional" >>./$project_name/DEBIAN/control
-echo "Description: BASIC1 interpreter" >>./$project_name/DEBIAN/control
-echo " Just one more BASIC interpreter." >>./$project_name/DEBIAN/control
-echo " Command-line BASIC interpreter." >>./$project_name/DEBIAN/control
-echo " Type b1i to get usage help." >>./$project_name/DEBIAN/control
+echo "Package: $project_name" >$tmp_dir$project_name/DEBIAN/control
+echo "Version: $version-$build_num" >>$tmp_dir$project_name/DEBIAN/control
+echo "Maintainer: Nikolay Pletnev <b1justomore@gmail.com>" >>$tmp_dir$project_name/DEBIAN/control
+echo "Architecture: $lnx_arch" >>$tmp_dir$project_name/DEBIAN/control
+echo "Section: misc" >>$tmp_dir$project_name/DEBIAN/control
+echo "Depends: $depends" >>$tmp_dir$project_name/DEBIAN/control
+echo "Priority: optional" >>$tmp_dir$project_name/DEBIAN/control
+echo "Description: BASIC1 interpreter" >>$tmp_dir$project_name/DEBIAN/control
+echo " Just one more BASIC interpreter." >>$tmp_dir$project_name/DEBIAN/control
+echo " Type b1i or b1iu to get usage help." >>$tmp_dir$project_name/DEBIAN/control
 
 #copy license and changelog, compress changelog with gzip
-cp ../../LICENSE ./$project_name/usr/share/doc/$project_name/copyright
-cp ../../docs/changelog ./$project_name/usr/share/doc/$project_name/changelog
-gzip -9 -n -S.Debian.gz ./$project_name/usr/share/doc/$project_name/changelog
+cp ../../LICENSE $tmp_dir$project_name/usr/share/doc/$project_name/copyright
+cp ../../docs/changelog $tmp_dir$project_name/usr/share/doc/$project_name/changelog
+gzip -9 -n -S.Debian.gz $tmp_dir$project_name/usr/share/doc/$project_name/changelog
 
 #strip copied executable
-${7}strip --strip-all ./$project_name/usr/bin/$project_name
+${7}strip --strip-all $tmp_dir$project_name/usr/bin/$project_name
 
 #correct file attributes
-chmod 755 `find ./$project_name -type d`
-chmod 755 ./$project_name/usr/bin/$project_name
-chmod 644 `find ./$project_name/usr/share -type f`
+chmod 755 `find $tmp_dir$project_name -type d`
+chmod 755 $tmp_dir$project_name/usr/bin/*
+chmod 644 `find $tmp_dir$project_name/usr/share -type f`
 
 #create deb package
-fakeroot dpkg-deb --build $project_name
+fakeroot dpkg-deb --build $tmp_dir$project_name
 
 #delete all the stuff we collected for the package
-rm -r ./$project_name
+rm -r $tmp_dir$project_name
 
 #delete package with the same name from distr directory
 rm ../../distr/${project_name}_lnx_${lnx_arch}_${compiler}_${version}-*.deb
 
 #move the package to distr directory
-mv $project_name.deb ../../distr/${project_name}_lnx_${lnx_arch}_${compiler}_${version}-${build_num}.deb
+mv $tmp_dir$project_name.deb ../../distr/${project_name}_lnx_${lnx_arch}_${compiler}_${version}-${build_num}.deb

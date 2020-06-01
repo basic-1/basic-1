@@ -1,0 +1,1 @@
+call win_build.bat "..\.." b1iu b1i x86 mingw dbg "-G ""MinGW Makefiles"" -DCMAKE_BUILD_TYPE=Debug" " " "." %1

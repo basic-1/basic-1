@@ -15,6 +15,10 @@
 #include "b1feat.h"
 #include "b1itypes.h"
 
+#ifdef B1_FEATURE_UNICODE_UCS2
+#include <wctype.h>
+#endif
+
 
 #define B1_TMP_BUF_LEN ((B1_T_INDEX)(((B1_MAX_STRING_LEN) > (B1_MAX_IDENTIFIER_LEN) ? (B1_MAX_STRING_LEN) : (B1_MAX_IDENTIFIER_LEN)) + 1))
 

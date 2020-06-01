@@ -2,7 +2,7 @@
   
 ## Preamble  
   
-BASIC1 interpreter core can be embedded into existing application or an alternative command-line or GUI shell can be written for the interpreter instead of the existing **b1i** command-line one. The interpreter core is written in C language and does not use standard memory allocation, input/output or other environment-specific functions. The interpreter hosting application has to provide such functions to the core as well as some other functions allowing navigating through program lines, caching line numbers and expressions data, etc.  
+BASIC1 interpreter core can be embedded into existing application or an alternative command-line or GUI shell can be written for the interpreter instead of the existing **b1i** and **b1iu** command-line utilities. The interpreter core is written in C language and does not use standard memory allocation, input/output or other environment-specific functions. The interpreter hosting application has to provide such functions to the core as well as some other functions allowing navigating through program lines, caching line numbers and expressions data, etc.  
   
 ## Typical embedding scenario  
   
@@ -16,13 +16,21 @@ BASIC1 interpreter core can be embedded into existing application or an alternat
 Some interpreter's features can be turned on or off by editing application's `feat.h` file. Comment corresponding macro definition to disable a feature.  
   
 `B1_FEATURE_STMT_ERASE`: enables `ERASE` statement.  
+  
 `B1_FEATURE_STMT_DATA_READ`: enables `DATA`, `READ` and `RESTORE` statements. If the feature is disabled `b1_ex_prg_data_go_next` function is not needed.  
+  
 `B1_FEATURE_FUNCTIONS_STANDARD`: enables `LEN`, `ASC`, `CHR$`, `STR$`, `VAL`, `IIF`, `IIF$` functions.  
+  
 `B1_FEATURE_FUNCTIONS_MATH_BASIC`: enables `ABS`, `INT`, `RND`, `SGN` functions and `RANDOMIZE` statement. No need to implement `b1_ex_rnd_randomize` and `b1_ex_rnd_rand` functions if the feature is disabled.  
+  
 `B1_FEATURE_FUNCTIONS_MATH_EXTRA`: enables `ATN`, `COS`, `EXP`, `LOG`, `PI`, `SIN`, `SQR`, `TAN` functions.  
+  
 `B1_FEATURE_FUNCTIONS_STRING`: enables `MID$`, `INSTR`, `LTRIM$`, `RTRIM$`, `LEFT$`, `RIGHT$`, `LSET$`, `RSET$`, `UCASE$`, `LCASE$` functions.  
+  
 `B1_FEATURE_FUNCTIONS_USER`: enables `DEF` statement and user defined functions.  
+  
 `B1_FEATURE_TYPE_SINGLE`: enables `SINGLE` data type. `B1_FEATURE_FUNCTIONS_MATH_EXTRA` feature is not allowed without `SINGLE` type enabled. Also disabling floating-pont data types turns off random generator feature.  
+  
 `B1_FEATURE_RPN_CACHING`: enables expression postfix notation caching. `b1_ex_prg_rpn_cache` and `b1_ex_prg_rpn_get_cached` functions have to be implemented to do the caching if enabled.  
   
 `B1_FEATURE_SUBSCRIPT_XXBIT`, where `XX` can be `8`, `12`, `16`, `24`: selects type and range of interpreter's array subscript. Enabling two or more macros of the group is not allowed. The macro determines signed integer data type for internal subscript value representation and subscript range (minimal and maximal values). Default subscript type (if no one macro is enabled) is 16-bit.  
@@ -30,6 +38,8 @@ Some interpreter's features can be turned on or off by editing application's `fe
 `B1_FEATURE_MEMOFFSET_XXBIT`, where `XX` can be `16` or `32`: selects data type for internal memory offset representation. The type should be at least 4 bits larger than subscript data type. Default type is 32-bit.  
   
 `B1_FEATURE_LOCALES`: makes the interpreter core use locale-specific functions for built-in `UCASE$`, `LCASE$` and `INSTR` functions and string comparison operators. The locale-specific functions are not a part of the interpreter core and have to be implemented when embedding the core. The functions are: `b1_t_toupper_l`, `b1_t_tolower_l` and `b1_t_strcmp_l`.  
+  
+`B1_FEATURE_UNICODE_UCS2`: defines `B1_T_CHAR` type as `uint16_t` allowing representing program lines and BASIC string values with 2-byte character encoding.  
   
 ## Interpreter's global variables and functions  
   

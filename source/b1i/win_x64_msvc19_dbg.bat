@@ -1,1 +1,0 @@
-call win_build.bat b1i x64 msvc19 dbg "-G ""Visual Studio 16 2019"" -A x64" "--config Debug" ".\Debug" %1

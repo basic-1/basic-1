@@ -1,3 +1,10 @@
+b1i (1.0.0-35) unstable; urgency=low
+
+  * Unicode support added (now the core supports UCS-2 encoding)
+  * b1iu executable module with Unicode support added
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Mon, 01 June 2020 18:45:18 +0300
+
 b1i (1.0.0-34) unstable; urgency=low
 
   * locales support added

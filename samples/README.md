@@ -15,4 +15,7 @@ The directory contains example programs written in BASIC. Some of the examples s
 - 7.bsc - locales support: sorting letters of Greek alphabet (Windows-1253 or ISO-8859-7 code pages)  
 - 8.bsc - locales support: sorting letters of Russian alphabet (Windows-1251 code page)  
 - 9.bsc - locales support: sorting letters of Russian alphabet (DOS866 code page)  
+- 10.bsc - locales support: sorting letters of Russian alphabet (ISO-8859-5 code page)  
+- 11.bsc - Unicode support: sorting Greek letters (UTF-8 encoding)  
+- 12.bsc - Unicode support: sorting Russian letters (UTF-8 encoding)  
   

@@ -1,0 +1,1 @@
+call win_build.bat "..\.." b1i b1i x86 msvc19 rel "-G ""Visual Studio 16 2019"" -A Win32" "--config Release" ".\Release" %1

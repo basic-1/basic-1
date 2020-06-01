@@ -10,6 +10,7 @@
 - interpreter core written in C  
 - embeddable: memory functions, input/output and caching detached from core  
 - command-line interpreter built for Windows x86, Windows x64, Linux i386, Linux amd64, Linux armhf  
+- optional Unicode support
 - licensed under MIT license  
   
 # Data types  
@@ -60,15 +61,15 @@
   
 ## Building  
   
-Use CMake 3.1 tools to build **b1i** simple command-line interpreter. At the moment the next compilers were tested: MinGW-W64 (x86 and x64) for Windows, MSVC 2010 (x86 and x64) for Windows, MSVC 2019 (x86 and x64) for Windows, gcc/g++ (x86, x64 and armhf) for Linux.  
+Use CMake 3.1 tools to build **b1i** or **b1iu** simple command-line interpreter. **b1iu** interpreter uses Unicode for characters representation. Use one of the next C/C++ toolchains: MinGW-W64 (x86 and x64) under Windows, MSVC 2010 (x86 and x64) under Windows, MSVC 2019 (x86 and x64) under Windows, gcc/g++ (x86, x64 and armhf) under Linux. Other compilers/toolchains are probably compatible too.  
   
-To build the interpreter in Windows go to `./source/b1i` directory and run corresponding batch file depending on your compiler and target platform: `win_x86_mingw_rel.bat` and `win_x64_mingw_rel.bat` for MinGW-W64, `win_x86_msvc10_rel.bat` and `win_x64_msvc10_rel.bat` for MSVC10, etc. Under Linux the procedure is the same but shell script names are `lnx_x86_gcc_rel.bat`, `lnx_x64_gcc_rel.bat` and `lnx_armhf_gcc_rel.bat`.  
+To build the interpreter under Windows go to `./source/b1i` directory and run corresponding batch file depending on your compiler and target platform: `b1i_win_x86_mingw_rel.bat` and `b1i_win_x64_mingw_rel.bat` for MinGW-W64, `b1i_win_x86_msvc10_rel.bat` and `b1i_win_x64_msvc10_rel.bat` for MSVC10, etc. Under Linux the procedure is the same but shell script names are `b1i_lnx_x86_gcc_rel.sh`, `b1i_lnx_x64_gcc_rel.sh` and `b1i_lnx_armhf_gcc_rel.sh`. Use scripts with `b1iu_` prefix to build Unicode version of the interpreter.  
   
-**Important note:** The batch files mentioned above run corresponding `<platform_name>_env.bat` files if they exist to set compiler-specific environment variables(PATH, INCLUDE, LIB, etc.). So the file names are: `win_x86_mingw_env.bat`, `win_x64_mingw_env.bat`, `win_x86_msvc10_env.bat`, etc. Create them if necessary before building the project.  
+**Important note:** The batch files mentioned above run corresponding `<platform_toolchain_name>_env.bat` files if they exist to set compiler-specific environment variables(PATH, INCLUDE, LIB, etc.). So the file names are: `win_x86_mingw_env.bat`, `win_x64_mingw_env.bat`, `win_x86_msvc10_env.bat`, etc. Create them if necessary before building the project.  
   
 ## Usage  
   
-Executable file name of the interpreter is `b1i.exe` for Windows anf `b1i` for Linux. After successful project building the file can be found in `./bin` directory. The command-line interpreter usage syntax: `b1i [options] <filename>` where `<filename>` is relative or absolute path of a BASIC program file.  
+Executable file names of the interpreter are `b1i.exe` and `b1iu.exe` for Windows and `b1i` and `b1iu` for Linux. After successful project building the file can be found in `./bin` directory. The command-line interpreter usage syntax: `b1i [options] <filename>` where `<filename>` is relative or absolute path of a BASIC program file.  
   
 Possible options:  
 - `-d` - print not only error code but textual description too  
@@ -80,6 +81,7 @@ Possible options:
 Examples:  
 `./b1i sample1.bsc`  
 `./b1i -e sample2.bsc <input.txt`  
+`./b1iu 12.bsc`  
   
 # Project directories structure  
   

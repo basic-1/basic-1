@@ -18,6 +18,7 @@ Default subscript upper boundary value: 10
 
 Integer data type range: \[−2147483648 ... 2147483647\]  
 Floating-point data type range: \[±1.1754943e−38 ... ±3.4028234e38\]  
-Character type range: \[0 ... 255\]  
+Character type range (ANSI version): \[0 ... 255\]  
+Character type range (Unicode UCS-2 version): \[0 ... 65535\]  
 Subscript range: \[-8388608 ... 8388607\]  
   

@@ -41,6 +41,9 @@
 // locales support (for LCASE$, UCASE$, INSTR functions and string comparison operators)
 #define B1_FEATURE_LOCALES
 
+// enables two byte B1_T_CHAR type for Unicode (UCS-2) support
+//#define B1_FEATURE_UNICODE_UCS2
+
 // type size for array subscripts (if no one macro is enabled 16 bit type is used)
 //#define B1_FEATURE_SUBSCRIPT_8BIT
 //#define B1_FEATURE_SUBSCRIPT_12BIT

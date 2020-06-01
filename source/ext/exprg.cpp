@@ -47,6 +47,44 @@ static std::map<uint32_t, std::pair<B1_T_INDEX, std::vector<B1_RPNREC>>> b1_ex_p
 static std::vector<std::vector<B1_T_CHAR>> b1_ex_prg_lines;
 
 
+#ifdef B1_FEATURE_UNICODE_UCS2
+static B1_T_ERROR b1_ex_prg_read_line(FILE *fp, std::vector<B1_T_CHAR> &ostr)
+{
+	wint_t c;
+	B1_T_ERROR err;
+
+	err = B1_RES_OK;
+
+	while(1)
+	{
+		c = fgetwc(fp);
+		if(c == WEOF)
+		{
+			if(feof(fp))
+			{
+				err = B1_RES_EEOF;
+			}
+			else
+			{
+				err = B1_RES_EENVFAT;
+			}
+
+			break;
+		}
+
+		if(c == '\n')
+		{
+			break;
+		}
+
+		ostr.push_back((B1_T_CHAR)c);
+	}
+
+	ostr.push_back(0);
+
+	return err;
+}
+#else
 static B1_T_ERROR b1_ex_prg_read_line(FILE *fp, std::vector<B1_T_CHAR> &ostr)
 {
 	int c;
@@ -83,6 +121,7 @@ static B1_T_ERROR b1_ex_prg_read_line(FILE *fp, std::vector<B1_T_CHAR> &ostr)
 
 	return err;
 }
+#endif
 
 extern "C" B1_T_ERROR b1_ex_prg_set_prog_file(const char *prog_file)
 {

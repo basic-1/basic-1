@@ -3,7 +3,7 @@
  Copyright (c) 2020 Nikolay Pletnev
  MIT license
 
- b1i.c: command line basic interpreter main file
+ b1i.c: command line BASIC interpreter main file
 */
 
 
@@ -14,12 +14,43 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifdef B1_FEATURE_UNICODE_UCS2
+#include <wchar.h>
+#endif
+
 #include "b1feat.h"
 #include "b1int.h"
 #include "b1err.h"
 
 #include "version.h"
 #include "gitrev.h"
+
+
+#ifdef B1_FEATURE_UNICODE_UCS2
+#define FPUTS(STR, STREAM) \
+do { \
+	size_t _slen = strlen(STR); \
+	wchar_t *_wstr = malloc(sizeof(wchar_t) * (_slen + 1)); \
+	mbstowcs(_wstr, STR, _slen); \
+	_wstr[_slen] = L'\0'; \
+	fputws(_wstr, STREAM); \
+	free(_wstr); \
+} while(0)
+#define FPRINTF(STREAM, FMT, ...) \
+do { \
+	size_t _slen = strlen(FMT); \
+	wchar_t *_wstr = malloc(sizeof(wchar_t) * (_slen + 1)); \
+	mbstowcs(_wstr, FMT, _slen); \
+	_wstr[_slen] = L'\0'; \
+	fwprintf(STREAM, _wstr, ##__VA_ARGS__); \
+	free(_wstr); \
+} while(0)
+#define PRINTF_TYPESPEC_STRING "%ls"
+#else
+#define FPUTS(STR, STREAM) fputs(STR, STREAM)
+#define FPRINTF(STREAM, FMT, ...) fprintf(STREAM, FMT, ##__VA_ARGS__)
+#define PRINTF_TYPESPEC_STRING "%s"
+#endif
 
 
 extern B1_T_ERROR b1_ex_prg_set_prog_file(const char *prog_file);
@@ -77,33 +108,33 @@ static const char *err_msgs[] =
 
 static void b1_print_error(uint8_t err_code, int print_line_cnt, int print_err_desc)
 {
-	fprintf(stderr, "error: %d", (int)err_code);
+	FPRINTF(stderr, "error: %d", (int)err_code);
 	
 	if(print_line_cnt)
 	{
-		fprintf(stderr, " at line %d", (int)b1_int_curr_prog_line_cnt);
+		FPRINTF(stderr, " at line %d", (int)b1_int_curr_prog_line_cnt);
 	}
 
 	if(print_err_desc && err_code >= B1_RES_FIRSTERRCODE && err_code <= B1_RES_LASTERRCODE)
 	{
-		fprintf(stderr, " (%s)", err_msgs[err_code - B1_RES_FIRSTERRCODE]);
+		FPRINTF(stderr, " (" PRINTF_TYPESPEC_STRING ")", err_msgs[err_code - B1_RES_FIRSTERRCODE]);
 	}
 
-	fprintf(stderr, "\n");
+	FPUTS("\n", stderr);
 }
 
 static void b1_print_version(FILE *fstr)
 {
-	fputs("BASIC1 interpreter\n", fstr);
-	fputs("MIT license\n", fstr);
-	fputs("Version: ", fstr);
-	fputs(version, fstr);
+	FPUTS("BASIC1 interpreter\n", fstr);
+	FPUTS("MIT license\n", fstr);
+	FPUTS("Version: ", fstr);
+	FPUTS(version, fstr);
 #ifdef B1_GIT_REVISION
-	fputs(" (", fstr);
-	fputs(B1_GIT_REVISION, fstr);
-	fputs(")", fstr);
+	FPUTS(" (", fstr);
+	FPUTS(B1_GIT_REVISION, fstr);
+	FPUTS(")", fstr);
 #endif
-	fputs("\n", fstr);
+	FPUTS("\n", fstr);
 }
 
 int main(int argc, char **argv)
@@ -123,18 +154,18 @@ int main(int argc, char **argv)
 	if(argc <= 1)
 	{
 		b1_print_version(stderr);
-		fputs("error: missing file name\n", stderr);
-		fputs("usage: ", stderr);
-		fputs(B1_PROJECT_NAME, stderr);
-		fputs(" [options] filename\n", stderr);
-		fputs("options:\n", stderr);
-		fputs("-d or /d - print error description\n", stderr);
-		fputs("-e or /e - echo input\n", stderr);
+		FPUTS("error: missing file name\n", stderr);
+		FPUTS("usage: ", stderr);
+		FPUTS(B1_PROJECT_NAME, stderr);
+		FPUTS(" [options] filename\n", stderr);
+		FPUTS("options:\n", stderr);
+		FPUTS("-d or /d - print error description\n", stderr);
+		FPUTS("-e or /e - echo input\n", stderr);
 #ifdef B1_FEATURE_LOCALES
-		fputs("-l <locale_name> or /l <locale_name> - set program locale\n", stderr);
+		FPUTS("-l <locale_name> or /l <locale_name> - set program locale\n", stderr);
 #endif
-		fputs("-t or /t - print program execution time\n", stderr);
-		fputs("-v or /v - show interpreter version\n", stderr);
+		FPUTS("-t or /t - print program execution time\n", stderr);
+		FPUTS("-v or /v - show interpreter version\n", stderr);
 		return -1;
 	}
 
@@ -281,7 +312,7 @@ int main(int argc, char **argv)
 	{
 		i = (int)(100 * (uint64_t)(end - start) / CLOCKS_PER_SEC);
 
-		fprintf(stdout, "The program execution time: %d.%02d s\n", i / 100, i - (i / 100) * 100);
+		FPRINTF(stdout, "The program execution time: %d.%02d s\n", i / 100, i - (i / 100) * 100);
 	}
 
 	return retcode;

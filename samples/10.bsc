@@ -1,11 +1,11 @@
-' Case-insensitive sorting of Russian letters, DOS866 encoding
+' Case-insensitive sorting of Russian letters, ISO-8859-5 encoding
 ' Set proper Windows console code page prior to the program start: compatible
-' code page is DOS866. Commands to run the program under Windows:
-' chcp 866
-' b1i -l .866 9.bsc
+' code page is ISO-8859-5. Commands to run the program under Windows:
+' chcp 28595
+' b1i -l .28595 10.bsc
 
-10  DATA †,°,¢,£,§,•,¶,ß,®,©,™,´,¨,≠,Æ,Ø,‡,·,‚,„,‰,Â,Ê,Á,Ë,È,Ï,Î,Í,Ì,Ó,Ô,Ò
-20  DATA Ä,Å,Ç,É,Ñ,Ö,Ü,á,à,â,ä,ã,å,ç,é,è,ê,ë,í,ì,î,ï,ñ,ó,ò,ô,ú,õ,ö,ù,û,ü,
+10  DATA –,—,“,”,‘,’,÷,◊,ÿ,Ÿ,⁄,€,‹,›,ﬁ,ﬂ,‡,·,‚,„,‰,Â,Ê,Á,Ë,È,Ï,Î,Í,Ì,Ó,Ô,Ò
+20  DATA ∞,±,≤,≥,¥,µ,∂,∑,∏,π,∫,ª,º,Ω,æ,ø,¿,¡,¬,√,ƒ,≈,∆,«,»,…,Ã,À, ,Õ,Œ,œ,°
 30
 40  N% = 66
 50  DIM alpha$(N% - 1%)

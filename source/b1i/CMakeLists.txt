@@ -11,8 +11,8 @@ if(UNIX)
  set(CMAKE_CXX_STANDARD 11)
 endif()
 
-# set project (target) name
-set(B1_PROJECT_NAME b1i)
+# set project (target) name, B1I_TARGET variable should be set before running cmake
+set(B1_PROJECT_NAME $ENV{B1I_TARGET})
 
 project(${B1_PROJECT_NAME} LANGUAGES C CXX)
 
@@ -22,6 +22,14 @@ set(B1_CORE_SRC_DIR ../core)
 set(B1_EXT_SRC_DIR ../ext)
 
 add_definitions(-DB1_PROJECT_NAME="${B1_PROJECT_NAME}")
+
+# enable B1_FEATURE_UNICODE_UCS2 feature if the target is b1iu
+string(LENGTH "$ENV{B1I_TARGET}" STR_LEN)
+math(EXPR STR_LEN "${STR_LEN} - 1")
+string(SUBSTRING "$ENV{B1I_TARGET}" ${STR_LEN} -1 LAST_CHAR)
+if("${LAST_CHAR}" STREQUAL "u")
+ add_definitions(-DB1_FEATURE_UNICODE_UCS2)
+endif()
 
 include_directories(${B1_CORE_SRC_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})

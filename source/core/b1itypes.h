@@ -26,8 +26,13 @@
 #define B1_T_IDHASH_SIZE ((uint8_t)(sizeof(B1_T_IDHASH)))
 
 // min/max values for internal interpreter types
+#ifdef B1_FEATURE_UNICODE_UCS2
+#define B1_T_CHAR_MAX_VALUE (UINT16_MAX)
+#define B1_T_INDEX_MAX_VALUE (UINT16_MAX)
+#else
 #define B1_T_CHAR_MAX_VALUE (UINT8_MAX)
 #define B1_T_INDEX_MAX_VALUE (UINT8_MAX)
+#endif
 
 #if defined(B1_FEATURE_SUBSCRIPT_8BIT)
 #define B1_T_SUBSCRIPT_MIN_VALUE (INT8_MIN)
@@ -74,8 +79,13 @@
 typedef uint8_t B1_T_ERROR;
 // B1_T_CHAR: type for program line and data string characters (unsigned type, from 0 to B1_T_CHAR_MAX_VALUE)
 // B1_T_INDEX: type for program line and data string index variables (unsigned type, from 0 to B1_T_INDEX_MAX_VALUE)
+#ifdef B1_FEATURE_UNICODE_UCS2
+typedef uint16_t B1_T_CHAR;
+typedef uint16_t B1_T_INDEX;
+#else
 typedef uint8_t B1_T_CHAR;
 typedef uint8_t B1_T_INDEX;
+#endif
 // type for array subscripts (signed type, from B1_T_SUBSCRIPT_MIN_VALUE to B1_T_SUBSCRIPT_MAX_VALUE)
 #if defined(B1_FEATURE_SUBSCRIPT_8BIT)
 typedef int8_t B1_T_SUBSCRIPT;

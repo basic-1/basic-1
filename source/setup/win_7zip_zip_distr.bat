@@ -1,4 +1,4 @@
-rem usage: win_7zip_zip_distr.bat <project_name> <platform> <compiler> <is_next_revision>
+rem usage: win_7zip_zip_distr.bat <project_name> <platform> <compiler> [<is_next_revision>]
 
 if "%~1"=="" goto _invargs
 if "%~2"=="" goto _invargs

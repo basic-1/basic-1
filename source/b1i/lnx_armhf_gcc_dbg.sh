@@ -1,3 +1,0 @@
-#!/bin/bash
-
-./lnx_build.sh b1i armhf gcc dbg "-DCMAKE_BUILD_TYPE=DEBUG" $1

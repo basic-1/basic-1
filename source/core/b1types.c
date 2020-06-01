@@ -387,12 +387,26 @@ B1_T_ERROR b1_t_strtoi32(const B1_T_CHAR *cs, int32_t *value)
 B1_T_ERROR b1_t_i32tostr(int32_t value, B1_T_CHAR *sbuf, B1_T_INDEX buflen)
 {
 #ifdef B1_FEATURE_TYPE_SINGLE
+#ifdef B1_FEATURE_UNICODE_UCS2
+	char tmpbuf[50];
+	B1_T_INDEX len, i;
+#endif
+
 	if(buflen < 13)
 	{
 		return B1_RES_EBUFSMALL;
 	}
 
+#ifdef B1_FEATURE_UNICODE_UCS2
+	len = (B1_T_CHAR)sprintf(tmpbuf, "%ld", (long int)value);
+	*sbuf = len;
+	for(i = 0; i <= len; i++)
+	{
+		*(sbuf + 1 + i) = (uint8_t)tmpbuf[i];
+	}
+#else
 	*sbuf = (B1_T_CHAR)sprintf((char *)(sbuf + 1), "%ld", (long int)value);
+#endif
 
 	return B1_RES_OK;
 #else
@@ -455,7 +469,26 @@ B1_T_ERROR b1_t_i32tostr(int32_t value, B1_T_CHAR *sbuf, B1_T_INDEX buflen)
 // temporary implementation: just a replace to atof
 B1_T_ERROR b1_t_strtosingle(const B1_T_CHAR *cs, float *value)
 {
+#ifdef B1_FEATURE_UNICODE_UCS2
+	char tmpbuf[50];
+	B1_T_INDEX i;
+
+	for(i = 0; i < 49; i++)
+	{
+		if(cs[i] == 0)
+		{
+			break;
+		}
+
+		tmpbuf[i] = (uint8_t)cs[i];
+	}
+
+	tmpbuf[i] = 0;
+
+	*value = (float)atof(tmpbuf);
+#else
 	*value = (float)atof((const char *)cs);
+#endif
 
 	return B1_RES_OK;
 }
@@ -653,6 +686,9 @@ B1_T_ERROR b1_t_singletostr(float value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, uin
 	B1_T_INDEX start, end, n;
 	uint8_t neg, use_exp, lt1;
 	int8_t e;
+#ifdef B1_FEATURE_UNICODE_UCS2
+	char tmpbuf[50];
+#endif
 
 	// negative value
 	neg = 0;
@@ -694,7 +730,15 @@ B1_T_ERROR b1_t_singletostr(float value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, uin
 		lt1++;
 	}
 
+#ifdef B1_FEATURE_UNICODE_UCS2
+	n = (B1_T_INDEX)sprintf(tmpbuf, lt1 ? "%.47f" : "%.9f", value);
+	for(start = 0; start <= n; start++)
+	{
+		*(sbuf + neg + 1 + start) = (uint8_t)tmpbuf[start];
+	}
+#else
 	n = (B1_T_INDEX)sprintf((char *)(sbuf + neg + 1), lt1 ? "%.47f" : "%.9f", value);
+#endif
 
 	if(neg)
 	{
