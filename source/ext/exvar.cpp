@@ -54,3 +54,30 @@ extern "C" B1_T_ERROR b1_ex_var_free(B1_T_IDHASH name_hash)
 
 	return B1_RES_OK;
 }
+
+#ifdef B1_FEATURE_INIT_FREE_MEMORY
+extern "C" B1_T_ERROR b1_ex_var_enum(B1_NAMED_VAR **var)
+{
+	auto var_it = b1_ex_vars.begin();
+
+	if(*var != NULL)
+	{
+		var_it = b1_ex_vars.find((*var)->id.name_hash);
+		if(var_it != b1_ex_vars.end())
+		{
+			var_it++;
+		}
+	}
+
+	if(var_it == b1_ex_vars.end())
+	{
+		*var = NULL;
+	}
+	else
+	{
+		*var = &var_it->second;
+	}
+
+	return B1_RES_OK;
+}
+#endif

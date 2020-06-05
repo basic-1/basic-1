@@ -23,6 +23,9 @@ extern B1_T_ERROR b1_ex_mem_free(const B1_T_MEM_BLOCK_DESC mem_desc);
 extern B1_T_ERROR b1_ex_var_init();
 extern B1_T_ERROR b1_ex_var_alloc(B1_T_IDHASH name_hash, B1_NAMED_VAR **var);
 extern B1_T_ERROR b1_ex_var_free(B1_T_IDHASH name_hash);
+#ifdef B1_FEATURE_INIT_FREE_MEMORY
+extern B1_T_ERROR b1_ex_var_enum(B1_NAMED_VAR **var);
+#endif
 
 // localized string functions
 #ifdef B1_FEATURE_LOCALES

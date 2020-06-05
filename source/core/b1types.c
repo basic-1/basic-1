@@ -71,6 +71,10 @@ const B1_T_CHAR _SINGLE[] = { 6, 'S', 'I', 'N', 'G', 'L', 'E' };
 const B1_T_CHAR _STRING[] = { 6, 'S', 'T', 'R', 'I', 'N', 'G' };
 const B1_T_CHAR _INT[] = { 3, 'I', 'N', 'T' };
 
+#ifdef B1_FEATURE_DEBUG
+const B1_T_CHAR _SPECVAR[] = { 8, B1_T_C_LT, 'F', 'O', 'R', 'V', 'A', 'R', B1_T_C_GT };
+#endif
+
 
 // converts C string to uint16_t value
 B1_T_ERROR b1_t_strtoui16(const B1_T_CHAR *cs, uint16_t *value)

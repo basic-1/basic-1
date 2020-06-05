@@ -41,6 +41,8 @@ Some interpreter's features can be turned on or off by editing application's `fe
   
 `B1_FEATURE_UNICODE_UCS2`: defines `B1_T_CHAR` type as `uint16_t` allowing representing program lines and BASIC string values with 2-byte character encoding.  
   
+`B1_FEATURE_INIT_FREE_MEMORY`: if the macro is defined `b1_int_reset` function frees memory allocated during preceding program execution (in the most cases the feature must be enabled to allow resetting program state). `b1_ex_var_enum` function has to be implemented for the feature to work.  
+  
 ## Interpreter's global variables and functions  
   
 Hosting application can control the interpreter core by reading/writing special global variables and calling some functions. The most of them are described below.  
@@ -127,6 +129,22 @@ The simplest functions implementation: `./source/ext/exio.c` (sdandard C input/o
   
 `extern B1_T_ERROR b1_ex_var_free(B1_T_IDHASH name_hash);`  
 The function has to free the memory allocated for `B1_NAMED_VAR` structure of a variable identified with `name_hash` hash value.  
+  
+`extern B1_T_ERROR b1_ex_var_enum(B1_NAMED_VAR **var);`  
+The function is used by the interpreter core only if `B1_FEATURE_INIT_FREE_MEMORY` feature is enabled. It should allow reading all the variables in the cache. Calling the function with `*var` equal to `NULL` should result in returning pointer to the first variable in tha cache in the same `var` argument variable. The next call should return pointer to the next variable, etc. The function should put `NULL` value into `*var` if there're no more variables.  
+Typical usage sample:  
+```
+  B1_NAMED_VAR *var = NULL;
+  while(1)
+  {
+    b1_ex_var_enum(&var);
+    if(var == NULL)
+    {
+      break;
+    }
+    // do something with var
+  }
+```  
   
 Possible return codes for the functions: `B1_RES_OK` (success), `B1_RES_ENOMEM` (not enough memory), `B1_RES_EIDINUSE` (variable already exists).  
   

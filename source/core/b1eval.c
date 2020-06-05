@@ -520,10 +520,14 @@ B1_T_ERROR b1_eval(uint8_t options, B1_VAR_REF *var_ref)
 	B1_NAMED_VAR *var;
 	B1_VAR *var1;
 	B1_FN *fn;
-
 #ifdef B1_FEATURE_FUNCTIONS_USER
 	B1_T_INDEX rpn_stack_ptr, rpn_end, argsbase;
+#endif
+#ifdef B1_FEATURE_DEBUG
+	B1_T_INDEX id_off, id_len;
+#endif
 
+#ifdef B1_FEATURE_FUNCTIONS_USER
 	rpn_stack_ptr = 0;
 	rpn_end = 0;
 	argsbase = 0;
@@ -554,6 +558,10 @@ B1_T_ERROR b1_eval(uint8_t options, B1_VAR_REF *var_ref)
 		{
 			var_type = (*(b1_rpn + i)).data.id.flags;
 			name_hash = (*(b1_rpn + i)).data.id.hash;
+#ifdef B1_FEATURE_DEBUG
+			id_off = (*(b1_rpn + i)).data.id.offset;
+			id_len = (*(b1_rpn + i)).data.id.length;
+#endif
 		}
 		else
 		{
@@ -665,6 +673,10 @@ B1_T_ERROR b1_eval(uint8_t options, B1_VAR_REF *var_ref)
 						err = b1_var_create(name_hash, var_type, argnum, NULL, &var);
 						if(err == B1_RES_OK)
 						{
+#ifdef B1_FEATURE_DEBUG
+							memcpy((*var).id.name + 1, b1_int_progline + id_off, id_len * B1_T_CHAR_SIZE);
+							(*var).id.name[0] = (B1_T_CHAR)id_len;
+#endif
 							// the variable was created
 							if(b1_int_opt_explicit_val)
 							{

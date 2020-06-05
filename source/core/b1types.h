@@ -72,6 +72,7 @@
 #define B1_T_C_TAB ((B1_T_CHAR)'\t')
 #define B1_T_C_DBLQUOTE ((B1_T_CHAR)'\"')
 #define B1_T_C_COMMA ((B1_T_CHAR)',')
+#define B1_T_C_COLON ((B1_T_CHAR)':')
 #define B1_T_C_SEMICOLON ((B1_T_CHAR)';')
 #define B1_T_C_CR ((B1_T_CHAR)'\r')
 #define B1_T_C_LF ((B1_T_CHAR)'\n')
@@ -221,6 +222,11 @@ extern const B1_T_CHAR _SINGLE[];
 extern const B1_T_CHAR _STRING[];
 extern const B1_T_CHAR _INT[];
 
+#ifdef B1_FEATURE_DEBUG
+extern const B1_T_CHAR _SPECVAR[];
+#endif
+
+
 extern B1_T_ERROR b1_t_strtoui16(const B1_T_CHAR *cs, uint16_t *value);
 extern B1_T_ERROR b1_t_strtoi32(const B1_T_CHAR *cs, int32_t *value);
 extern B1_T_ERROR b1_t_i32tostr(int32_t value, B1_T_CHAR *sbuf, B1_T_INDEX buflen);
@@ -232,6 +238,10 @@ extern int8_t b1_t_strcmpi(const B1_T_CHAR *s1, const B1_T_CHAR *s2data, B1_T_IN
 
 
 // checks
+#if defined(B1_FEATURE_DEBUG) && !defined(B1_FEATURE_INIT_FREE_MEMORY)
+#error B1_FEATURE_DEBUG feature requires B1_FEATURE_INIT_FREE_MEMORY to be enabled
+#endif
+
 #if defined(B1_FEATURE_TYPE_SINGLE) && !defined(B1_FRACTIONAL_TYPE_EXISTS)
 #error floating point type(-s) support enabled without B1_FRACTIONAL_TYPE_EXISTS definition
 #endif

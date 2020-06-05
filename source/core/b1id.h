@@ -41,6 +41,9 @@ typedef struct
 {
 	uint16_t name_hash;
 	uint8_t flags;
+#ifdef B1_FEATURE_DEBUG
+	B1_T_CHAR name[B1_MAX_IDENTIFIER_LEN + 1];
+#endif
 } B1_ID;
 
 

@@ -13,6 +13,7 @@
 #include <locale.h>
 #include <string.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #ifdef B1_FEATURE_UNICODE_UCS2
 #include <wchar.h>
@@ -21,6 +22,11 @@
 #include "b1feat.h"
 #include "b1int.h"
 #include "b1err.h"
+#include "b1ex.h"
+
+#ifdef B1_FEATURE_DEBUG
+#include "b1dbg.h"
+#endif
 
 #include "version.h"
 #include "gitrev.h"
@@ -46,10 +52,12 @@ do { \
 	free(_wstr); \
 } while(0)
 #define PRINTF_TYPESPEC_STRING "%ls"
+#define PRINTF_TYPESPEC_STRING_A "%hs"
 #else
 #define FPUTS(STR, STREAM) fputs(STR, STREAM)
 #define FPRINTF(STREAM, FMT, ...) fprintf(STREAM, FMT, ##__VA_ARGS__)
 #define PRINTF_TYPESPEC_STRING "%s"
+#define PRINTF_TYPESPEC_STRING_A "%s"
 #endif
 
 
@@ -117,7 +125,7 @@ static void b1_print_error(uint8_t err_code, int print_line_cnt, int print_err_d
 
 	if(print_err_desc && err_code >= B1_RES_FIRSTERRCODE && err_code <= B1_RES_LASTERRCODE)
 	{
-		FPRINTF(stderr, " (" PRINTF_TYPESPEC_STRING ")", err_msgs[err_code - B1_RES_FIRSTERRCODE]);
+		FPRINTF(stderr, " (" PRINTF_TYPESPEC_STRING_A ")", err_msgs[err_code - B1_RES_FIRSTERRCODE]);
 	}
 
 	FPUTS("\n", stderr);
@@ -137,6 +145,71 @@ static void b1_print_version(FILE *fstr)
 	FPUTS("\n", fstr);
 }
 
+#ifdef B1_FEATURE_DEBUG
+#ifdef B1_FEATURE_UNICODE_UCS2
+static void b1_str_to_cstr(const B1_T_CHAR *bstr, int is_null_terminated, wchar_t *outbuf)
+#else
+static void b1_str_to_cstr(const B1_T_CHAR *bstr, int is_null_terminated, char *outbuf)
+#endif
+{
+	int i, len;
+	B1_T_CHAR c;
+
+	len = is_null_terminated ? INT_MAX : (int)*bstr++;
+
+	for(i = 0; i < len; i++)
+	{
+		c = *bstr++;
+
+		if(c == B1_T_C_STRTERM)
+		{
+			break;
+		}
+
+#ifdef B1_FEATURE_UNICODE_UCS2
+		outbuf[i] = (wchar_t)c;
+#else
+		outbuf[i] = (char)c;
+#endif
+	}
+
+#ifdef B1_FEATURE_UNICODE_UCS2
+	outbuf[i] = L'\0';
+#else
+	outbuf[i] = '\0';
+#endif
+}
+
+static void print_variables_cache()
+{
+	B1_NAMED_VAR *var;
+	B1_T_CHAR bstrbuf[B1_TMP_BUF_LEN];
+#ifdef B1_FEATURE_UNICODE_UCS2
+	wchar_t cstrbuf[B1_TMP_BUF_LEN];
+#else
+	char cstrbuf[B1_TMP_BUF_LEN];
+#endif
+
+	FPUTS("\nVariables:\n", stderr);
+
+	var = NULL;
+	while(1)
+	{
+		b1_ex_var_enum(&var);
+
+		if(var == NULL)
+		{
+			break;
+		}
+
+		b1_dbg_get_var_dump(var, bstrbuf, B1_TMP_BUF_LEN);
+		b1_str_to_cstr(bstrbuf, 1, cstrbuf);
+
+		FPRINTF(stderr, PRINTF_TYPESPEC_STRING "\n", cstrbuf);
+	}
+}
+#endif
+
 int main(int argc, char **argv)
 {
 	B1_T_ERROR err;
@@ -150,15 +223,21 @@ int main(int argc, char **argv)
 	int get_locale = 0, ss, se;
 	char *locale = NULL;
 #endif
+#ifdef B1_FEATURE_DEBUG
+	int print_variables = 0;
+#endif
 
 	if(argc <= 1)
 	{
 		b1_print_version(stderr);
-		FPUTS("error: missing file name\n", stderr);
-		FPUTS("usage: ", stderr);
+		FPUTS("\nerror: missing file name\n", stderr);
+		FPUTS("\nusage: ", stderr);
 		FPUTS(B1_PROJECT_NAME, stderr);
 		FPUTS(" [options] filename\n", stderr);
 		FPUTS("options:\n", stderr);
+#ifdef B1_FEATURE_DEBUG
+		FPUTS("-a or /a - print variables values on error\n", stderr);
+#endif
 		FPUTS("-d or /d - print error description\n", stderr);
 		FPUTS("-e or /e - echo input\n", stderr);
 #ifdef B1_FEATURE_LOCALES
@@ -241,6 +320,16 @@ int main(int argc, char **argv)
 			continue;
 		}
 
+#ifdef B1_FEATURE_DEBUG
+		// print variables values
+		if((argv[i][0] == '-' || argv[i][0] == '/') &&
+			(argv[i][1] == 'A' || argv[i][1] == 'a') &&
+			argv[i][2] == 0)
+		{
+			print_variables = 1;
+			continue;
+		}
+#endif
 		// print interpreter version
 		if((argv[i][0] == '-' || argv[i][0] == '/') &&
 			(argv[i][1] == 'V' || argv[i][1] == 'v') &&
@@ -270,6 +359,7 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
+	// load program file
 	err = b1_ex_prg_set_prog_file(argv[argc - 1]);
 	if(err != B1_RES_OK)
 	{
@@ -279,6 +369,7 @@ int main(int argc, char **argv)
 
 	start = clock();
 
+	// initialize interpreter
 	err = b1_int_reset();
 	if(err != B1_RES_OK)
 	{
@@ -287,6 +378,7 @@ int main(int argc, char **argv)
 	}
 	else
 	{
+		// perform the initial program run to cache line numbers and make some checks 
 		err = b1_int_prerun();
 		if(err != B1_RES_OK)
 		{
@@ -295,10 +387,17 @@ int main(int argc, char **argv)
 		}
 		else
 		{
+			// run the program
 			err = b1_int_run();
 			if(err != B1_RES_OK)
 			{
 				b1_print_error(err, 1, print_err_desc);
+#ifdef B1_FEATURE_DEBUG
+				if(print_variables)
+				{
+					print_variables_cache();
+				}
+#endif
 				retcode = -5;
 			}
 		}
@@ -306,6 +405,10 @@ int main(int argc, char **argv)
 
 	end = clock();
 
+	// free variables and caches
+	b1_int_reset();
+
+	// free memory occupied by program file
 	b1_ex_prg_set_prog_file(NULL);
 
 	if(print_time && retcode == 0)

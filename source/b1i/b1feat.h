@@ -54,6 +54,13 @@
 //#define B1_FEATURE_MEMOFFSET_16BIT
 #define B1_FEATURE_MEMOFFSET_32BIT
 
+// if enabled b1_int_reset function frees memory allocated during preceding program execution
+// in the most cases the feature must be enabled to allow resetting program state
+#define B1_FEATURE_INIT_FREE_MEMORY
+
+// enables storing identifier names (not only hashes) in B1_ID structures
+#define B1_FEATURE_DEBUG
+
 // constraints and memory usage
 #define B1_MAX_PROGLINE_LEN 255
 #define B1_MAX_STRING_LEN (B1_MAX_PROGLINE_LEN / 2)

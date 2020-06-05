@@ -271,6 +271,10 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 			
 			if(rr.flags == B1_RPNREC_TYPE_FNVAR)
 			{
+#ifdef B1_FEATURE_DEBUG
+				rr.data.id.offset = offset;
+				rr.data.id.length = len;
+#endif
 				rr.data.id.hash = b1_id_calc_hash(b1_int_progline + offset, len * B1_T_CHAR_SIZE);
 				b1_int_get_type_by_type_spec(*(b1_int_progline + offset + len - 1), B1_TYPE_NULL, &rr.data.id.flags);
 			}

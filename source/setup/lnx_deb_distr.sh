@@ -74,8 +74,9 @@ cp ../../LICENSE $tmp_dir$project_name/usr/share/doc/$project_name/copyright
 cp ../../docs/changelog $tmp_dir$project_name/usr/share/doc/$project_name/changelog
 gzip -9 -n -S.Debian.gz $tmp_dir$project_name/usr/share/doc/$project_name/changelog
 
-#strip copied executable
-${7}strip --strip-all $tmp_dir$project_name/usr/bin/$project_name
+#strip copied executables
+${7}strip --strip-all $tmp_dir$project_name/usr/bin/b1i
+${7}strip --strip-all $tmp_dir$project_name/usr/bin/b1iu
 
 #correct file attributes
 chmod 755 `find $tmp_dir$project_name -type d`

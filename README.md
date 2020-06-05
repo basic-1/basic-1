@@ -72,6 +72,7 @@ To build the interpreter under Windows go to `./source/b1i` directory and run co
 Executable file names of the interpreter are `b1i.exe` and `b1iu.exe` for Windows and `b1i` and `b1iu` for Linux. After successful project building the file can be found in `./bin` directory. The command-line interpreter usage syntax: `b1i [options] <filename>` where `<filename>` is relative or absolute path of a BASIC program file.  
   
 Possible options:  
+- `-a` - print variables values on error (for debugging)  
 - `-d` - print not only error code but textual description too  
 - `-e` - enable input echo (redirects all the text receiving with INPUT statement to output stream)  
 - `-l <local_name>` - set `<local_name>` locale for the program (the locale should be available on your system)  
@@ -82,6 +83,7 @@ Examples:
 `./b1i sample1.bsc`  
 `./b1i -e sample2.bsc <input.txt`  
 `./b1iu 12.bsc`  
+`./b1iu -a failed.bsc`  
   
 # Project directories structure  
   

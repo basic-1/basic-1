@@ -1,3 +1,12 @@
+b1i (1.0.0-36) unstable; urgency=low
+
+  * added possibility to enumerate all existing variables (for debugging or
+    to free the memory occupied by them)
+  * now b1i/b1iu interpreters free memory taken by variables when terminating
+  * new '-a' command-line option added: dump all variables in case of error
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Fri, 05 June 2020 18:07:31 +0300
+
 b1i (1.0.0-35) unstable; urgency=low
 
   * Unicode support added (now the core supports UCS-2 encoding)

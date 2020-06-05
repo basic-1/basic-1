@@ -418,7 +418,7 @@ static B1_T_ERROR b1_var_array_alloc(B1_T_MEM_BLOCK_DESC arrdesc, uint8_t type, 
 	return B1_RES_OK;
 }
 
-static B1_T_ERROR b1_var_array_get_data_ptr(B1_T_MEM_BLOCK_DESC arr_data_desc, uint8_t type, B1_T_MEMOFFSET offset, void **data)
+B1_T_ERROR b1_var_array_get_data_ptr(B1_T_MEM_BLOCK_DESC arr_data_desc, uint8_t type, B1_T_MEMOFFSET offset, void **data)
 {
 	B1_T_ERROR err;
 
@@ -516,7 +516,7 @@ B1_T_ERROR b1_var_get(B1_NAMED_VAR *src_var, B1_VAR *dst_var, B1_VAR_REF *src_va
 		if(!src_var_ref && arrdatadesc == B1_T_MEM_BLOCK_DESC_INVALID)
 		{
 			// just return initial value even without memory allocation
-			b1_var_init_empty(type, 0, NULL, dst_var);
+			err = b1_var_init_empty(type, 0, NULL, dst_var);
 			if(err != B1_RES_OK)
 			{
 				return err;

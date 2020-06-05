@@ -69,6 +69,7 @@ extern B1_T_ERROR b1_var_str2var(const B1_T_CHAR *s, B1_VAR *var);
 extern B1_T_ERROR b1_var_var2str(const B1_VAR *var, B1_T_CHAR *sbuf);
 extern B1_T_ERROR b1_var_convert(B1_VAR *var, uint8_t otype);
 extern B1_T_ERROR b1_var_init_empty(uint8_t type, uint8_t argnum, const B1_T_SUBSCRIPT *subs_bounds, B1_VAR *pvar);
+extern B1_T_ERROR b1_var_array_get_data_ptr(B1_T_MEM_BLOCK_DESC arr_data_desc, uint8_t type, B1_T_MEMOFFSET offset, void **data);
 extern B1_T_ERROR b1_var_create(B1_T_IDHASH name_hash, uint8_t type, uint8_t argnum, const B1_T_SUBSCRIPT *subs_bounds, B1_NAMED_VAR **var);
 extern B1_T_ERROR b1_var_get(B1_NAMED_VAR *src_var, B1_VAR *dst_var, B1_VAR_REF *src_var_ref);
 extern B1_T_ERROR b1_var_set(B1_VAR *src_var, const B1_VAR_REF *dst_var_ref);

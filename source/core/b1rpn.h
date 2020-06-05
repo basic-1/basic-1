@@ -58,6 +58,10 @@ typedef struct
 {
 	uint8_t flags;
 	B1_T_IDHASH hash;
+#ifdef B1_FEATURE_DEBUG
+	B1_T_INDEX offset;
+	B1_T_INDEX length;
+#endif
 } B1_T_RPN_ID;
 
 typedef union

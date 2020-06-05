@@ -165,6 +165,11 @@ static const B1_T_CHAR *b1_int_stmt_names[] =
 // initializes or resets interpreter
 B1_T_ERROR b1_int_reset()
 {
+#ifdef B1_FEATURE_INIT_FREE_MEMORY
+	B1_NAMED_VAR *var;
+
+	var = NULL;
+#endif
 	b1_int_curr_prog_line_cnt = 0;
 	b1_int_curr_prog_line_offset = 0;
 	b1_int_curr_stmt_state = 0;
@@ -174,6 +179,23 @@ B1_T_ERROR b1_int_reset()
 	b1_int_opt_base_val = 0;
 	// set OPTION EXPLICIT turned off
 	b1_int_opt_explicit_val = 0;
+
+#ifdef B1_FEATURE_INIT_FREE_MEMORY
+	while(1)
+	{
+		b1_ex_var_enum(&var);
+
+		if(var == NULL)
+		{
+			break;
+		}
+
+		if((*var).var.type == B1_TYPE_SET(B1_TYPE_STRING, 0))
+		{
+			b1_ex_mem_free((*var).var.value.mem_desc);
+		}
+	}
+#endif
 
 	// clear variables cache
 	b1_ex_var_init();
@@ -1229,6 +1251,10 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 	B1_T_INDEX len;
 	B1_T_IDHASH name_hash;
 	B1_T_SUBSCRIPT bound1, subs_bounds[B1_MAX_VAR_DIM_NUM * 2], *subs_bnds_ptr;
+#ifdef B1_FEATURE_DEBUG
+	B1_T_INDEX id_off, id_len;
+	B1_NAMED_VAR *var;
+#endif
 
 	while(1)
 	{
@@ -1249,6 +1275,10 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 
 		// get hash and check for existence
 		name_hash = b1_id_calc_hash(b1_int_progline + offset, len * B1_T_CHAR_SIZE);
+#ifdef B1_FEATURE_DEBUG
+		id_off = offset;
+		id_len = len;
+#endif
 		offset += len;
 		type = B1_TYPE_NULL;
 		ts_char = b1_int_progline[offset - 1];
@@ -1408,11 +1438,22 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 		}
 
 		// create variable
+#ifdef B1_FEATURE_DEBUG
+		err = b1_var_create(name_hash, type, dimsnum, subs_bounds, &var);
+		if(err != B1_RES_OK)
+		{
+			return err;
+		}
+
+		memcpy((*var).id.name + 1, b1_int_progline + id_off, id_len * B1_T_CHAR_SIZE);
+		(*var).id.name[0] = (B1_T_CHAR)id_len;
+#else
 		err = b1_var_create(name_hash, type, dimsnum, subs_bounds, NULL);
 		if(err != B1_RES_OK)
 		{
 			return err;
 		}
+#endif
 
 		offset += len;
 		if(stop) break;
@@ -1903,6 +1944,10 @@ static B1_T_ERROR b1_int_st_for_get_intvar(uint8_t var_hash_base, uint8_t var_op
 		{
 			return err;
 		}
+
+#ifdef B1_FEATURE_DEBUG
+		memcpy((*var).id.name, _SPECVAR, (((B1_T_INDEX)_SPECVAR[0]) + 1) * B1_T_CHAR_SIZE);
+#endif
 
 		(*var_ref).var = var;
 
