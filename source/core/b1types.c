@@ -72,7 +72,13 @@ const B1_T_CHAR _STRING[] = { 6, 'S', 'T', 'R', 'I', 'N', 'G' };
 const B1_T_CHAR _INT[] = { 3, 'I', 'N', 'T' };
 
 #ifdef B1_FEATURE_DEBUG
-const B1_T_CHAR _SPECVAR[] = { 8, B1_T_C_LT, 'F', 'O', 'R', 'V', 'A', 'R', B1_T_C_GT };
+// string constant to designate FOR loop special variables (non-accessible directly from program)
+const B1_T_CHAR _DBG_FORVAR[] = { 8, B1_T_C_LT, 'F', 'O', 'R', 'V', 'A', 'R', B1_T_C_GT };
+const B1_T_CHAR _DBG_TYPE_OPBR[] = { 2, B1_T_C_SPACE, B1_T_C_OPBRACK };
+const B1_T_CHAR _DBG_TYPE_CLBR[] = { 3, B1_T_C_CLBRACK, B1_T_C_COLON, B1_T_C_SPACE };
+// string constant for unallocated arrays
+const B1_T_CHAR _DBG_UNALLOC[] = { 9, B1_T_C_LT, 'U', 'N', 'A', 'L', 'L', 'O', 'C', B1_T_C_GT };
+const B1_T_CHAR _DBG_DELIM[] = { 2, B1_T_C_COMMA, B1_T_C_SPACE };
 #endif
 
 

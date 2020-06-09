@@ -58,7 +58,8 @@
 // in the most cases the feature must be enabled to allow resetting program state
 #define B1_FEATURE_INIT_FREE_MEMORY
 
-// enables storing identifier names (not only hashes) in B1_ID structures
+// enables storing identifier names (not only hashes) in B1_ID structure, allows reading variables
+// created during program execution, makes b1_dbg_get_var_dump function available
 #define B1_FEATURE_DEBUG
 
 // constraints and memory usage

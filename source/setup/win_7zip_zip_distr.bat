@@ -7,7 +7,7 @@ goto _argsok
 
 :_invargs
 echo invalid arguments
-goto _exit
+goto :eof
 
 :_argsok
 set project_name=%~1
@@ -19,14 +19,14 @@ set path_to_7z="C:\Program Files\7-Zip\7z.exe"
 
 if not exist %path_to_7z% (
   echo 7z archiver not found
-  goto _exit
+  goto :eof
 )
 
 git rev-list --count --first-parent HEAD >>gitrev.tmp
 if errorlevel 1 (
   del gitrev.tmp
   echo get build number error
-  goto _exit
+  goto :eof
 )
 
 set /p build_num=<gitrev.tmp
@@ -74,5 +74,3 @@ rem move temp. bin, docs and samples directories to the archive
 rem add LICENSE and README.md files to the archive
 %path_to_7z% a -tZIP -- %out_file_path%-%build_num%.zip ..\..\LICENSE
 %path_to_7z% a -tZIP -- %out_file_path%-%build_num%.zip ..\..\README.md
-
-:_exit

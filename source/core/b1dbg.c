@@ -56,14 +56,8 @@ static B1_T_ERROR b1_dbg_var_to_str(B1_VAR *var)
 	return B1_RES_OK;
 }
 
-
 B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_INDEX buflen)
 {
-	static const B1_T_CHAR _STR1[] = { 2, B1_T_C_SPACE, B1_T_C_OPBRACK };
-	static const B1_T_CHAR _STR2[] = { 3, B1_T_C_CLBRACK, B1_T_C_COLON, B1_T_C_SPACE };
-	static const B1_T_CHAR _STR3[] = { 9, B1_T_C_LT, 'U', 'N', 'A', 'L', 'L', 'O', 'C', B1_T_C_GT };
-	static const B1_T_CHAR _STR4[] = { 2, B1_T_C_COMMA, B1_T_C_SPACE };
-
 	B1_T_ERROR err;
 	B1_VAR tmpvar;
 	B1_T_INDEX i;
@@ -82,7 +76,7 @@ B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_IN
 		return B1_RES_OK;
 	}
 
-	if(b1_dbg_copy_str(_STR1, &sbuf, &buflen))
+	if(b1_dbg_copy_str(_DBG_TYPE_OPBR, &sbuf, &buflen))
 	{
 		return B1_RES_OK;
 	}
@@ -104,7 +98,7 @@ B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_IN
 	// copy variable value
 	if(dimnum == 0)
 	{
-		if(b1_dbg_copy_str(_STR2, &sbuf, &buflen))
+		if(b1_dbg_copy_str(_DBG_TYPE_CLBR, &sbuf, &buflen))
 		{
 			return B1_RES_OK;
 		}
@@ -144,7 +138,7 @@ B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_IN
 			ai = (*arrdata++ - ai) + 1;
 			arrsize *= ai;
 
-			if(b1_dbg_copy_str(_STR4, &sbuf, &buflen))
+			if(b1_dbg_copy_str(_DBG_DELIM, &sbuf, &buflen))
 			{
 				return B1_RES_OK;
 			}
@@ -165,7 +159,7 @@ B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_IN
 		}
 		arrdatadesc = *((B1_T_MEM_BLOCK_DESC *)arrdata);
 
-		if(b1_dbg_copy_str(_STR2, &sbuf, &buflen))
+		if(b1_dbg_copy_str(_DBG_TYPE_CLBR, &sbuf, &buflen))
 		{
 			return B1_RES_OK;
 		}
@@ -173,7 +167,7 @@ B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_IN
 		// invalid memory block descriptor means non-allocated array
 		if(arrdatadesc == B1_T_MEM_BLOCK_DESC_INVALID)
 		{
-			b1_dbg_copy_str(_STR3, &sbuf, &buflen);
+			b1_dbg_copy_str(_DBG_UNALLOC, &sbuf, &buflen);
 		}
 		else
 		{
@@ -225,7 +219,7 @@ B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_IN
 					break;
 				}
 
-				if(b1_dbg_copy_str(_STR4, &sbuf, &buflen))
+				if(b1_dbg_copy_str(_DBG_DELIM, &sbuf, &buflen))
 				{
 					return B1_RES_OK;
 				}

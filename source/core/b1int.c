@@ -1946,7 +1946,7 @@ static B1_T_ERROR b1_int_st_for_get_intvar(uint8_t var_hash_base, uint8_t var_op
 		}
 
 #ifdef B1_FEATURE_DEBUG
-		memcpy((*var).id.name, _SPECVAR, (((B1_T_INDEX)_SPECVAR[0]) + 1) * B1_T_CHAR_SIZE);
+		memcpy((*var).id.name, _DBG_FORVAR, (((B1_T_INDEX)_DBG_FORVAR[0]) + 1) * B1_T_CHAR_SIZE);
 #endif
 
 		(*var_ref).var = var;

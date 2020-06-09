@@ -13,7 +13,7 @@ goto _argsok
 
 :_invargs
 echo invalid arguments
-goto _exit
+goto :eof
 
 :_argsok
 

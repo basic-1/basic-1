@@ -43,6 +43,8 @@ Some interpreter's features can be turned on or off by editing application's `fe
   
 `B1_FEATURE_INIT_FREE_MEMORY`: if the macro is defined `b1_int_reset` function frees memory allocated during preceding program execution (in the most cases the feature must be enabled to allow resetting program state). `b1_ex_var_enum` function has to be implemented for the feature to work.  
   
+`B1_FEATURE_DEBUG`: extends `B1_NAMED_VAR` structure to save variable name (not only name hash), presents `b1_dbg_get_var_dump` function allowing displaying variables content in human-readable format.  
+    
 ## Interpreter's global variables and functions  
   
 Hosting application can control the interpreter core by reading/writing special global variables and calling some functions. The most of them are described below.  
@@ -74,7 +76,10 @@ The function performs the first idle program run to check line numbers, proper `
 `extern B1_T_ERROR b1_int_run();`  
 Runs the program.  
   
-`b1_rpn` variable is declared in `./source/core/b1rpn.h` file and the `b1_int_xxx` variables and functions are declared in `./source/core/b1int.h` file.  
+`extern B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_INDEX buflen);`  
+Returns a string consisting of a variable name, type and value (or values if the variable is array). `var` argument specifies the variable to dump content of, `sbuf` should be a pointer to buffer to receive the resulting string, `buflen` is the buffer length (number of `B1_T_CHAR` characters). The result is zero character terminating string.  
+  
+`b1_rpn` variable is declared in `./source/core/b1rpn.h` file, `b1_int_xxx` variables and functions are declared in `./source/core/b1int.h` file, `b1_dbg_get_var_dump` function is declared in `./source/core/b1dbg.h`.  
   
 ## External functions needed for the interpreter core  
   
