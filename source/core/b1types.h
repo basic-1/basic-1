@@ -167,7 +167,6 @@
 
 extern const B1_T_CHAR _EQ[];
 extern const B1_T_CHAR _THEN[];
-extern const B1_T_CHAR _GO[];
 extern const B1_T_CHAR _GOTO[];
 extern const B1_T_CHAR _GOSUB[];
 extern const B1_T_CHAR _TO[];
@@ -176,16 +175,6 @@ extern const B1_T_CHAR _COMMA[];
 extern const B1_T_CHAR _SEMICOLON[];
 extern const B1_T_CHAR _CLBRACKET[];
 extern const B1_T_CHAR _PROMPT[];
-#ifdef B1_FEATURE_STMT_DATA_READ
-extern const B1_T_CHAR _DATA[];
-extern const B1_T_CHAR _READ[];
-extern const B1_T_CHAR _RESTORE[];
-#endif
-extern const B1_T_CHAR _FOR[];
-extern const B1_T_CHAR _NEXT[];
-#ifdef B1_FEATURE_FUNCTIONS_USER
-extern const B1_T_CHAR _DEF[];
-#endif
 extern const B1_T_CHAR _AS[];
 extern const B1_T_CHAR _ON[];
 extern const B1_T_CHAR _OFF[];
@@ -194,28 +183,6 @@ extern const B1_T_CHAR _EXPLICIT[];
 extern const B1_T_CHAR _MARGIN[];
 extern const B1_T_CHAR _ZONEWIDTH[];
 extern const B1_T_CHAR _INPUTECHO[];
-extern const B1_T_CHAR _REM[];
-extern const B1_T_CHAR _OPTION[];
-extern const B1_T_CHAR _ELSEIF[];
-extern const B1_T_CHAR _ELSE[];
-extern const B1_T_CHAR _IF[];
-extern const B1_T_CHAR _SUB[];
-extern const B1_T_CHAR _RETURN[];
-extern const B1_T_CHAR _PRINT[];
-extern const B1_T_CHAR _INPUT[];
-extern const B1_T_CHAR _DIM[];
-#ifdef B1_FEATURE_STMT_ERASE
-extern const B1_T_CHAR _ERASE[];
-#endif
-#ifdef B1_FEATURE_FUNCTIONS_MATH_BASIC
-#ifdef B1_FRACTIONAL_TYPE_EXISTS
-extern const B1_T_CHAR _RANDOMIZE[];
-#endif
-#endif
-extern const B1_T_CHAR _SET[];
-extern const B1_T_CHAR _END[];
-extern const B1_T_CHAR _STOP[];
-extern const B1_T_CHAR _LET[];
 #ifdef B1_FEATURE_TYPE_SINGLE
 extern const B1_T_CHAR _SINGLE[];
 #endif

@@ -62,6 +62,9 @@
 // created during program execution, makes b1_dbg_get_var_dump function available
 #define B1_FEATURE_DEBUG
 
+// forbid using statement keywords as variable names
+#define B1_FEATURE_CHECK_KEYWORDS
+
 // constraints and memory usage
 #define B1_MAX_PROGLINE_LEN 255
 #define B1_MAX_STRING_LEN (B1_MAX_PROGLINE_LEN / 2)

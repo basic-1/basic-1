@@ -1,3 +1,11 @@
+b1i (1.0.0-38) unstable; urgency=low
+
+  * B1_FEATURE_CHECK_KEYWORDS feature added (forbids using reserved keywords
+    as identifier names)
+  * implemented binary search of hashes of statements and built-in functions
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Thu, 11 Jun 2020 18:42:40 +0300
+
 b1i (1.0.0-37) unstable; urgency=low
 
   * B1_FEATURE_DEBUG feature code refined

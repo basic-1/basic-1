@@ -27,16 +27,6 @@ const B1_T_CHAR _COMMA[] = { 1, B1_T_C_COMMA };
 const B1_T_CHAR _SEMICOLON[] = { 1, B1_T_C_SEMICOLON };
 const B1_T_CHAR _CLBRACKET[] = { 1, B1_T_C_CLBRACK };
 const B1_T_CHAR _PROMPT[] = { 2, B1_T_C_QUESTION, B1_T_C_SPACE };
-#ifdef B1_FEATURE_STMT_DATA_READ
-const B1_T_CHAR _DATA[] = {4, 'D', 'A', 'T', 'A' };
-const B1_T_CHAR _READ[] = { 4, 'R', 'E', 'A', 'D' };
-const B1_T_CHAR _RESTORE[] = { 7, 'R', 'E', 'S', 'T', 'O', 'R', 'E' };
-#endif
-const B1_T_CHAR _FOR[] = {3, 'F', 'O', 'R' };
-const B1_T_CHAR _NEXT[] = { 4, 'N', 'E', 'X', 'T' };
-#ifdef B1_FEATURE_FUNCTIONS_USER
-const B1_T_CHAR _DEF[] = {3, 'D', 'E', 'F' };
-#endif
 const B1_T_CHAR _AS[] = { 2, 'A', 'S' };
 const B1_T_CHAR _ON[] = { 2, 'O', 'N' };
 const B1_T_CHAR _OFF[] = { 3, 'O', 'F', 'F' };
@@ -45,26 +35,6 @@ const B1_T_CHAR _EXPLICIT[] = { 8, 'E', 'X', 'P', 'L', 'I', 'C', 'I', 'T' };
 const B1_T_CHAR _MARGIN[] = { 6, 'M', 'A', 'R', 'G', 'I', 'N' };
 const B1_T_CHAR _ZONEWIDTH[] = { 9, 'Z', 'O', 'N', 'E', 'W', 'I', 'D', 'T', 'H' };
 const B1_T_CHAR _INPUTECHO[] = { 9, 'I', 'N', 'P', 'U', 'T', 'E', 'C', 'H', 'O' };
-const B1_T_CHAR _REM[] = { 3, 'R', 'E', 'M' };
-const B1_T_CHAR _OPTION[] = { 6, 'O', 'P', 'T', 'I', 'O', 'N' };
-const B1_T_CHAR _ELSEIF[] = { 6, 'E', 'L', 'S', 'E', 'I', 'F' };
-const B1_T_CHAR _ELSE[] = { 4, 'E', 'L', 'S', 'E' };
-const B1_T_CHAR _IF[] = { 2, 'I', 'F' };
-const B1_T_CHAR _RETURN[] = { 6, 'R', 'E', 'T', 'U', 'R', 'N' };
-const B1_T_CHAR _PRINT[] = { 5, 'P', 'R', 'I', 'N', 'T' };
-const B1_T_CHAR _INPUT[] = { 5, 'I', 'N', 'P', 'U', 'T' };
-const B1_T_CHAR _DIM[] = { 3, 'D', 'I', 'M' };
-#ifdef B1_FEATURE_STMT_ERASE
-const B1_T_CHAR _ERASE[] = { 5, 'E', 'R', 'A', 'S', 'E' };
-#endif
-#ifdef B1_FEATURE_FUNCTIONS_MATH_BASIC
-#ifdef B1_FRACTIONAL_TYPE_EXISTS
-const B1_T_CHAR _RANDOMIZE[] = { 9, 'R', 'A', 'N', 'D', 'O', 'M', 'I', 'Z', 'E' };
-#endif
-#endif
-const B1_T_CHAR _SET[] = { 3, 'S', 'E', 'T' };
-const B1_T_CHAR _END[] = { 3, 'E', 'N', 'D' };
-const B1_T_CHAR _LET[] = { 3, 'L', 'E', 'T' };
 #ifdef B1_FEATURE_TYPE_SINGLE
 const B1_T_CHAR _SINGLE[] = { 6, 'S', 'I', 'N', 'G', 'L', 'E' };
 #endif

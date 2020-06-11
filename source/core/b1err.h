@@ -104,5 +104,7 @@
 #define B1_RES_EUDEFOVF ((B1_T_ERROR)141)
 // EEOF error: end of file
 #define B1_RES_EEOF ((B1_T_ERROR)142)
+// ERESKWRD error: use of a reserved keyword as identifier forbidden
+#define B1_RES_ERESKWRD ((B1_T_ERROR)143)
 
 #endif

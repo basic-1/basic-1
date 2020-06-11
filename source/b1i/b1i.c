@@ -111,6 +111,7 @@ static const char *err_msgs[] =
 	"too many DEF statements",
 	"user functions stack overflow",
 	"end of file",
+	"use of a reserved keyword as identifer forbidden",
 };
 
 

@@ -13,6 +13,7 @@
 
 #include "b1ex.h"
 #include "b1var.h"
+#include "b1fn.h"
 #include "b1int.h"
 #include "b1err.h"
 
@@ -323,6 +324,9 @@ B1_T_ERROR b1_var_create(B1_T_IDHASH name_hash, uint8_t type, uint8_t argnum, co
 {
 	B1_T_ERROR err;
 	B1_NAMED_VAR *newvar;
+#ifdef B1_FEATURE_CHECK_KEYWORDS
+	B1_FN *fn_ptr;
+#endif
 
 	if(argnum > B1_MAX_VAR_DIM_NUM)
 	{
@@ -330,9 +334,18 @@ B1_T_ERROR b1_var_create(B1_T_IDHASH name_hash, uint8_t type, uint8_t argnum, co
 	}
 
 	err = b1_ex_var_alloc(name_hash, &newvar);
-	
+
 	if(err == B1_RES_OK)
 	{
+#ifdef B1_FEATURE_CHECK_KEYWORDS
+		if(b1_id_get_stmt_by_hash(name_hash) != B1_ID_STMT_UNKNOWN ||
+			b1_fn_get_params(name_hash, &fn_ptr) != B1_RES_EUNKIDENT)
+		{
+			b1_ex_var_free(name_hash);
+			return B1_RES_ERESKWRD;
+		}
+#endif
+
 		(*newvar).id.name_hash = name_hash;
 		(*newvar).id.flags = B1_IDENT_FLAGS_SET_VAR(argnum);
 

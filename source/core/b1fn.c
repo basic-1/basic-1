@@ -74,50 +74,100 @@ static B1_T_ERROR b1_fn_bltin_lcase(B1_VAR *parg1);
 #endif
 
 
+// array of built-in functions definitions, sorted by name hash value (to use binary search)
 #if defined(B1_FEATURE_FUNCTIONS_STANDARD) || defined(B1_FEATURE_FUNCTIONS_MATH_BASIC) || defined(B1_FEATURE_FUNCTIONS_MATH_EXTRA) || defined(B1_FEATURE_FUNCTIONS_STRING)
 static const B1_BLTIN_FN b1_fn_bltin[B1_FN_BLTIN_COUNT] =
 {
-#ifdef B1_FEATURE_FUNCTIONS_STANDARD
-	{{{0x621D, B1_IDENT_FLAGS_SET_FN(3, 1)}, {B1_TYPE_BOOL, B1_TYPE_ANY, B1_TYPE_ANY}, B1_TYPE_ANY}, b1_fn_bltin_iif},
-	{{{0x4866, B1_IDENT_FLAGS_SET_FN(3, 1)}, {B1_TYPE_BOOL, B1_TYPE_STRING, B1_TYPE_STRING}, B1_TYPE_STRING}, b1_fn_bltin_striif},
-	{{{0xDFC8, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_STRING}, B1_TYPE_INT32}, b1_fn_bltin_len},
-	{{{0x6D38, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_STRING}, B1_TYPE_INT32}, b1_fn_bltin_asc},
-	{{{0xFAE3, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_ANY}, B1_TYPE_STRING}, b1_fn_bltin_chr},
-	{{{0x4BFE, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_ANY}, B1_TYPE_STRING}, b1_fn_bltin_str},
-	{{{0xF7C3, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_STRING}, B1_TYPE_ANY}, b1_fn_bltin_val},
+#ifdef B1_FEATURE_FUNCTIONS_MATH_EXTRA
+	{{{0x5af, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_log},
 #endif
-
 #ifdef B1_FEATURE_FUNCTIONS_MATH_BASIC
-	{{{0x290A, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_ANY}, B1_TYPE_ANY}, b1_fn_bltin_abs},
 #ifdef B1_FRACTIONAL_TYPE_EXISTS
-	{{{0x77AF, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_int},
 	{{{0x1924, B1_IDENT_FLAGS_SET_FN(0, 1)}, {0}, B1_TYPE_SINGLE}, b1_fn_bltin_rnd},
 #endif
-	{{{0x834A, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_ANY}, B1_TYPE_ANY}, b1_fn_bltin_sgn},
 #endif
-
-#ifdef B1_FEATURE_FUNCTIONS_MATH_EXTRA
-	{{{0x71B5, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_atn},
-	{{{0x6370, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_cos},
-	{{{0x917C, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_exp},
-	{{{0x05AF, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_log},
-	{{{0xD787, B1_IDENT_FLAGS_SET_FN(0, 1)}, {0}, B1_TYPE_SINGLE}, b1_fn_bltin_pi},
-	{{{0x8B0A, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_sin},
-	{{{0xAE97, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_sqr},
-	{{{0xF009, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_tan},
-#endif
-
 #ifdef B1_FEATURE_FUNCTIONS_STRING
-	{{{0x46B6, B1_IDENT_FLAGS_SET_FN(3, 1)}, {B1_TYPE_STRING, B1_TYPE_INT32, B1_TYPE_ANY}, B1_TYPE_STRING}, b1_fn_bltin_mid},
-	{{{0xFF2D, B1_IDENT_FLAGS_SET_FN(3, 1)}, {B1_TYPE_ANY, B1_TYPE_STRING, B1_TYPE_STRING}, B1_TYPE_INT32}, b1_fn_bltin_instr},
-	{{{0x2C0D, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_STRING}, B1_TYPE_STRING}, b1_fn_bltin_ltrim},
-	{{{0x4C4E, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_STRING}, B1_TYPE_STRING}, b1_fn_bltin_rtrim},
-	{{{0xEAA3, B1_IDENT_FLAGS_SET_FN(2, 1)}, {B1_TYPE_STRING, B1_TYPE_INT32}, B1_TYPE_STRING}, b1_fn_bltin_left},
-	{{{0x21BD, B1_IDENT_FLAGS_SET_FN(2, 1)}, {B1_TYPE_STRING, B1_TYPE_INT32}, B1_TYPE_STRING}, b1_fn_bltin_right},
-	{{{0x9628, B1_IDENT_FLAGS_SET_FN(2, 1)}, {B1_TYPE_STRING, B1_TYPE_INT32}, B1_TYPE_STRING}, b1_fn_bltin_lset},
-	{{{0x6D27, B1_IDENT_FLAGS_SET_FN(2, 1)}, {B1_TYPE_STRING, B1_TYPE_INT32}, B1_TYPE_STRING}, b1_fn_bltin_rset},
+	{{{0x21bd, B1_IDENT_FLAGS_SET_FN(2, 1)}, {B1_TYPE_STRING, B1_TYPE_INT32}, B1_TYPE_STRING}, b1_fn_bltin_right},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_MATH_BASIC
+	{{{0x290a, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_ANY}, B1_TYPE_ANY}, b1_fn_bltin_abs},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_STRING
+	{{{0x2c0d, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_STRING}, B1_TYPE_STRING}, b1_fn_bltin_ltrim},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_STRING
 	{{{0x4346, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_STRING}, B1_TYPE_STRING}, b1_fn_bltin_ucase},
-	{{{0x444E, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_STRING}, B1_TYPE_STRING}, b1_fn_bltin_lcase},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_STRING
+	{{{0x444e, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_STRING}, B1_TYPE_STRING}, b1_fn_bltin_lcase},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_STRING
+	{{{0x46b6, B1_IDENT_FLAGS_SET_FN(3, 1)}, {B1_TYPE_STRING, B1_TYPE_INT32, B1_TYPE_ANY}, B1_TYPE_STRING}, b1_fn_bltin_mid},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_STANDARD
+	{{{0x4866, B1_IDENT_FLAGS_SET_FN(3, 1)}, {B1_TYPE_BOOL, B1_TYPE_STRING, B1_TYPE_STRING}, B1_TYPE_STRING}, b1_fn_bltin_striif},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_STANDARD
+	{{{0x4bfe, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_ANY}, B1_TYPE_STRING}, b1_fn_bltin_str},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_STRING
+	{{{0x4c4e, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_STRING}, B1_TYPE_STRING}, b1_fn_bltin_rtrim},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_STANDARD
+	{{{0x621d, B1_IDENT_FLAGS_SET_FN(3, 1)}, {B1_TYPE_BOOL, B1_TYPE_ANY, B1_TYPE_ANY}, B1_TYPE_ANY}, b1_fn_bltin_iif},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_MATH_EXTRA
+	{{{0x6370, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_cos},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_STRING
+	{{{0x6d27, B1_IDENT_FLAGS_SET_FN(2, 1)}, {B1_TYPE_STRING, B1_TYPE_INT32}, B1_TYPE_STRING}, b1_fn_bltin_rset},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_STANDARD
+	{{{0x6d38, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_STRING}, B1_TYPE_INT32}, b1_fn_bltin_asc},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_MATH_EXTRA
+	{{{0x71b5, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_atn},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_MATH_BASIC
+#ifdef B1_FRACTIONAL_TYPE_EXISTS
+	{{{0x77af, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_int},
+#endif
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_MATH_BASIC
+	{{{0x834a, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_ANY}, B1_TYPE_ANY}, b1_fn_bltin_sgn},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_MATH_EXTRA
+	{{{0x8b0a, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_sin},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_MATH_EXTRA
+	{{{0x917c, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_exp},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_STRING
+	{{{0x9628, B1_IDENT_FLAGS_SET_FN(2, 1)}, {B1_TYPE_STRING, B1_TYPE_INT32}, B1_TYPE_STRING}, b1_fn_bltin_lset},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_MATH_EXTRA
+	{{{0xae97, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_sqr},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_MATH_EXTRA
+	{{{0xd787, B1_IDENT_FLAGS_SET_FN(0, 1)}, {0}, B1_TYPE_SINGLE}, b1_fn_bltin_pi},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_STANDARD
+	{{{0xdfc8, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_STRING}, B1_TYPE_INT32}, b1_fn_bltin_len},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_STRING
+	{{{0xeaa3, B1_IDENT_FLAGS_SET_FN(2, 1)}, {B1_TYPE_STRING, B1_TYPE_INT32}, B1_TYPE_STRING}, b1_fn_bltin_left},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_MATH_EXTRA
+	{{{0xf009, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_tan},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_STANDARD
+	{{{0xf7c3, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_STRING}, B1_TYPE_ANY}, b1_fn_bltin_val},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_STANDARD
+	{{{0xfae3, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_ANY}, B1_TYPE_STRING}, b1_fn_bltin_chr},
+#endif
+#ifdef B1_FEATURE_FUNCTIONS_STRING
+	{{{0xff2d, B1_IDENT_FLAGS_SET_FN(3, 1)}, {B1_TYPE_ANY, B1_TYPE_STRING, B1_TYPE_STRING}, B1_TYPE_INT32}, b1_fn_bltin_instr},
 #endif
 };
 #endif
@@ -845,46 +895,31 @@ static B1_T_ERROR b1_fn_bltin_lcase(B1_VAR *parg1)
 }
 #endif
 
-#if defined(B1_FEATURE_FUNCTIONS_STANDARD) || defined(B1_FEATURE_FUNCTIONS_MATH_BASIC) || defined(B1_FEATURE_FUNCTIONS_MATH_EXTRA) || defined(B1_FEATURE_FUNCTIONS_STRING) || defined(B1_FEATURE_FUNCTIONS_USER)
-static B1_T_ERROR b1_fn_find(uint8_t fn_type, B1_T_IDHASH name_hash, B1_FN **fn_ptr)
+B1_T_ERROR b1_fn_get_params(B1_T_IDHASH name_hash, B1_FN **fn_ptr)
 {
 	B1_T_ERROR err;
-	B1_FN *fns;
-	uint16_t size;
-	B1_T_INDEX fn_num;
-
-#if (defined(B1_FEATURE_FUNCTIONS_STANDARD) || defined(B1_FEATURE_FUNCTIONS_MATH_BASIC) || defined(B1_FEATURE_FUNCTIONS_MATH_EXTRA) || defined(B1_FEATURE_FUNCTIONS_STRING)) && defined(B1_FEATURE_FUNCTIONS_USER)
-	if(fn_type == 0)
-	{
-#endif
-#if defined(B1_FEATURE_FUNCTIONS_STANDARD) || defined(B1_FEATURE_FUNCTIONS_MATH_BASIC) || defined(B1_FEATURE_FUNCTIONS_MATH_EXTRA) || defined(B1_FEATURE_FUNCTIONS_STRING)
-		fns = (B1_FN *)b1_fn_bltin;
-		size = sizeof(B1_BLTIN_FN);
-		fn_num = B1_FN_BLTIN_COUNT;
-#endif
-#if (defined(B1_FEATURE_FUNCTIONS_STANDARD) || defined(B1_FEATURE_FUNCTIONS_MATH_BASIC) || defined(B1_FEATURE_FUNCTIONS_MATH_EXTRA) || defined(B1_FEATURE_FUNCTIONS_STRING)) && defined(B1_FEATURE_FUNCTIONS_USER)
-	}
-	else
-	{
-#endif
 #ifdef B1_FEATURE_FUNCTIONS_USER
-		fns = (B1_FN *)b1_fn_udef_fns;
-		size = sizeof(B1_UDEF_FN);
-		fn_num = B1_MAX_UDEF_FN_NUM;
-#endif
-#if (defined(B1_FEATURE_FUNCTIONS_STANDARD) || defined(B1_FEATURE_FUNCTIONS_MATH_BASIC) || defined(B1_FEATURE_FUNCTIONS_MATH_EXTRA) || defined(B1_FEATURE_FUNCTIONS_STRING)) && defined(B1_FEATURE_FUNCTIONS_USER)
-	}
+	B1_T_INDEX i;
+	const B1_FN *fn;
 #endif
 
 	err = B1_RES_EUNKIDENT;
 
-	for(; fn_num != 0; fn_num--)
+#if defined(B1_FEATURE_FUNCTIONS_STANDARD) || defined(B1_FEATURE_FUNCTIONS_MATH_BASIC) || defined(B1_FEATURE_FUNCTIONS_MATH_EXTRA) || defined(B1_FEATURE_FUNCTIONS_STRING)
+	*fn_ptr = (B1_FN *)bsearch(&name_hash, b1_fn_bltin, B1_FN_BLTIN_COUNT, sizeof(B1_BLTIN_FN), b1_id_cmp_hashes);
+	if(*fn_ptr != NULL)
 	{
-		*fn_ptr = fns;
+		return B1_RES_OK;
+	}
+#endif
 
-		if(B1_IDENT_TEST_FLAGS_BUSY((*fns).id.flags))
+#ifdef B1_FEATURE_FUNCTIONS_USER
+	for(i = 0; i < B1_MAX_UDEF_FN_NUM; i++)
+	{
+		fn = (const B1_FN *)(b1_fn_udef_fns + i);
+		if(B1_IDENT_TEST_FLAGS_BUSY((*fn).id.flags))
 		{
-			if(name_hash == (*fns).id.name_hash)
+			if(name_hash == (*fn).id.name_hash)
 			{
 				err = B1_RES_OK;
 				break;
@@ -894,34 +929,14 @@ static B1_T_ERROR b1_fn_find(uint8_t fn_type, B1_T_IDHASH name_hash, B1_FN **fn_
 		{
 			break;
 		}
-
-		fns = (B1_FN *)(((uint8_t *)fns) + size);
 	}
 
-	if(fn_num == 0)
+	if(i == B1_MAX_UDEF_FN_NUM)
 	{
-		*fn_ptr = NULL;
+		fn = NULL;
 	}
 
-	return err;
-}
-#endif
-
-B1_T_ERROR b1_fn_get_params(B1_T_IDHASH name_hash, B1_FN **fn_ptr)
-{
-	B1_T_ERROR err;
-
-	err = B1_RES_EUNKIDENT;
-
-#if defined(B1_FEATURE_FUNCTIONS_STANDARD) || defined(B1_FEATURE_FUNCTIONS_MATH_BASIC) || defined(B1_FEATURE_FUNCTIONS_MATH_EXTRA) || defined(B1_FEATURE_FUNCTIONS_STRING)
-	err = b1_fn_find(0, name_hash, fn_ptr);
-#endif
-
-#ifdef B1_FEATURE_FUNCTIONS_USER
-	if(err == B1_RES_EUNKIDENT)
-	{
-		err = b1_fn_find(1, name_hash, fn_ptr);
-	}
+	*fn_ptr = (B1_FN *)fn;
 #endif
 
 	return err;

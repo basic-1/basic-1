@@ -190,7 +190,7 @@ static B1_T_ERROR b1_ex_prg_get_first_prog_line()
 extern "C" B1_T_ERROR b1_ex_prg_cache_curr_line_num(B1_T_LINE_NUM curr_line_num, uint8_t stmt)
 {
 #ifdef B1_FEATURE_STMT_DATA_READ
-	if(stmt == B1_INT_STMT_DATA)
+	if(stmt == B1_ID_STMT_DATA)
 	{
 		b1_ex_prg_data_line_cnt_cache.push_back(std::pair<B1_T_PROG_LINE_CNT, B1_T_INDEX>(b1_int_curr_prog_line_cnt, b1_int_curr_prog_line_offset));
 	}
@@ -202,12 +202,12 @@ extern "C" B1_T_ERROR b1_ex_prg_cache_curr_line_num(B1_T_LINE_NUM curr_line_num,
 	}
 
 	// move FOR statement line counter to tmp. stack
-	if(stmt == B1_INT_STMT_FOR)
+	if(stmt == B1_ID_STMT_FOR)
 	{
 		b1_ex_prg_for_line_cnt_stack.push(b1_int_curr_prog_line_cnt);
 	}
 
-	if(stmt == B1_INT_STMT_NEXT && !b1_ex_prg_for_line_cnt_stack.empty())
+	if(stmt == B1_ID_STMT_NEXT && !b1_ex_prg_for_line_cnt_stack.empty())
 	{
 		b1_ex_prg_for_line_cnt_cache[b1_ex_prg_for_line_cnt_stack.top()] = b1_int_curr_prog_line_cnt;
 		b1_ex_prg_for_line_cnt_stack.pop();

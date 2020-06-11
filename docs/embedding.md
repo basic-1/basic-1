@@ -44,7 +44,9 @@ Some interpreter's features can be turned on or off by editing application's `fe
 `B1_FEATURE_INIT_FREE_MEMORY`: if the macro is defined `b1_int_reset` function frees memory allocated during preceding program execution (in the most cases the feature must be enabled to allow resetting program state). `b1_ex_var_enum` function has to be implemented for the feature to work.  
   
 `B1_FEATURE_DEBUG`: extends `B1_NAMED_VAR` structure to save variable name (not only name hash), presents `b1_dbg_get_var_dump` function allowing displaying variables content in human-readable format.  
-    
+  
+`B1_FEATURE_CHECK_KEYWORDS`: forbids creating variables with the same names as statements and existing functions have  
+  
 ## Interpreter's global variables and functions  
   
 Hosting application can control the interpreter core by reading/writing special global variables and calling some functions. The most of them are described below.  
@@ -65,7 +67,7 @@ One-based counter of the current `DATA` statement program line. `b1_ex_prg_data_
 Zero-based offset the next `DATA` statement value. The value can bne read with the next `READ` statement. The variable has to be set by `b1_ex_prg_data_go_next` function and the value can be previously stored by `b1_ex_prg_cache_curr_line_num` function.
   
 `extern const B1_RPNREC *b1_rpn;`  
-The variable should be used by `b1_ex_prg_rpn_cache` and `b1_ex_prg_rpn_get_cached` function to cache expressions' postfix notation.  
+The variable should be used by `b1_ex_prg_rpn_cache` and `b1_ex_prg_rpn_get_cached` functions to cache expressions' postfix notation.  
   
 `extern B1_T_ERROR b1_int_reset();`  
 The function reset the interpreter core to its initial state. Has to be called before `b1_int_prerun` function to initialize the interpreter or after `b1_int_run` function to free resources.  
@@ -170,7 +172,7 @@ See `./source/ext/exrnd.c` file for possible functions implementation.
 The functions are called by interpreter to navigate through program lines when executing a program.  
   
 `extern B1_T_ERROR b1_ex_prg_cache_curr_line_num(B1_T_LINE_NUM curr_line_num, uint8_t stmt);`  
-The function is called by the interpreter during the idle program run (see `b1_int_prerun` function description for details) allowing caching line numbers of every program line. The cached values can be used then with other navigation functions to make program line search faster. `curr_line_num` argument value is a program line number of the current program line (identified with a value of `b1_int_curr_prog_line_cnt` global variable). If a program line does not have line number the argument variable is set to `B1_T_LINE_NUM_ABSENT` value. `stmt` argument variable identifies the current program line statement and can be one of the `B1_INT_STMT_XXXX` values defined in `./source/core/b1int.h` file.  
+The function is called by the interpreter during the idle program run (see `b1_int_prerun` function description for details) allowing caching line numbers of every program line. The cached values can be used then with other navigation functions to make program line search faster. `curr_line_num` argument value is a program line number of the current program line (identified with a value of `b1_int_curr_prog_line_cnt` global variable). If a program line does not have line number the argument variable is set to `B1_T_LINE_NUM_ABSENT` value. `stmt` argument variable identifies the current program line statement and can be one of the `B1_ID_STMT_XXXX` values defined in `./source/core/b1int.h` file.  
   
 `extern B1_T_ERROR b1_ex_prg_get_prog_line(B1_T_LINE_NUM next_line_num);`  
 `b1_ex_prg_get_prog_line` function is called by the interpreter to navigate to another program line depending on `next_line_num` argument variable value: `B1_T_LINE_NUM_FIRST` and `B1_T_LINE_NUM_NEXT` special values corresponds to the first line of the program and to the line coming after the current one. Other values are line numbers identifying program lines (e.g. the interpreter calls this function when executing `GOTO` statement). The function should return `B1_RES_ELINENNOTFND` code if the line number is not found and `B1_RES_EPROGUNEND` code if it reached the end of the program and the next program line does not exist. If the requested program line is found the function has to change `b1_int_progline` and `b1_int_curr_prog_line_cnt` variables properly.  
