@@ -1,3 +1,9 @@
+b1i (1.0.0-39) unstable; urgency=low
+
+  * B1_FEATURE_STMT_WHILE_WEND feature added (WHILE - WEND statements)
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Wed, 08 Jul 2020 18:23:22 +0300
+
 b1i (1.0.0-38) unstable; urgency=low
 
   * B1_FEATURE_CHECK_KEYWORDS feature added (forbids using reserved keywords

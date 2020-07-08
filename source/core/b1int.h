@@ -26,6 +26,7 @@
 #define B1_INT_STATE_GOSUB ((uint8_t)0x40)
 #define B1_INT_STATE_FOR ((uint8_t)0x20)
 #define B1_INT_STATE_ON ((uint8_t)0x10)
+#define B1_INT_STATE_WHILE ((uint8_t)0x08)
 
 #define B1_INT_STATE_IF_EXEC ((uint8_t)0x1)
 #define B1_INT_STATE_IF_NEXT ((uint8_t)0x2)
@@ -40,7 +41,7 @@
 #define B1_INT_STATE_ON_POS_GET(STATE) (((uint8_t)STATE) & B1_INT_STATE_ON_POS_MASK)
 
 
-// call stack structure (for IF, GOSUB and FOR statements)
+// call stack structure (for IF, GOSUB, FOR, ON and WHILE statements)
 typedef struct
 {
 	uint8_t state;

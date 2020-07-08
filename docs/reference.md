@@ -476,3 +476,35 @@ The statement is used to write remarks or comments in program text. Interpreter 
 **Examples:**  
 `SET MARGIN 80`  
 `SET ZONEWIDTH 10`  
+  
+### `WHILE`, `WEND` statements  
+  
+`WHILE` and `WEND` statements are used to create loops executing statements while a logical expression evaluates as `TRUE`.  
+  
+**Usage:**  
+`WHILE <logical_expr>`  
+`<statement_to_repeat1>`  
+` ... `  
+`<statement_to_repeatN>`  
+`WEND`  
+  
+Here `<logical_expr>` is a logical expression evaluated before every loop iteration. If the expression evaluates as `TRUE` interpreter executes code fragment between `WHILE` and `WEND` statements once and goes to the `WHILE` statement execution again. Statements within `WHILE` - `WEND` loop can include another loop called inner or nested.  
+  
+**Examples**  
+`REM print numbers from 0 to 3`  
+`I = 0`  
+`WHILE I <= 3`  
+`PRINT I`  
+`I = I + 1`  
+`WEND`  
+  
+`REM an infinite loop`  
+`WHILE 1 > 2`  
+`PRINT "infinite loop"`  
+`WEND`  
+  
+`REM the loop below executes zero times`  
+`I = 0`  
+`WHILE I > 0`  
+`PRINT "never executes"`  
+`WEND`  

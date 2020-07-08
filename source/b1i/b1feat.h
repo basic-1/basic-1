@@ -65,6 +65,9 @@
 // forbid using statement keywords as variable names
 #define B1_FEATURE_CHECK_KEYWORDS
 
+// enables WHILE and WEND statements
+#define B1_FEATURE_STMT_WHILE_WEND
+
 // constraints and memory usage
 #define B1_MAX_PROGLINE_LEN 255
 #define B1_MAX_STRING_LEN (B1_MAX_PROGLINE_LEN / 2)

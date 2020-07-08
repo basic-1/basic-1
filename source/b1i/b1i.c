@@ -102,8 +102,8 @@ static const char *err_msgs[] =
 	"unexpected RETURN statement",
 	"unexpected end of program",
 	"the end of DATA block reached",
+	"WEND without WHILE",
 	"NEXT without FOR",
-	"",
 	"FOR without NEXT",
 	"can't use subscripted variable as FOR loop control variable",
 	"invalid number",
@@ -112,6 +112,7 @@ static const char *err_msgs[] =
 	"user functions stack overflow",
 	"end of file",
 	"use of a reserved keyword as identifer forbidden",
+	"WHILE without WEND",
 };
 
 

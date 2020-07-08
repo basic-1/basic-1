@@ -45,7 +45,9 @@ Some interpreter's features can be turned on or off by editing application's `fe
   
 `B1_FEATURE_DEBUG`: extends `B1_NAMED_VAR` structure to save variable name (not only name hash), presents `b1_dbg_get_var_dump` function allowing displaying variables content in human-readable format.  
   
-`B1_FEATURE_CHECK_KEYWORDS`: forbids creating variables with the same names as statements and existing functions have  
+`B1_FEATURE_CHECK_KEYWORDS`: forbids creating variables with the same names as statements and existing functions.  
+  
+`B1_FEATURE_STMT_WHILE_WEND`: enables `WHILE` and `WEND` statements, if the feature is enabled `b1_ex_prg_while_go_wend` function has to be implemented.  
   
 ## Interpreter's global variables and functions  
   
@@ -182,6 +184,9 @@ The function should find program line counter of a `NEXT` statement correspondin
   
 `extern B1_T_ERROR b1_ex_prg_data_go_next(B1_T_LINE_NUM next_line_num);`  
 The function is called by the interpreter when processing `READ` statement and all the data of the current `DATA` statement is already read or when processing `RESTORE` statement. `next_line_num` argument variable can be equal to either `B1_T_LINE_NUM_FIRST` and `B1_T_LINE_NUM_NEXT` values or to a program line number identifing a program line with `DATA` statement. `B1_T_LINE_NUM_FIRST` and `B1_T_LINE_NUM_NEXT` constants correspond to the first and the next program lines with `DATA` statements. The function should return `B1_RES_ELINENNOTFND` code if the line number is not found and `B1_RES_EDATAEND` if there's no more `DATA` statements in the program. If the program line is found the function has to change `b1_int_data_curr_line_cnt` and `b1_int_data_curr_line_offset` variables properly. Note that the function should work with `b1_int_data_curr_line_xxx` global variables not with `b1_int_curr_prog_line_xxx` ones.  
+  
+`extern B1_T_ERROR b1_ex_prg_while_go_wend();`  
+The function should find program line counter of a `WEND` statement corresponding to the current `WHILE` statement (identified with `b1_int_curr_prog_line_cnt` variable value). The resulting line counter should be written to the same `b1_int_curr_prog_line_cnt` variable. If the program line is not found the function should return `B1_RES_EWHILEWOWND` value. The function has to be implemented if `B1_FEATURE_STMT_WHILE_WEND` feature is enabled.  
   
 See `./source/ext/exprg.cpp` file for possible functions implementation.  
   

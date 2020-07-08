@@ -9,7 +9,7 @@ Maximum number of function arguments: 3
 Maximum expression brackets nesting level: 7  
 Maximum number of user-defined functions: 10  
 Maximum call nesting depth of user-defined functions: 3  
-Maximum statements nesting depth (`IF`, `GOSUB` and `FOR`): 10  
+Maximum statements nesting depth (`IF`, `ON`, `GOSUB`, `FOR` and `WHILE`): 10  
   
 Line number range: \[1 ... 65530\]  
   

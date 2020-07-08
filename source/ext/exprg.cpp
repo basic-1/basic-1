@@ -37,6 +37,11 @@ static std::map<B1_T_LINE_NUM, B1_T_PROG_LINE_CNT> b1_ex_prg_line_num_cache;
 // FOR/NEXT statement line counters cache
 static std::stack<B1_T_PROG_LINE_CNT> b1_ex_prg_for_line_cnt_stack;
 static std::map<B1_T_PROG_LINE_CNT, B1_T_PROG_LINE_CNT> b1_ex_prg_for_line_cnt_cache;
+#ifdef B1_FEATURE_STMT_WHILE_WEND
+// WHILE/WEND statement line counters cache
+static std::stack<B1_T_PROG_LINE_CNT> b1_ex_prg_while_line_cnt_stack;
+static std::map<B1_T_PROG_LINE_CNT, B1_T_PROG_LINE_CNT> b1_ex_prg_while_line_cnt_cache;
+#endif
 // DATA statement line counters cache
 #ifdef B1_FEATURE_STMT_DATA_READ
 static std::vector<std::pair<B1_T_PROG_LINE_CNT, B1_T_INDEX>> b1_ex_prg_data_line_cnt_cache;
@@ -131,6 +136,25 @@ extern "C" B1_T_ERROR b1_ex_prg_set_prog_file(const char *prog_file)
 
 	if(!b1_ex_prg_lines.empty())
 	{
+		b1_ex_prg_line_num_cache.clear();
+		while(!b1_ex_prg_for_line_cnt_stack.empty())
+		{
+			b1_ex_prg_for_line_cnt_stack.pop();
+		}
+		b1_ex_prg_for_line_cnt_cache.clear();
+#ifdef B1_FEATURE_STMT_WHILE_WEND
+		while(!b1_ex_prg_while_line_cnt_stack.empty())
+		{
+			b1_ex_prg_while_line_cnt_stack.pop();
+		}
+		b1_ex_prg_while_line_cnt_cache.clear();
+#endif
+#ifdef B1_FEATURE_STMT_DATA_READ
+		b1_ex_prg_data_line_cnt_cache.clear();
+#endif
+#ifdef B1_FEATURE_RPN_CACHING
+		b1_ex_prg_rpn_expr_cache.clear();
+#endif
 		b1_ex_prg_lines.clear();
 	}
 
@@ -212,7 +236,21 @@ extern "C" B1_T_ERROR b1_ex_prg_cache_curr_line_num(B1_T_LINE_NUM curr_line_num,
 		b1_ex_prg_for_line_cnt_cache[b1_ex_prg_for_line_cnt_stack.top()] = b1_int_curr_prog_line_cnt;
 		b1_ex_prg_for_line_cnt_stack.pop();
 	}
-	
+
+#ifdef B1_FEATURE_STMT_DATA_READ
+	// move WHILE statement line counter to tmp. stack
+	if(stmt == B1_ID_STMT_WHILE)
+	{
+		b1_ex_prg_while_line_cnt_stack.push(b1_int_curr_prog_line_cnt);
+	}
+
+	if(stmt == B1_ID_STMT_WEND && !b1_ex_prg_while_line_cnt_stack.empty())
+	{
+		b1_ex_prg_while_line_cnt_cache[b1_ex_prg_while_line_cnt_stack.top()] = b1_int_curr_prog_line_cnt;
+		b1_ex_prg_while_line_cnt_stack.pop();
+	}
+#endif
+
 	return B1_RES_OK;
 }
 
@@ -258,6 +296,23 @@ extern "C" B1_T_ERROR b1_ex_prg_for_go_next()
 
 	return B1_RES_OK;
 }
+
+#ifdef B1_FEATURE_STMT_WHILE_WEND
+// sets the WEND statement line counter for the current WHILE statement
+extern "C" B1_T_ERROR b1_ex_prg_while_go_wend()
+{
+	auto line_cnt_it = b1_ex_prg_while_line_cnt_cache.find(b1_int_curr_prog_line_cnt);
+
+	if(line_cnt_it == b1_ex_prg_while_line_cnt_cache.end())
+	{
+		return B1_RES_EWHILEWOWND;
+	}
+	
+	b1_int_curr_prog_line_cnt = line_cnt_it->second;
+
+	return B1_RES_OK;
+}
+#endif
 
 #ifdef B1_FEATURE_STMT_DATA_READ
 // sets the next DATA stamtement line counter (b1_int_data_curr_line_cnt and b1_int_data_curr_line_offset),

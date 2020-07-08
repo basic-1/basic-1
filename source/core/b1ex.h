@@ -52,6 +52,10 @@ extern B1_T_ERROR b1_ex_prg_cache_curr_line_num(B1_T_LINE_NUM curr_line_num, uin
 extern B1_T_ERROR b1_ex_prg_get_prog_line(B1_T_LINE_NUM next_line_num);
 // sets the NEXT statement line counter for the current FOR statement
 extern B1_T_ERROR b1_ex_prg_for_go_next();
+#ifdef B1_FEATURE_STMT_WHILE_WEND
+// sets the WEND statement line counter for the current WHILE statement
+extern B1_T_ERROR b1_ex_prg_while_go_wend();
+#endif
 #ifdef B1_FEATURE_STMT_DATA_READ
 // sets the next DATA stamtement line counter (b1_int_data_curr_line_cnt and b1_int_data_curr_line_offset),
 // next_line_num can be either valid line number or B1_T_LINE_NUM_FIRST, B1_T_LINE_NUM_NEXT constants.

@@ -88,6 +88,8 @@
 #define B1_RES_EPROGUNEND ((B1_T_ERROR)132)
 // EDATAEND error: the end of DATA block reached
 #define B1_RES_EDATAEND ((B1_T_ERROR)133)
+// EWNDWOWHILE error: WEND without WHILE
+#define B1_RES_EWNDWOWHILE ((B1_T_ERROR)134)
 // ENXTWOFOR error: NEXT without FOR
 #define B1_RES_ENXTWOFOR ((B1_T_ERROR)135)
 // EFORWONXT error: FOR without NEXT
@@ -106,5 +108,7 @@
 #define B1_RES_EEOF ((B1_T_ERROR)142)
 // ERESKWRD error: use of a reserved keyword as identifier forbidden
 #define B1_RES_ERESKWRD ((B1_T_ERROR)143)
+// EWHILEWOWND error: WHILE without WEND
+#define B1_RES_EWHILEWOWND ((B1_T_ERROR)144)
 
 #endif

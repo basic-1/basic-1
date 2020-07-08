@@ -26,6 +26,9 @@ static const uint8_t b1_id_stmts[] =
 #ifdef B1_FEATURE_STMT_DATA_READ
 	B1_ID_STMT_RESTORE,
 #endif
+#ifdef B1_FEATURE_STMT_WHILE_WEND
+	B1_ID_STMT_WHILE,
+#endif
 	B1_ID_STMT_GOSUB,
 	B1_ID_STMT_END,
 	B1_ID_STMT_SET,
@@ -34,6 +37,9 @@ static const uint8_t b1_id_stmts[] =
 #ifdef B1_FRACTIONAL_TYPE_EXISTS
 	B1_ID_STMT_RANDOMIZE,
 #endif
+#endif
+#ifdef B1_FEATURE_STMT_WHILE_WEND
+	B1_ID_STMT_WEND,
 #endif
 	B1_ID_STMT_INPUT,
 	B1_ID_STMT_ELSEIF,
@@ -67,6 +73,9 @@ static const B1_T_IDHASH b1_id_stmt_hashes[] =
 #ifdef B1_FEATURE_STMT_DATA_READ
 	0x3b4c,
 #endif
+#ifdef B1_FEATURE_STMT_WHILE_WEND
+	0x5087,
+#endif
 	0x6119,
 	0x65af,
 	0x7c57,
@@ -75,6 +84,9 @@ static const B1_T_IDHASH b1_id_stmt_hashes[] =
 #ifdef B1_FRACTIONAL_TYPE_EXISTS
 	0x7f56,
 #endif
+#endif
+#ifdef B1_FEATURE_STMT_WHILE_WEND
+	0x80af,
 #endif
 	0x8f40,
 	0xab4b,

@@ -2467,6 +2467,39 @@ static B1_T_ERROR b1_int_st_set(B1_T_INDEX offset)
 	return B1_RES_OK;
 }
 
+#ifdef B1_FEATURE_STMT_WHILE_WEND
+static B1_T_ERROR b1_int_st_while(B1_T_INDEX offset)
+{
+	B1_T_ERROR err;
+
+	// build RPN for WHILE expression
+	err = b1_rpn_build(offset, NULL, &offset);
+	if(err != B1_RES_OK)
+	{
+		return err;
+	}
+
+	if(offset != 0)
+	{
+		return B1_RES_ESYNTAX;
+	}
+
+	// evaluate WHILE expression
+	err = b1_eval(0, NULL);
+	if(err != B1_RES_OK)
+	{
+		return err;
+	}
+
+	if(!B1_TYPE_TEST_BOOL(b1_rpn_eval[0].type))
+	{
+		return B1_RES_ETYPMISM;
+	}
+
+	return b1_rpn_eval[0].value.bval ? b1_int_save_stmt_state(B1_INT_STATE_WHILE) : b1_ex_prg_while_go_wend();
+}
+#endif
+
 static B1_T_ERROR b1_int_interpret_stmt(uint8_t stmt, B1_T_LINE_NUM *linen)
 {
 	B1_T_ERROR err;
@@ -2723,6 +2756,43 @@ static B1_T_ERROR b1_int_interpret_stmt(uint8_t stmt, B1_T_LINE_NUM *linen)
 		// b1_int_st_for_test restores previous statement state if needed
 		return b1_int_st_for_test();
 	}
+
+#ifdef B1_FEATURE_STMT_WHILE_WEND
+	if(stmt == B1_ID_STMT_WHILE)
+	{
+		if(b1_int_curr_stmt_state & B1_INT_STATE_IF)
+		{
+			return B1_RES_EINVSTAT;
+		}
+
+		// b1_int_st_while saves the current statement state if needed
+		return b1_int_st_while(offset);
+	}
+
+	if(stmt == B1_ID_STMT_WEND)
+	{
+		if(b1_int_curr_stmt_state & B1_INT_STATE_IF)
+		{
+			return B1_RES_EINVSTAT;
+		}
+
+		if(!(b1_int_curr_stmt_state & B1_INT_STATE_WHILE))
+		{
+			return B1_RES_EWNDWOWHILE;
+		}
+
+		// go to the beginning of the loop
+		err = b1_int_restore_stmt_state();
+		if(err != B1_RES_OK)
+		{
+			return err;
+		}
+
+		b1_int_curr_prog_line_cnt--;
+
+		return B1_RES_OK;
+	}
+#endif
 
 #ifdef B1_FEATURE_STMT_DATA_READ
 	if(stmt == B1_ID_STMT_READ)

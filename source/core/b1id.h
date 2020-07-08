@@ -76,6 +76,10 @@
 #endif
 #define B1_ID_STMT_RETURN ((uint8_t)0x15)
 #define B1_ID_STMT_SET ((uint8_t)0x16)
+#ifdef B1_FEATURE_STMT_WHILE_WEND
+#define B1_ID_STMT_WEND ((uint8_t)0x17)
+#define B1_ID_STMT_WHILE ((uint8_t)0x18)
+#endif
 
 
 typedef struct
