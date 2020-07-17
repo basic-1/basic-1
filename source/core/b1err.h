@@ -15,7 +15,7 @@
 
 // return codes
 #define B1_RES_FIRSTERRCODE ((B1_T_ERROR)100)
-#define B1_RES_LASTERRCODE ((B1_T_ERROR)142)
+#define B1_RES_LASTERRCODE ((B1_T_ERROR)144)
 // OK, no error
 #define B1_RES_OK ((B1_T_ERROR)0)
 // OK, execution reached END statement

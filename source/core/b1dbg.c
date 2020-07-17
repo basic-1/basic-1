@@ -64,11 +64,12 @@ B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_IN
 	uint8_t type, dimnum;
 	B1_T_SUBSCRIPT *arrdata;
 	B1_T_MEMOFFSET ai, arrsize;
-	B1_T_MEM_BLOCK_DESC arrdatadesc;
+	B1_T_MEM_BLOCK_DESC desc;
 	void *data;
 
-	dimnum = B1_IDENT_GET_FLAGS_ARGNUM((*var).id.flags);
 	type = B1_TYPE_GET((*var).var.type);
+	desc = (*var).var.value.mem_desc;
+	dimnum = B1_IDENT_GET_FLAGS_ARGNUM((*var).id.flags);
 
 	// copy variable name
 	if(b1_dbg_copy_str((*var).id.name, &sbuf, &buflen))
@@ -122,7 +123,21 @@ B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_IN
 	{
 		// array
 		// get array descriptor data
-		err = b1_var_get_dataptr((*var).var.value.mem_desc, (void **)&arrdata);
+		if(desc == B1_T_MEM_BLOCK_DESC_INVALID)
+		{
+			// the descriptor can be invalid if a memory allocation error
+			// occurred during array variable creation
+			if(b1_dbg_copy_str(_DBG_TYPE_CLBR, &sbuf, &buflen))
+			{
+				return B1_RES_OK;
+			}
+
+			b1_dbg_copy_str(_DBG_INVALID, &sbuf, &buflen);
+
+			return B1_RES_OK;
+		}
+
+		err = b1_var_get_dataptr(desc, (void **)&arrdata);
 		if(err != B1_RES_OK)
 		{
 			return err;
@@ -157,7 +172,7 @@ B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_IN
 				return B1_RES_OK;
 			}
 		}
-		arrdatadesc = *((B1_T_MEM_BLOCK_DESC *)arrdata);
+		desc = *((B1_T_MEM_BLOCK_DESC *)arrdata);
 
 		if(b1_dbg_copy_str(_DBG_TYPE_CLBR, &sbuf, &buflen))
 		{
@@ -165,7 +180,7 @@ B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_IN
 		}
 
 		// invalid memory block descriptor means non-allocated array
-		if(arrdatadesc == B1_T_MEM_BLOCK_DESC_INVALID)
+		if(desc == B1_T_MEM_BLOCK_DESC_INVALID)
 		{
 			b1_dbg_copy_str(_DBG_UNALLOC, &sbuf, &buflen);
 		}
@@ -174,13 +189,13 @@ B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_IN
 			ai = 0;
 			while(1)
 			{
-				err = b1_var_array_get_data_ptr(arrdatadesc, type, ai, &data);
+				err = b1_var_array_get_data_ptr(desc, type, ai, &data);
 				if(err != B1_RES_OK)
 				{
 					return err;
 				}
 
-				b1_ex_mem_release(arrdatadesc);
+				b1_ex_mem_release(desc);
 
 				// copy array value to output variabe
 #ifdef B1_FEATURE_TYPE_SINGLE

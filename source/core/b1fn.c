@@ -24,7 +24,6 @@
 #ifdef B1_FEATURE_FUNCTIONS_USER
 B1_T_INDEX b1_fn_udef_fn_rpn_off = 0;
 B1_RPNREC b1_fn_udef_fn_rpn[B1_MAX_UDEF_FN_RPN_LEN];
-B1_UDEF_FN b1_fn_udef_fns[B1_MAX_UDEF_FN_NUM];
 // user defined function call stack
 B1_UDEF_CALL b1_fn_udef_call_stack[B1_MAX_UDEF_CALL_NEST_DEPTH];
 #endif
@@ -895,16 +894,12 @@ static B1_T_ERROR b1_fn_bltin_lcase(B1_VAR *parg1)
 }
 #endif
 
-B1_T_ERROR b1_fn_get_params(B1_T_IDHASH name_hash, B1_FN **fn_ptr)
-{
-	B1_T_ERROR err;
 #ifdef B1_FEATURE_FUNCTIONS_USER
-	B1_T_INDEX i;
-	const B1_FN *fn;
+B1_T_ERROR b1_fn_get_params(B1_T_IDHASH name_hash, uint8_t alloc_new, B1_FN **fn_ptr)
+#else
+B1_T_ERROR b1_fn_get_params(B1_T_IDHASH name_hash, B1_FN **fn_ptr)
 #endif
-
-	err = B1_RES_EUNKIDENT;
-
+{
 #if defined(B1_FEATURE_FUNCTIONS_STANDARD) || defined(B1_FEATURE_FUNCTIONS_MATH_BASIC) || defined(B1_FEATURE_FUNCTIONS_MATH_EXTRA) || defined(B1_FEATURE_FUNCTIONS_STRING)
 	*fn_ptr = (B1_FN *)bsearch(&name_hash, b1_fn_bltin, B1_FN_BLTIN_COUNT, sizeof(B1_BLTIN_FN), b1_id_cmp_hashes);
 	if(*fn_ptr != NULL)
@@ -914,30 +909,8 @@ B1_T_ERROR b1_fn_get_params(B1_T_IDHASH name_hash, B1_FN **fn_ptr)
 #endif
 
 #ifdef B1_FEATURE_FUNCTIONS_USER
-	for(i = 0; i < B1_MAX_UDEF_FN_NUM; i++)
-	{
-		fn = (const B1_FN *)(b1_fn_udef_fns + i);
-		if(B1_IDENT_TEST_FLAGS_BUSY((*fn).id.flags))
-		{
-			if(name_hash == (*fn).id.name_hash)
-			{
-				err = B1_RES_OK;
-				break;
-			}
-		}
-		else
-		{
-			break;
-		}
-	}
-
-	if(i == B1_MAX_UDEF_FN_NUM)
-	{
-		fn = NULL;
-	}
-
-	*fn_ptr = (B1_FN *)fn;
+	return b1_ex_ufn_get(name_hash, alloc_new, (B1_UDEF_FN **)fn_ptr);
+#else
+	return B1_RES_EUNKIDENT;
 #endif
-
-	return err;
 }

@@ -46,6 +46,7 @@ add_executable(${B1_PROJECT_NAME} b1i.c
 	${B1_CORE_SRC_DIR}/b1dbg.c
 	${B1_EXT_SRC_DIR}/exmem.cpp
 	${B1_EXT_SRC_DIR}/exvar.cpp
+	${B1_EXT_SRC_DIR}/exufn.cpp
 	${B1_EXT_SRC_DIR}/exio.c
 	${B1_EXT_SRC_DIR}/exprg.cpp
 	${B1_EXT_SRC_DIR}/exrnd.c

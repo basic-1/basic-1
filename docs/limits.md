@@ -7,7 +7,6 @@ Maximum length of string value: 127 characters
 Maximum number of subscripted variable dimensions: 2  
 Maximum number of function arguments: 3  
 Maximum expression brackets nesting level: 7  
-Maximum number of user-defined functions: 10  
 Maximum call nesting depth of user-defined functions: 3  
 Maximum statements nesting depth (`IF`, `ON`, `GOSUB`, `FOR` and `WHILE`): 10  
   

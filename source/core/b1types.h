@@ -193,6 +193,7 @@ extern const B1_T_CHAR _INT[];
 extern const B1_T_CHAR _DBG_FORVAR[];
 extern const B1_T_CHAR _DBG_TYPE_OPBR[];
 extern const B1_T_CHAR _DBG_TYPE_CLBR[];
+extern const B1_T_CHAR _DBG_INVALID[];
 extern const B1_T_CHAR _DBG_UNALLOC[];
 extern const B1_T_CHAR _DBG_DELIM[];
 #endif

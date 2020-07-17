@@ -12,6 +12,7 @@
 #define _B1_EX_
 
 #include "b1var.h"
+#include "b1fn.h"
 
 
 extern B1_T_ERROR b1_ex_mem_init();
@@ -25,6 +26,11 @@ extern B1_T_ERROR b1_ex_var_alloc(B1_T_IDHASH name_hash, B1_NAMED_VAR **var);
 extern B1_T_ERROR b1_ex_var_free(B1_T_IDHASH name_hash);
 #ifdef B1_FEATURE_INIT_FREE_MEMORY
 extern B1_T_ERROR b1_ex_var_enum(B1_NAMED_VAR **var);
+#endif
+
+#ifdef B1_FEATURE_FUNCTIONS_USER
+extern B1_T_ERROR b1_ex_ufn_init();
+extern B1_T_ERROR b1_ex_ufn_get(B1_T_IDHASH name_hash, uint8_t alloc_new, B1_UDEF_FN **fn);
 #endif
 
 // localized string functions

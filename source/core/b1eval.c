@@ -665,7 +665,11 @@ B1_T_ERROR b1_eval(uint8_t options, B1_VAR_REF *var_ref)
 					// tflags = 1 stands for function and tflags = 2 - variable
 					tflags = 1;
 					// test if the identifier is a function
+#ifdef B1_FEATURE_FUNCTIONS_USER
+					err = b1_fn_get_params(name_hash, 0, &fn);
+#else
 					err = b1_fn_get_params(name_hash, &fn);
+#endif
 					if(err == B1_RES_EUNKIDENT)
 					{
 						// not a function: variable subscripts are numerics (B1_TYPE_INT32)

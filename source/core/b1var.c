@@ -114,12 +114,14 @@ B1_T_ERROR b1_var_var2str(const B1_VAR *var, B1_T_CHAR *sbuf)
 		{
 			desc = (*var).value.mem_desc;
 
+			// check the memory descriptor here because this function can be called
+			// for temporary variables representing array elements
 			if(desc == B1_T_MEM_BLOCK_DESC_INVALID)
 			{
 				sbuf[0] = 0;
 			}
 			else
-			{
+ 			{
 				err = b1_var_get_dataptr(desc, (void **)&data);
 				if(err != B1_RES_OK)
 				{
@@ -325,7 +327,7 @@ B1_T_ERROR b1_var_create(B1_T_IDHASH name_hash, uint8_t type, uint8_t argnum, co
 	B1_T_ERROR err;
 	B1_NAMED_VAR *newvar;
 #ifdef B1_FEATURE_CHECK_KEYWORDS
-	B1_FN *fn_ptr;
+	B1_FN *fn;
 #endif
 
 	if(argnum > B1_MAX_VAR_DIM_NUM)
@@ -339,7 +341,12 @@ B1_T_ERROR b1_var_create(B1_T_IDHASH name_hash, uint8_t type, uint8_t argnum, co
 	{
 #ifdef B1_FEATURE_CHECK_KEYWORDS
 		if(b1_id_get_stmt_by_hash(name_hash) != B1_ID_STMT_UNKNOWN ||
-			b1_fn_get_params(name_hash, &fn_ptr) != B1_RES_EUNKIDENT)
+#ifdef B1_FEATURE_FUNCTIONS_USER
+			b1_fn_get_params(name_hash, 0, &fn) != B1_RES_EUNKIDENT
+#else
+			b1_fn_get_params(name_hash, &fn) != B1_RES_EUNKIDENT
+#endif
+			)
 		{
 			b1_ex_var_free(name_hash);
 			return B1_RES_ERESKWRD;
@@ -607,7 +614,7 @@ B1_T_ERROR b1_var_set(B1_VAR *src_var, const B1_VAR_REF *dst_var_ref)
 		return err;
 	}
 
-	if(!argnum)
+	if(argnum == 0)
 	{
 		if((*(*dst_var_ref).var).var.type == B1_TYPE_SET(B1_TYPE_STRING, 0))
 		{

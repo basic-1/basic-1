@@ -27,7 +27,7 @@ Some interpreter's features can be turned on or off by editing application's `fe
   
 `B1_FEATURE_FUNCTIONS_STRING`: enables `MID$`, `INSTR`, `LTRIM$`, `RTRIM$`, `LEFT$`, `RIGHT$`, `LSET$`, `RSET$`, `UCASE$`, `LCASE$` functions.  
   
-`B1_FEATURE_FUNCTIONS_USER`: enables `DEF` statement and user defined functions.  
+`B1_FEATURE_FUNCTIONS_USER`: enables `DEF` statement and user defined functions. `b1_ex_ufn_init` and `b1_ex_ufn_get` functions have to be implemented if the feature is enabled.  
   
 `B1_FEATURE_TYPE_SINGLE`: enables `SINGLE` data type. `B1_FEATURE_FUNCTIONS_MATH_EXTRA` feature is not allowed without `SINGLE` type enabled. Also disabling floating-pont data types turns off random generator feature.  
   
@@ -131,7 +131,7 @@ The simplest functions implementation: `./source/ext/exio.c` (sdandard C input/o
 ### Variables cache functions  
   
 `extern B1_T_ERROR b1_ex_var_init();`  
-`b1_ex_var_init` function should initilize variables store or reset it removing all existing variables.  
+`b1_ex_var_init` function should initialize variables store or reset it removing all existing variables.  
   
 `extern B1_T_ERROR b1_ex_var_alloc(B1_T_IDHASH name_hash, B1_NAMED_VAR **var);`  
 `b1_ex_var_alloc` function is used for new variable creation or searching for already existing variable in the cache. A variable is represented with `B1_NAMED_VAR` structure and is identified with special hash value (generated from the variable name). If the memory is successfully allocated the function should return `B1_RES_OK` value, if the variable already exists it should return `B1_RES_EIDINUSE` code. In any case the function must return pointer to the structure in `var` parameter.  
@@ -140,7 +140,7 @@ The simplest functions implementation: `./source/ext/exio.c` (sdandard C input/o
 The function has to free the memory allocated for `B1_NAMED_VAR` structure of a variable identified with `name_hash` hash value.  
   
 `extern B1_T_ERROR b1_ex_var_enum(B1_NAMED_VAR **var);`  
-The function is used by the interpreter core only if `B1_FEATURE_INIT_FREE_MEMORY` feature is enabled. It should allow reading all the variables in the cache. Calling the function with `*var` equal to `NULL` should result in returning pointer to the first variable in tha cache in the same `var` argument variable. The next call should return pointer to the next variable, etc. The function should put `NULL` value into `*var` if there're no more variables.  
+The function is used by the interpreter core only if `B1_FEATURE_INIT_FREE_MEMORY` feature is enabled. It should allow reading all cached variables one-by-one. Calling the function with `*var` equal to `NULL` should result in returning pointer to the first variable in tha cache in the same `var` argument variable. The next call should return pointer to the next variable, etc. The function should put `NULL` value into `*var` if there're no more variables.  
 Typical usage sample:  
 ```
   B1_NAMED_VAR *var = NULL;
@@ -158,6 +158,18 @@ Typical usage sample:
 Possible return codes for the functions: `B1_RES_OK` (success), `B1_RES_ENOMEM` (not enough memory), `B1_RES_EIDINUSE` (variable already exists).  
   
 The simplest functions implementation: `./source/ext/exvar.cpp` (with C++ standard library).  
+  
+### User-defined functions data cache functions  
+  
+The functions have to be implemented only if `B1_FEATURE_FUNCTIONS_USER` feature is enabled.  
+  
+`extern B1_T_ERROR b1_ex_ufn_init();`  
+The function should initialize the cache or clear it.  
+  
+`extern B1_T_ERROR b1_ex_ufn_get(B1_T_IDHASH name_hash, uint8_t alloc_new, B1_UDEF_FN **fn);`  
+The function is called by the interpreter to get cached user-defined function data or to add new record to the cache. `name_hash` parameter stands for user-defined function name hash value, `alloc_new` is a logical parameter responsible to the function behavior when record is not found and `fn` is a pointer to a variable to receive address of a found or just allocated cache record. The function should return address of cached `B1_UDEF_FN` structure identified with `name_hash` value: if the record is found the function should write its address to `*fn` and return `B1_RES_OK` value, if the record is not found it should just return `B1_RES_EUNKIDENT` error code. However, if `alloc_new` argument variable is non-zero the function should create new cache element, put its address into `*fn` and return the same `B1_RES_EUNKIDENT` value. If memory for new structure cannot me allocated the function should return `B1_RES_ENOMEM` or `B1_RES_EMANYDEF` error code.  
+  
+The simplest functions implementation: `./source/ext/exufn.cpp` (with C++ standard library).  
   
 ### Random values generator functions  
   

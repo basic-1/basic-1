@@ -102,11 +102,14 @@ typedef struct
 #ifdef B1_FEATURE_FUNCTIONS_USER
 extern B1_T_INDEX b1_fn_udef_fn_rpn_off;
 extern B1_RPNREC b1_fn_udef_fn_rpn[B1_MAX_UDEF_FN_RPN_LEN];
-extern B1_UDEF_FN b1_fn_udef_fns[B1_MAX_UDEF_FN_NUM];
 // user defined function call stack
 extern B1_UDEF_CALL b1_fn_udef_call_stack[B1_MAX_UDEF_CALL_NEST_DEPTH];
 #endif
 
+#ifdef B1_FEATURE_FUNCTIONS_USER
+extern B1_T_ERROR b1_fn_get_params(B1_T_IDHASH name_hash, uint8_t alloc_new, B1_FN **fn_ptr);
+#else
 extern B1_T_ERROR b1_fn_get_params(B1_T_IDHASH name_hash, B1_FN **fn_ptr);
+#endif
 
 #endif

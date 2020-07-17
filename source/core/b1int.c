@@ -80,10 +80,16 @@ static const B1_T_CHAR *FOR_STOP_TOKEN1[2] = { _TO, NULL };
 static const B1_T_CHAR *FOR_STOP_TOKEN2[2] = { _STEP, NULL };
 
 
+#ifdef B1_FEATURE_INIT_FREE_MEMORY
+static B1_T_ERROR b1_int_var_mem_free(B1_NAMED_VAR *var);
+#endif
+
+
 // initializes or resets interpreter
 B1_T_ERROR b1_int_reset()
 {
 #ifdef B1_FEATURE_INIT_FREE_MEMORY
+	B1_T_ERROR err;
 	B1_NAMED_VAR *var;
 
 	var = NULL;
@@ -108,9 +114,10 @@ B1_T_ERROR b1_int_reset()
 			break;
 		}
 
-		if((*var).var.type == B1_TYPE_SET(B1_TYPE_STRING, 0))
+		err = b1_int_var_mem_free(var);
+		if(err != B1_RES_OK)
 		{
-			b1_ex_mem_free((*var).var.value.mem_desc);
+			return err;
 		}
 	}
 #endif
@@ -121,7 +128,7 @@ B1_T_ERROR b1_int_reset()
 #ifdef B1_FEATURE_FUNCTIONS_USER
 	// clear user functions
 	b1_fn_udef_fn_rpn_off = 0;
-	memset(b1_fn_udef_fns, 0, B1_MAX_UDEF_FN_NUM * sizeof(B1_UDEF_FN));
+	b1_ex_ufn_init();
 #endif
 
 	// reset statements call stack
@@ -1376,26 +1383,111 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 	return B1_RES_OK;
 }
 
-#ifdef B1_FEATURE_STMT_ERASE
-static B1_T_ERROR b1_int_st_erase(B1_T_INDEX offset)
+#if defined(B1_FEATURE_STMT_ERASE) || defined(B1_FEATURE_INIT_FREE_MEMORY)
+static B1_T_ERROR b1_int_var_mem_free(B1_NAMED_VAR *var)
 {
 	B1_T_ERROR err;
-	uint8_t next, type, dimsnum, i;
-	B1_TOKENDATA td;
-	B1_T_INDEX len;
-	B1_T_IDHASH name_hash;
+	uint8_t type, dimsnum;
 	B1_T_MEMOFFSET size;
 	B1_T_MEM_BLOCK_DESC desc, arrdesc;
 	const B1_T_MEM_BLOCK_DESC *arrdata;
 	const B1_T_SUBSCRIPT *arrdescdata;
+	B1_T_SUBSCRIPT sub;
+
+	// the variable exists, free it
+	type = (*var).var.type;
+	desc = (*var).var.value.mem_desc;
+	dimsnum = B1_IDENT_GET_FLAGS_ARGNUM((*var).id.flags);
+
+	if(dimsnum == 0)
+	{
+		// free string data
+		if(type == B1_TYPE_SET(B1_TYPE_STRING, 0))
+		{
+			b1_ex_mem_free(desc);
+		}
+	}
+	else
+	{
+		// free array data
+#ifdef B1_FEATURE_INIT_FREE_MEMORY
+		if(desc != B1_T_MEM_BLOCK_DESC_INVALID)
+		{
+#endif
+			err = b1_var_get_dataptr(desc, (void **)&arrdescdata);
+			if(err != B1_RES_OK)
+			{
+				return err;
+			}
+
+			// calc array size
+			size = 1;
+			while(dimsnum > 0)
+			{
+				dimsnum--;
+				sub = *arrdescdata++;
+				sub = *arrdescdata++ - sub;
+				size *= ((B1_T_MEMOFFSET)sub) + 1;
+			}
+			arrdesc = *((B1_T_MEM_BLOCK_DESC *)arrdescdata);
+
+			if(arrdesc != B1_T_MEM_BLOCK_DESC_INVALID)
+			{
+				// free array string data
+				if(B1_TYPE_TEST_STRING(type))
+				{
+					err = b1_var_get_dataptr(arrdesc, (void **)&arrdata);
+					if(err != B1_RES_OK)
+					{
+						return err;
+					}
+
+					while(size)
+					{
+						if(*arrdata != B1_T_MEM_BLOCK_DESC_INVALID)
+						{
+							b1_ex_mem_free(*arrdata);
+						}
+
+						arrdata++;
+						size--;
+					}
+				}
+
+				// free array data
+				b1_ex_mem_free(arrdesc);
+			}
+
+			// free array descriptor data
+			b1_ex_mem_free(desc);
+#ifdef B1_FEATURE_INIT_FREE_MEMORY
+		}
+#endif
+	}
+
+	return B1_RES_OK;
+}
+#endif
+
+#ifdef B1_FEATURE_STMT_ERASE
+static B1_T_ERROR b1_int_st_erase(B1_T_INDEX offset)
+{
+	B1_T_ERROR err;
+	uint8_t next, type;
+	B1_TOKENDATA td;
+	B1_T_INDEX len;
+	B1_T_IDHASH name_hash;
 	B1_NAMED_VAR *var;
 
 	while(1)
 	{
 		// get variable name
 		err = b1_tok_get(offset, 0, &td);
-		if(err != B1_RES_OK) return err;
-		
+		if(err != B1_RES_OK)
+		{
+			return err;
+		}
+
 		type = td.type;
 		offset = td.offset;
 		len = td.length;
@@ -1403,6 +1495,7 @@ static B1_T_ERROR b1_int_st_erase(B1_T_INDEX offset)
 		{
 			return B1_RES_ESYNTAX;
 		}
+
 		if(!(type & B1_TOKEN_TYPE_IDNAME))
 		{
 			return B1_RES_EINVTOK;
@@ -1433,67 +1526,10 @@ static B1_T_ERROR b1_int_st_erase(B1_T_INDEX offset)
 			return err;
 		}
 
-		// the variable exists, free it
-		dimsnum = B1_IDENT_GET_FLAGS_ARGNUM((*var).id.flags);
-		type = (*var).var.type;
-		desc = (*var).var.value.mem_desc;
-
-		if(dimsnum == 0)
+		err = b1_int_var_mem_free(var);
+		if(err != B1_RES_OK)
 		{
-			// free string data
-			if(type == B1_TYPE_SET(B1_TYPE_STRING, 0) && desc != B1_T_MEM_BLOCK_DESC_INVALID)
-			{
-				b1_ex_mem_free(desc);
-			}
-		}
-		else
-		{
-			// free array data
-			if(desc != B1_T_MEM_BLOCK_DESC_INVALID)
-			{
-				err = b1_var_get_dataptr(desc, (void **)&arrdescdata);
-				if(err != B1_RES_OK)
-				{
-					return err;
-				}
-
-				// free array string data
-				arrdesc = *((B1_T_MEM_BLOCK_DESC *)(arrdescdata + dimsnum * (uint8_t)2));
-
-				if(B1_TYPE_TEST_STRING(type))
-				{
-					// calc array sizes
-					size = 1;
-					for(i = 0; i < dimsnum; i++)
-					{
-						size *= (((B1_T_MEMOFFSET)*(arrdescdata + 1)) - *arrdescdata + 1);
-						arrdescdata += 2;
-					}
-
-					err = b1_var_get_dataptr(arrdesc, (void **)&arrdata);
-					if(err != B1_RES_OK)
-					{
-						return err;
-					}
-
-					while(size)
-					{
-						if(*arrdata != B1_T_MEM_BLOCK_DESC_INVALID)
-						{
-							b1_ex_mem_free(*arrdata);
-						}
-
-						arrdata++;
-						size--;
-					}
-				}
-
-				// free array data
-				b1_ex_mem_free(arrdesc);
-
-				// free array descriptor data
-				b1_ex_mem_free(desc);
-			}
+			return err;
 		}
 
 		// release variable memory
@@ -2212,7 +2248,7 @@ static B1_T_ERROR b1_int_st_def(B1_T_INDEX offset, B1_T_PROG_LINE_CNT def_line_c
 	offset += len;
 
 	// check for existence
-	err = b1_fn_get_params(hash, (B1_FN **)&fn);
+	err = b1_fn_get_params(hash, 1, (B1_FN **)&fn);
 	if(err == B1_RES_OK)
 	{
 		return B1_RES_EIDINUSE;
@@ -2221,11 +2257,6 @@ static B1_T_ERROR b1_int_st_def(B1_T_INDEX offset, B1_T_PROG_LINE_CNT def_line_c
 	if(err != B1_RES_EUNKIDENT)
 	{
 		return err;
-	}
-
-	if(fn == NULL)
-	{
-		return B1_RES_EMANYDEF;
 	}
 
 	// create new user function
@@ -2654,7 +2685,7 @@ static B1_T_ERROR b1_int_interpret_stmt(uint8_t stmt, B1_T_LINE_NUM *linen)
 			}
 		}
 
-		// GOTO and RETURN should terminate IF statement processing
+		// GOTO should terminate IF statement processing
 		if(b1_int_curr_stmt_state & B1_INT_STATE_IF)
 		{
 			err = b1_int_restore_stmt_state();
@@ -2692,20 +2723,18 @@ static B1_T_ERROR b1_int_interpret_stmt(uint8_t stmt, B1_T_LINE_NUM *linen)
 
 	if(stmt == B1_ID_STMT_RETURN)
 	{
-		// GOTO and RETURN should terminate IF statement processing
-		if(b1_int_curr_stmt_state & B1_INT_STATE_IF)
+		// RETURN should unwind statements stack
+		while(!(b1_int_curr_stmt_state & B1_INT_STATE_GOSUB))
 		{
 			err = b1_int_restore_stmt_state();
+			if(err == B1_RES_ESTSTKUDF)
+			{
+				err = B1_RES_ENOGOSUB;
+			}
 			if(err != B1_RES_OK)
 			{
 				return err;
 			}
-		}
-
-		// restore program line position
-		if(!(b1_int_curr_stmt_state & B1_INT_STATE_GOSUB))
-		{
-			return B1_RES_ENOGOSUB;
 		}
 
 		return b1_int_restore_stmt_state();

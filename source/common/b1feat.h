@@ -82,7 +82,6 @@
 
 #ifdef B1_FEATURE_FUNCTIONS_USER
 #define B1_MAX_UDEF_FN_RPN_LEN (768 / sizeof(B1_RPNREC))
-#define B1_MAX_UDEF_FN_NUM ((uint8_t)10)
 #define B1_MAX_UDEF_CALL_NEST_DEPTH 3
 #endif
 
