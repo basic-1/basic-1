@@ -46,7 +46,7 @@ const B1_T_CHAR _INT[] = { 3, 'I', 'N', 'T' };
 const B1_T_CHAR _DBG_FORVAR[] = { 8, B1_T_C_LT, 'F', 'O', 'R', 'V', 'A', 'R', B1_T_C_GT };
 const B1_T_CHAR _DBG_TYPE_OPBR[] = { 2, B1_T_C_SPACE, B1_T_C_OPBRACK };
 const B1_T_CHAR _DBG_TYPE_CLBR[] = { 3, B1_T_C_CLBRACK, B1_T_C_COLON, B1_T_C_SPACE };
-// string donstant for invalid array (not properly created due to error)
+// string constant for invalid array (not properly created due to error)
 const B1_T_CHAR _DBG_INVALID[] = { 9, B1_T_C_LT, 'I', 'N', 'V', 'A', 'L', 'I', 'D', B1_T_C_GT };
 // string constant for unallocated arrays
 const B1_T_CHAR _DBG_UNALLOC[] = { 9, B1_T_C_LT, 'U', 'N', 'A', 'L', 'L', 'O', 'C', B1_T_C_GT };

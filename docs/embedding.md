@@ -6,11 +6,11 @@ BASIC1 interpreter core can be embedded into existing application or an alternat
   
 ## Typical embedding scenario  
   
-1) add core source files from `./source/core` directory to hosting application project;  
-2) copy `./source/common/feat.h` file to the project direcory and change it if necessary;  
-3) implement all external functions necessary for the core to act;  
-4) implement BASIC program loading;  
-5) call the interpreter initialization and run functions.  
+1) add core source files from `./source/core` directory to hosting application project  
+2) copy `./source/common/feat.h` file to the project direcory and change it if necessary  
+3) implement all external functions necessary for the core to act (there are samples of the functions in `./source/ext` directory)  
+4) implement BASIC program loading  
+5) call the interpreter initialization and run functions  
   
 ## Choose interpreter's features  
 Some interpreter's features can be turned on or off by editing application's `feat.h` file. Comment corresponding macro definition to disable a feature.  
@@ -95,13 +95,13 @@ The functions have `b1_ex_` prefix and must be implemented for external linkage 
 `b1_ex_mem_init` function is called on interpreter initialization or reset (`b1_int_reset` function does this).  
   
 `extern B1_T_ERROR b1_ex_mem_alloc(B1_T_MEMOFFSET size, B1_T_MEM_BLOCK_DESC *mem_desc, void **data);`  
-`b1_ex_mem_alloc` function has to allocate `size` bytes of memory and return the memory block descriptor in `mem_desc` parameter and pointer to already allocated memory in `data` parameter. Any memory block is accessible for reading and writing after `b1_ex_mem_alloc` and `b1_ex_mem_access` calls and `b1_ex_mem_release` call makes the pointer returned in `data` parameter invalid. To get a new valid pointer to the same memory block the interpreter calls `b1_ex_mem_access` again. The interpreter does not use two or more memory block pointers at the same time.  
+`b1_ex_mem_alloc` function has to allocate `size` bytes of memory and return the memory block descriptor in `mem_desc` parameter and pointer to already allocated memory in `data` parameter (if `data` pointer is not `NULL` value). A memory block should be accessible for reading and writing after `b1_ex_mem_alloc` call (at most first `B1_MAX_STRING_LEN + 1` bytes of the block). Memory address returned in `data` parameter can point to a temporary buffer and the final data write can occur during the next `b1_ex_mem_release` call. `b1_ex_mem_release` function call makes `data` pointer invalid: to get a new valid pointer to the same memory block the interpreter calls `b1_ex_mem_access` function. The interpreter does not work with two or more memory blocks at the same time.  
   
-`extern B1_T_ERROR b1_ex_mem_access(const B1_T_MEM_BLOCK_DESC mem_desc, void **data);`  
-`b1_ex_mem_access` function has to make the memory block identified with `mem_desc` parameter accessible and return the pointer to the block in `data` parameter.  
+`extern B1_T_ERROR b1_ex_mem_access(const B1_T_MEM_BLOCK_DESC mem_desc, B1_T_MEMOFFSET offset, B1_T_INDEX size, uint8_t options, void **data);`  
+`b1_ex_mem_access` function has to make the memory block identified with `mem_desc` parameter accessible for reading, writing or both operations (depending on `options` parameter) and return the pointer to the block in `data` parameter. `offset` and `size` parameters specify offset and size of data to access. Maximal value for `size` parameter is `B1_MAX_STRING_LEN + 1` (for interpreter to be able managing entire strings). Zero `size` parameter stands for entire memory block or `B1_MAX_STRING_LEN + 1` bytes if the block is larger. `options` parameter is a bit set responsible to desired memory access, possible values: `B1_EX_MEM_READ`, `B1_EX_MEM_WRITE` and `B1_EX_MEM_READ | B1_EX_MEM_WRITE`.  
   
 `extern B1_T_ERROR b1_ex_mem_release(const B1_T_MEM_BLOCK_DESC mem_desc);`  
-`b1_ex_mem_release` function is called by the interpreter when it finishes working with the memory block and memory manager can move the changes made by the interpreter to some another memory location if needed. The function must not free the memory block.  
+`b1_ex_mem_release` function is called by the interpreter when it finishes working with the memory block and memory manager can move the changes made by the interpreter to some another memory location if needed. The function must not free the memory block. The interpreter calls the function after writing some data to a memory region returned via `data` parameter of `b1_ex_mem_alloc` or `b1_ex_mem_access` function.  
   
 `extern B1_T_ERROR b1_ex_mem_free(const B1_T_MEM_BLOCK_DESC mem_desc);`  
 `b1_ex_mem_free` function must free the memory block identified with `mem_desc` parameter.  

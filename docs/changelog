@@ -1,3 +1,9 @@
+b1i (1.0.0-41) unstable; urgency=low
+
+  * memory management functions revised
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Thu, 27 Aug 2020 18:15:11 +0300
+
 b1i (1.0.0-40) unstable; urgency=low
 
   * user-defined functions data cache detached from interpreter's core

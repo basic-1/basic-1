@@ -15,9 +15,13 @@
 #include "b1fn.h"
 
 
+#define B1_EX_MEM_READ ((uint8_t)0x1)
+#define B1_EX_MEM_WRITE ((uint8_t)0x2)
+
+
 extern B1_T_ERROR b1_ex_mem_init();
 extern B1_T_ERROR b1_ex_mem_alloc(B1_T_MEMOFFSET size, B1_T_MEM_BLOCK_DESC *mem_desc, void **data);
-extern B1_T_ERROR b1_ex_mem_access(const B1_T_MEM_BLOCK_DESC mem_desc, void **data);
+extern B1_T_ERROR b1_ex_mem_access(const B1_T_MEM_BLOCK_DESC mem_desc, B1_T_MEMOFFSET offset, B1_T_INDEX size, uint8_t options, void **data);
 extern B1_T_ERROR b1_ex_mem_release(const B1_T_MEM_BLOCK_DESC mem_desc);
 extern B1_T_ERROR b1_ex_mem_free(const B1_T_MEM_BLOCK_DESC mem_desc);
 

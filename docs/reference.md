@@ -499,7 +499,7 @@ Here `<logical_expr>` is a logical expression evaluated before every loop iterat
 `WEND`  
   
 `REM an infinite loop`  
-`WHILE 1 > 2`  
+`WHILE 1 < 2`  
 `PRINT "infinite loop"`  
 `WEND`  
   

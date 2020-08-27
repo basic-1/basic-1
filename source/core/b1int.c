@@ -1388,11 +1388,12 @@ static B1_T_ERROR b1_int_var_mem_free(B1_NAMED_VAR *var)
 {
 	B1_T_ERROR err;
 	uint8_t type, dimsnum;
-	B1_T_MEMOFFSET size;
+	B1_T_MEMOFFSET size, mem_size;
 	B1_T_MEM_BLOCK_DESC desc, arrdesc;
 	const B1_T_MEM_BLOCK_DESC *arrdata;
 	const B1_T_SUBSCRIPT *arrdescdata;
 	B1_T_SUBSCRIPT sub;
+	B1_T_INDEX i;
 
 	// the variable exists, free it
 	type = (*var).var.type;
@@ -1414,7 +1415,7 @@ static B1_T_ERROR b1_int_var_mem_free(B1_NAMED_VAR *var)
 		if(desc != B1_T_MEM_BLOCK_DESC_INVALID)
 		{
 #endif
-			err = b1_var_get_dataptr(desc, (void **)&arrdescdata);
+			err = b1_ex_mem_access(desc, 0, 0, B1_EX_MEM_READ, (void **)&arrdescdata);
 			if(err != B1_RES_OK)
 			{
 				return err;
@@ -1436,21 +1437,28 @@ static B1_T_ERROR b1_int_var_mem_free(B1_NAMED_VAR *var)
 				// free array string data
 				if(B1_TYPE_TEST_STRING(type))
 				{
-					err = b1_var_get_dataptr(arrdesc, (void **)&arrdata);
-					if(err != B1_RES_OK)
-					{
-						return err;
-					}
+					mem_size = size * (uint8_t)sizeof(B1_T_MEM_BLOCK_DESC);
 
-					while(size)
+					for(size = 0, i = 0; size != mem_size; size += (uint8_t)sizeof(B1_T_MEM_BLOCK_DESC), i++)
 					{
-						if(*arrdata != B1_T_MEM_BLOCK_DESC_INVALID)
+						if(i == ((B1_T_INDEX)(B1_MAX_STRING_LEN + 1)) / (uint8_t)sizeof(B1_T_MEM_BLOCK_DESC))
 						{
-							b1_ex_mem_free(*arrdata);
+							i = 0;
 						}
 
-						arrdata++;
-						size--;
+						if(i == 0)
+						{
+							err = b1_ex_mem_access(arrdesc, size, (((B1_T_INDEX)(B1_MAX_STRING_LEN + 1)) / (uint8_t)sizeof(B1_T_MEM_BLOCK_DESC)) * (uint8_t)sizeof(B1_T_MEM_BLOCK_DESC), B1_EX_MEM_WRITE, (void **)&arrdata);
+							if(err != B1_RES_OK)
+							{
+								return err;
+							}
+						}
+
+						if(*(arrdata + i) != B1_T_MEM_BLOCK_DESC_INVALID)
+						{
+							b1_ex_mem_free(*(arrdata + i));
+						}
 					}
 				}
 

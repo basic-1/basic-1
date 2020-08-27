@@ -64,7 +64,6 @@ typedef struct
 extern const uint8_t b1_var_types[B1_VAR_TYPE_COUNT];
 extern const B1_T_CHAR *b1_var_type_names[B1_VAR_TYPE_COUNT];
 
-extern B1_T_ERROR b1_var_get_dataptr(B1_T_MEM_BLOCK_DESC mem_desc, void **data);
 extern B1_T_ERROR b1_var_str2var(const B1_T_CHAR *s, B1_VAR *var);
 extern B1_T_ERROR b1_var_var2str(const B1_VAR *var, B1_T_CHAR *sbuf);
 extern B1_T_ERROR b1_var_convert(B1_VAR *var, uint8_t otype);

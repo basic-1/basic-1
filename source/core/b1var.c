@@ -28,21 +28,6 @@ const B1_T_CHAR *b1_var_type_names[B1_VAR_TYPE_COUNT] = { _STRING, _INT };
 #endif
 
 
-B1_T_ERROR b1_var_get_dataptr(B1_T_MEM_BLOCK_DESC mem_desc, void **data)
-{
-	B1_T_ERROR err;
-
-	// get data ptr
-	err = b1_ex_mem_access(mem_desc, data);
-	if(err != B1_RES_OK)
-	{
-		return err;
-	}
-	b1_ex_mem_release(mem_desc);
-
-	return B1_RES_OK;
-}
-
 static B1_T_ERROR b1_var_put_str_to_mem(const B1_T_CHAR *s, B1_T_MEM_BLOCK_DESC *mem_desc)
 {
 	B1_T_ERROR err;
@@ -122,7 +107,7 @@ B1_T_ERROR b1_var_var2str(const B1_VAR *var, B1_T_CHAR *sbuf)
 			}
 			else
  			{
-				err = b1_var_get_dataptr(desc, (void **)&data);
+				err = b1_ex_mem_access(desc, 0, 0, B1_EX_MEM_READ, (void **)&data);
 				if(err != B1_RES_OK)
 				{
 					return err;
@@ -294,7 +279,7 @@ B1_T_ERROR b1_var_init_empty(uint8_t type, uint8_t argnum, const B1_T_SUBSCRIPT 
 	if(type == B1_TYPE_SINGLE)
 	{
 		(*pvar).type = B1_TYPE_SET(B1_TYPE_SINGLE, 0);
-		(*pvar).value.sval = 0.0;
+		(*pvar).value.sval = 0.0f;
 	}
 	else
 #endif
@@ -371,88 +356,100 @@ B1_T_ERROR b1_var_create(B1_T_IDHASH name_hash, uint8_t type, uint8_t argnum, co
 	return err;
 }
 
+static uint8_t b1_var_get_type_size(uint8_t type)
+{
+	return
+#ifdef B1_FEATURE_TYPE_SINGLE
+		(type == B1_TYPE_SINGLE) ?	(uint8_t)sizeof(float) :
+#endif
+		(type == B1_TYPE_INT32) ?	(uint8_t)sizeof(int32_t) :
+									(uint8_t)sizeof(B1_T_MEM_BLOCK_DESC);
+}
+
 static B1_T_MEMOFFSET b1_var_array_get_data_offset(uint8_t type, B1_T_MEMOFFSET index)
 {
-	B1_T_MEMOFFSET size1;
-
-	size1 = 
-#ifdef B1_FEATURE_TYPE_SINGLE
-			(type == B1_TYPE_SINGLE) ?	(uint8_t)sizeof(float) :
-#endif
-			(type == B1_TYPE_INT32) ?	(uint8_t)sizeof(int32_t) :
-										(uint8_t)sizeof(B1_T_MEM_BLOCK_DESC);
-
-	return size1 * index;
+	return index * b1_var_get_type_size(type);
 }
 
 static B1_T_ERROR b1_var_array_alloc(B1_T_MEM_BLOCK_DESC arrdesc, uint8_t type, uint8_t argnum, B1_T_MEMOFFSET size, B1_T_MEM_BLOCK_DESC *arrdatadesc)
 {
 	B1_T_ERROR err;
+	uint8_t size1;
 	B1_T_MEMOFFSET mem_size;
 	void *data;
+	B1_T_INDEX max1, i;
 
-	mem_size = b1_var_array_get_data_offset(type, size);
+	size1 = b1_var_get_type_size(type);
+	max1 = ((B1_T_INDEX)(B1_MAX_STRING_LEN + 1)) / size1;
+	mem_size = size * size1;
 
-	err = b1_ex_mem_alloc(mem_size, arrdatadesc, &data);
+	err = b1_ex_mem_alloc(mem_size, arrdatadesc, NULL);
 	if(err != B1_RES_OK)
 	{
 		return err;
 	}
 
-	for(; size; )
+	for(size = 0, i = 0; size != mem_size; size += size1, i++)
 	{
-		size--;
+		if(i == max1)
+		{
+			i = 0;
+		}
+
+		if(i == 0)
+		{
+			b1_ex_mem_release(*arrdatadesc);
+			err = b1_ex_mem_access(*arrdatadesc, size, max1 * size1, B1_EX_MEM_WRITE, &data);
+			if(err != B1_RES_OK)
+			{
+				b1_ex_mem_free(*arrdatadesc);
+				return err;
+			}
+		}
 
 #ifdef B1_FEATURE_TYPE_SINGLE
 		if(type == B1_TYPE_SINGLE)
 		{
-			*(((float *)data) + size) = 0.0;
+			*(((float *)data) + i) = 0.0f;
 		}
 		else
 #endif
 		if(type == B1_TYPE_INT32)
 		{
-			*(((int32_t *)data) + size) = 0;
+			*(((int32_t *)data) + i) = 0;
 		}
 		else
 		if(type == B1_TYPE_STRING)
 		{
 			// initialize with empty string
-			*(((B1_T_MEM_BLOCK_DESC *)data) + size) = B1_T_MEM_BLOCK_DESC_INVALID;
+			*(((B1_T_MEM_BLOCK_DESC *)data) + i) = B1_T_MEM_BLOCK_DESC_INVALID;
 		}
 	}
 
 	b1_ex_mem_release(*arrdatadesc);
 
-	err = b1_ex_mem_access(arrdesc, &data);
+	err = b1_ex_mem_access(arrdesc, argnum * (uint8_t)2 * (uint8_t)sizeof(B1_T_SUBSCRIPT), sizeof(B1_T_MEM_BLOCK_DESC), B1_EX_MEM_WRITE, &data);
 	if(err != B1_RES_OK)
 	{
 		b1_ex_mem_free(*arrdatadesc);
 		return err;
 	}
 
-	*((B1_T_MEM_BLOCK_DESC *)((B1_T_SUBSCRIPT *)data + (argnum * (uint8_t)2))) = *arrdatadesc;
+	*((B1_T_MEM_BLOCK_DESC *)data) = *arrdatadesc;
 
 	b1_ex_mem_release(arrdesc);
 
 	return B1_RES_OK;
 }
 
+// returns pointer to an array element in read/write mode
 B1_T_ERROR b1_var_array_get_data_ptr(B1_T_MEM_BLOCK_DESC arr_data_desc, uint8_t type, B1_T_MEMOFFSET offset, void **data)
 {
-	B1_T_ERROR err;
+	uint8_t size1;
 
-	err = b1_ex_mem_access(arr_data_desc, data);
-	if(err != B1_RES_OK)
-	{
-		return err;
-	}
+	size1 = b1_var_get_type_size(type);
 
-	offset = b1_var_array_get_data_offset(type, offset);
-
-	*data = (uint8_t *)*data + offset;
-
-	return B1_RES_OK;
+	return b1_ex_mem_access(arr_data_desc, offset * size1, size1, B1_EX_MEM_READ | B1_EX_MEM_WRITE, data);
 }
 
 // copies value from named variable to temp. stack variable (dst_var must point on a temp. stack variable that can consist of
@@ -489,7 +486,7 @@ B1_T_ERROR b1_var_get(B1_NAMED_VAR *src_var, B1_VAR *dst_var, B1_VAR_REF *src_va
 	else
 	{
 		// get array descriptor data
-		err = b1_var_get_dataptr((*src_var).var.value.mem_desc, (void **)&arrdata);
+		err = b1_ex_mem_access((*src_var).var.value.mem_desc, 0, 0, B1_EX_MEM_READ, (void **)&arrdata);
 		if(err != B1_RES_OK)
 		{
 			return err;
@@ -563,8 +560,6 @@ B1_T_ERROR b1_var_get(B1_NAMED_VAR *src_var, B1_VAR *dst_var, B1_VAR_REF *src_va
 				return err;
 			}
 
-			b1_ex_mem_release(arrdatadesc);
-
 			// copy array value to output variabe
 #ifdef B1_FEATURE_TYPE_SINGLE
 			if(type == B1_TYPE_SINGLE)
@@ -627,13 +622,13 @@ B1_T_ERROR b1_var_set(B1_VAR *src_var, const B1_VAR_REF *dst_var_ref)
 	else
 	{
 		// array value
-		err = b1_var_get_dataptr(dstdesc, &data);
+		err = b1_ex_mem_access(dstdesc, argnum * (uint8_t)2 * (uint8_t)sizeof(B1_T_SUBSCRIPT), sizeof(B1_T_MEM_BLOCK_DESC), B1_EX_MEM_READ, &data);
 		if(err != B1_RES_OK)
 		{
 			return err;
 		}
 
-		arrdesc = *((B1_T_MEM_BLOCK_DESC *)((B1_T_SUBSCRIPT *)data + (argnum * (uint8_t)2)));
+		arrdesc = *((B1_T_MEM_BLOCK_DESC *)data);
 
 		err = b1_var_array_get_data_ptr(arrdesc, type, (*dst_var_ref).val_off, &data);
 		if(err != B1_RES_OK)
@@ -659,15 +654,11 @@ B1_T_ERROR b1_var_set(B1_VAR *src_var, const B1_VAR_REF *dst_var_ref)
 			if(*((B1_T_MEM_BLOCK_DESC *)data) != B1_T_MEM_BLOCK_DESC_INVALID)
 			{
 				// free memory occupied by string dst_var_ref points to
-				b1_ex_mem_release(arrdesc);
-				access = 1;
-
 				b1_ex_mem_free(*((B1_T_MEM_BLOCK_DESC *)data));
 			}
 
 			if(B1_TYPE_TEST_STRING_IMM((*src_var).type))
 			{
-				b1_ex_mem_release(arrdesc);
 				access = 1;
 
 				data = (*src_var).value.istr;

@@ -137,7 +137,7 @@ B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_IN
 			return B1_RES_OK;
 		}
 
-		err = b1_var_get_dataptr(desc, (void **)&arrdata);
+		err = b1_ex_mem_access(desc, 0, 0, B1_EX_MEM_READ, (void **)&arrdata);
 		if(err != B1_RES_OK)
 		{
 			return err;
@@ -194,8 +194,6 @@ B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_IN
 				{
 					return err;
 				}
-
-				b1_ex_mem_release(desc);
 
 				// copy array value to output variabe
 #ifdef B1_FEATURE_TYPE_SINGLE

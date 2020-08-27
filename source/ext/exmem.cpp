@@ -40,9 +40,11 @@ extern "C" B1_T_ERROR b1_ex_mem_alloc(B1_T_MEMOFFSET size, B1_T_MEM_BLOCK_DESC *
 	return B1_RES_OK;
 }
 
-extern "C" B1_T_ERROR b1_ex_mem_access(const B1_T_MEM_BLOCK_DESC mem_desc, void **data)
+extern "C" B1_T_ERROR b1_ex_mem_access(const B1_T_MEM_BLOCK_DESC mem_desc, B1_T_MEMOFFSET offset, B1_T_INDEX size, uint8_t options, void **data)
 {
-	*data = (void *)mem_desc;
+	size;
+	options;
+	*data = (void *)(((uint8_t *)mem_desc) + offset);
 	return B1_RES_OK;
 }
 
