@@ -4,7 +4,7 @@ Maximum length of program line: 255 characters
 Maximum number of program lines: 65535  
 Maximum length of identifier: 31 characters  
 Maximum length of string value: 127 characters  
-Maximum number of subscripted variable dimensions: 2  
+Maximum number of subscripted variable dimensions: 3 (2 if `B1_FEATURE_3_DIM_ARRAYS` feature is disabled)  
 Maximum number of function arguments: 3  
 Maximum expression brackets nesting level: 7  
 Maximum call nesting depth of user-defined functions: 3  

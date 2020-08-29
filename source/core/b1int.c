@@ -1528,7 +1528,7 @@ static B1_T_ERROR b1_int_st_erase(B1_T_INDEX offset)
 		}
 		offset++;
 
-		err = b1_var_create(name_hash, B1_TYPE_STRING, 0, NULL, &var);
+		err = b1_ex_var_alloc(name_hash, &var);
 		if(err != B1_RES_OK && err != B1_RES_EIDINUSE)
 		{
 			return err;

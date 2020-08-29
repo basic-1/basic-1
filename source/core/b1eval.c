@@ -690,12 +690,6 @@ B1_T_ERROR b1_eval(uint8_t options, B1_VAR_REF *var_ref)
 						else
 						if(err == B1_RES_EIDINUSE)
 						{
-							// the variable existed before b1_var_create call, check number or arguments (subscripts)
-							if(B1_IDENT_GET_FLAGS_ARGNUM((*var).id.flags) != argnum)
-							{
-								err = B1_RES_EWSUBSCNT;
-							}
-
 							err = B1_RES_OK;
 						}
 

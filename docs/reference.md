@@ -51,7 +51,7 @@ Identifier is a text string representing function or variable. Identifier must s
   
 ## Variables  
   
-Variable is a named program object used for storing values. In BASIC program variables are represented with identifiers. Every variable has data type which determines the values that the variable can contain. BASIC1 data types are described below (see **Data types** chapter). There are two types of variables supported by BASIC1 interpreter: simple variables and subscripted variables. A simple variable can contain a single value only and a subscripted variable can contain multiple values, each identified with subscript(-s). Subscripted variables are often called arrays. BASIC1 interpreter supports one- and two-dimensional arrays. Interpreter creates a variable when it meets it in the program for the first time. Right after creation a variable gets a value choosen as default value for its data type: zero for numeric data types and empty string for textual one. Simple and subscripted variables can be created explicitly using `DIM` statement. Subscripted variables created implicitly get minimum subscript value equal to 0 and maximum subscript value equal to 10. Minimum subscript value can be changed with `OPTION BASE` statement. **limits.md** document lists data type, subscript and other interpreter limitations.  
+Variable is a named program object used for storing values. In BASIC program variables are represented with identifiers. Every variable has data type which determines the values that the variable can contain. BASIC1 data types are described below (see **Data types** chapter). There are two types of variables supported by BASIC1 interpreter: simple variables and subscripted variables. A simple variable can contain a single value only and a subscripted variable can contain multiple values, each identified with subscript(-s). Subscripted variables are often called arrays. BASIC1 interpreter supports one-, two- and three-dimensional arrays (three-dimensional arrays feature is enabled by default in builds for Linux and Windows and can be turned off if not needed). Interpreter creates a variable when it meets it in the program for the first time. Right after creation a variable gets a value choosen as default value for its data type: zero for numeric data types and empty string for textual one. Simple and subscripted variables can be created explicitly using `DIM` statement. Subscripted variables created implicitly get minimum subscript value equal to 0 and maximum subscript value equal to 10. Minimum subscript value can be changed with `OPTION BASE` statement. **limits.md** document lists data type, subscript and other interpreter limitations.  
   
 **Examples:**  
 `A = 10` 'here `A` is a numeric variable  
@@ -243,11 +243,11 @@ A user-defined function must be defined before being used. Function arguments ar
 `DIM` statement allocates memory for variable(-s) and `ERASE` statement frees memory occupied by variable(-s). By default BASIC1 interpreter creates a variable when meets it first in an expression. The behavior can be changed by specifying `OPTION EXPLICIT` statement in the beginning of a program. If the explicit variables declaration option is turned on every variable must be created with `DIM` statement before usage.  
   
 **Usage:**  
-`<var_decl> = <var_name>[([<subs1_lower> TO ]<subs1_upper>[, [<subs2_lower> TO ]<subs2_upper>])][AS <type_name>]`  
+`<var_decl> = <var_name>[([<subs1_lower> TO ]<subs1_upper>[, [<subs2_lower> TO ]<subs2_upper>[, [<subs3_lower> TO ]<subs3_upper>]])][AS <type_name>]`  
 `DIM <var_decl1>[, <var_decl2>, ... <var_declN>]`  
 `ERASE <var_name1>[, <var_name2>, ... <var_nameM>]`  
   
-`<subs1_lower>`, `<subs1_upper>`, `<subs2_lower>`, `<subs2_upper>` must be numeric expressions responsible to lower and upper boundaries of variable subscripts. If a lower boundary of subscript is omitted it is taken equal to zero. The default value of lower boundary of subscripts can be changed with `OPTION BASE` statement. Now BASIC1 interpreter supports only one- and two-dimensional subscripted variables (arrays).  Optional variable type `<var_type>` must be one of the types described in the **Data types** chapter above. The type must correspond to the variable's data type specifier if it is present. If both data type specifier and data type name are omitted the statement creates variable of default numeric type (`SINGLE`).  
+`<subs1_lower>`, `<subs1_upper>`, `<subs2_lower>`, `<subs2_upper>`, `<subs3_lower>`, `<subs3_upper>` must be numeric expressions to specify lower and upper boundaries of variable subscripts. If a lower boundary of subscript is omitted it is taken equal to zero. The default value of lower boundary of subscripts can be changed with `OPTION BASE` statement. BASIC1 interpreter supports one-, two- and three-dimensional subscripted variables (arrays).  Three-dimensional arrays support is optional but enabled by default for Linux and Windows builds. Optional variable type `<var_type>` must be one of the types described in the **Data types** chapter above. The type must correspond to the variable's data type specifier if it is present. If both data type specifier and data type name are omitted the statement creates variable of default numeric type (`SINGLE`).  
   
 **Examples:**  
 `DIM I%, I AS INT` 'declare two integer variables  
@@ -257,6 +257,7 @@ A user-defined function must be defined before being used. Function arguments ar
 `DIM IARR(25) AS INT` 'declare one-dimensional integer array with valid subscript range \[0 ... 25\]  
 `DIM IARR1%(-10 TO 10)` 'integer array with subscript range \[-10 ... 10\]  
 `DIM MAP(0 TO 10, 0 TO 10), MSG$(10)` 'two-dimensional floating-point array and one-dimensional string array  
+`DIM A3(5, 5, 5)` 'declare three-dimensional array  
 `ERASE MAP, MSG$` 'free memory occupied by `MAP` and `MSG$` variables  
 `ERASE I%, I, I1%` 'delete three variables  
   

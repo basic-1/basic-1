@@ -347,6 +347,11 @@ B1_T_ERROR b1_var_create(B1_T_IDHASH name_hash, uint8_t type, uint8_t argnum, co
 			return err;
 		}
 	}
+	else
+	if(err == B1_RES_EIDINUSE && B1_IDENT_GET_FLAGS_ARGNUM((*newvar).id.flags) != argnum)
+	{
+		return B1_RES_EWSUBSCNT;
+	}
 
 	if(var != NULL)
 	{

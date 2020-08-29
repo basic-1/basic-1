@@ -51,7 +51,7 @@
 - optional line numbers  
 - optional LET statement  
 - case-insensitive statement, variable and function names  
-- one- and two-dimensional arrays  
+- one-, two- and three-dimensional arrays  
 - relational operators can be used with strings  
 - automatic numeric to string conversion  
 - functions: ABS, INT, RND, SGN, LEN, ASC, CHR$, STR$, VAL  

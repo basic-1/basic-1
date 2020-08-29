@@ -68,13 +68,20 @@
 // enables WHILE and WEND statements
 #define B1_FEATURE_STMT_WHILE_WEND
 
+// enable three-dimensional arrays
+#define B1_FEATURE_3_DIM_ARRAYS
+
 // constraints and memory usage
 #define B1_MAX_PROGLINE_LEN 255
 #define B1_MAX_STRING_LEN (B1_MAX_PROGLINE_LEN / 2)
 #define B1_MAX_LINE_NUM_LEN 5
 #define B1_MAX_FN_ARGS_NUM 3
 #define B1_MAX_IDENTIFIER_LEN 31
+#ifdef B1_FEATURE_3_DIM_ARRAYS
+#define B1_MAX_VAR_DIM_NUM 3
+#else
 #define B1_MAX_VAR_DIM_NUM 2
+#endif
 #define B1_DEF_SUBSCRIPT_UBOUND 10
 #define B1_MAX_RPN_LEN 64
 #define B1_MAX_RPN_EVAL_BUFFER_LEN 9

@@ -49,6 +49,8 @@ Some interpreter's features can be turned on or off by editing application's `fe
   
 `B1_FEATURE_STMT_WHILE_WEND`: enables `WHILE` and `WEND` statements, if the feature is enabled `b1_ex_prg_while_go_wend` function has to be implemented.  
   
+`B1_FEATURE_3_DIM_ARRAYS`: enables three-dimensional arrays support.  
+  
 ## Interpreter's global variables and functions  
   
 Hosting application can control the interpreter core by reading/writing special global variables and calling some functions. The most of them are described below.  

@@ -1,3 +1,14 @@
+b1i (1.0.0-42) unstable; urgency=low
+
+  * B1_FEATURE_3_DIM_ARRAYS feature added (three-dimensional arrays support)
+  * tar.gz archives with binary executable files for Linux
+  * distr directory description added (README.md file)
+  * a bug with wrong subscript number when accessing arrays fixed (the
+    interpreter allowed reading and writing arrays specifying wrong number
+    of subscripts)
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Sat, 29 Aug 2020 17:52:42 +0300
+
 b1i (1.0.0-41) unstable; urgency=low
 
   * memory management functions revised
