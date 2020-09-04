@@ -1124,6 +1124,11 @@ B1_T_ERROR b1_int_get_type_by_type_spec(B1_T_CHAR type_spec_char, uint8_t expl_t
 			type = B1_TYPE_SINGLE;
 			break;
 #endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+		case B1_T_C_NUMBER:
+			type = B1_TYPE_DOUBLE;
+			break;
+#endif
 		case B1_T_C_PERCENT:
 			type = B1_TYPE_INT32;
 	}
@@ -1135,6 +1140,8 @@ B1_T_ERROR b1_int_get_type_by_type_spec(B1_T_CHAR type_spec_char, uint8_t expl_t
 			// default type for variabe without type specificator
 #ifdef B1_FEATURE_TYPE_SINGLE
 			type = B1_TYPE_SINGLE;
+#elif defined(B1_FEATURE_TYPE_DOUBLE)
+			type = B1_TYPE_DOUBLE;
 #else
 			type = B1_TYPE_INT32;
 #endif
@@ -2049,7 +2056,12 @@ static B1_T_ERROR b1_int_st_for_start(B1_T_INDEX offset)
 		b1_rpn_eval[0].type = type;
 #ifdef B1_FEATURE_TYPE_SINGLE
 		if(type == B1_TYPE_SINGLE)
-			b1_rpn_eval[0].value.sval = 1.0;
+			b1_rpn_eval[0].value.sval = 1.0f;
+		else
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+		if(type == B1_TYPE_DOUBLE)
+			b1_rpn_eval[0].value.dval = 1.0;
 		else
 #endif
 		if(type == B1_TYPE_INT32)

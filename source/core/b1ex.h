@@ -80,7 +80,7 @@ extern B1_T_ERROR b1_ex_prg_rpn_get_cached(B1_T_INDEX offset, B1_T_INDEX *contin
 #ifdef B1_FEATURE_FUNCTIONS_MATH_BASIC
 #ifdef B1_FRACTIONAL_TYPE_EXISTS
 extern void b1_ex_rnd_randomize(uint8_t init);
-extern float b1_ex_rnd_rand();
+extern B1_T_RAND_SEED b1_ex_rnd_get_next_seed();
 #endif
 #endif
 

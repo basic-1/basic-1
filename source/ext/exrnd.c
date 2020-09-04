@@ -17,14 +17,12 @@
 #include <time.h>
 
 
-float b1_ex_rnd_rand()
+B1_T_RAND_SEED b1_ex_rnd_get_next_seed()
 {
-	int r = rand();
-	if(r == RAND_MAX)
-	{
-		r--;
-	}
-	return ((float)r) / (float)(RAND_MAX);
+	int seed;
+
+	seed = rand();
+	return (B1_T_RAND_SEED)((((float)seed) / (float)RAND_MAX) * ((float)B1_T_RAND_SEED_MAX_VALUE));
 }
 
 void b1_ex_rnd_randomize(uint8_t init)

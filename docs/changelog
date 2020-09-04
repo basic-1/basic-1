@@ -1,3 +1,13 @@
+b1i (1.0.0-43) unstable; urgency=low
+
+  * DOUBLE type support added (B1_FEATURE_TYPE_DOUBLE)
+  * random generator functions revised
+  * fixed wrong floating-point values formatting when print zone width
+    exceeded some value (SET ZONEWIDTH 14 statement caused the issue for
+    SINGLE data type values)
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Fri, 04 Sep 2020 18:05:02 +0300
+
 b1i (1.0.0-42) unstable; urgency=low
 
   * B1_FEATURE_3_DIM_ARRAYS feature added (three-dimensional arrays support)

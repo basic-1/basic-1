@@ -204,6 +204,15 @@ B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_IN
 				}
 				else
 #endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+				if(type == B1_TYPE_DOUBLE)
+				{
+					tmpvar.type = B1_TYPE_SET(B1_TYPE_DOUBLE, 0);
+					tmpvar.value.dval = *((double *)data);
+				}
+				else
+#endif
+
 				if(type == B1_TYPE_INT32)
 				{
 					tmpvar.type = B1_TYPE_SET(B1_TYPE_INT32, 0);

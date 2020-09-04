@@ -16,7 +16,8 @@
 # Data types  
   
 - STRING  
-- SINGLE (32-bit floating point)  
+- SINGLE (32-bit floating-point)  
+- DOUBLE (64-bit floating-point)
 - INT (32-bit integer)  
   
 # Statements  

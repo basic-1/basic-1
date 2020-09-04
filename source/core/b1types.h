@@ -31,9 +31,13 @@
 #define B1_TYPE_INT32 ((uint8_t)0x1)
 // string value
 #define B1_TYPE_STRING ((uint8_t)0x2)
+#ifdef B1_FEATURE_TYPE_DOUBLE
+// 8-byte floating-point value
+#define B1_TYPE_DOUBLE ((uint8_t)0x3)
+#endif
 
 // internally used boolean value
-#define B1_TYPE_BOOL ((uint8_t)0x3)
+#define B1_TYPE_BOOL ((uint8_t)0x10)
 
 // special TAB value (PRINT statement TAB function)
 #define B1_TYPE_TAB_FN ((uint8_t)0x1B)
@@ -96,6 +100,7 @@
 #define B1_T_C_QUESTION ((B1_T_CHAR)'?')
 #define B1_T_C_POINT ((B1_T_CHAR)'.')
 #define B1_T_C_DOLLAR ((B1_T_CHAR)'$')
+#define B1_T_C_NUMBER ((B1_T_CHAR)'#')
 
 #define B1_T_ISCSTRTERM(C) ((B1_T_CHAR)(C) == B1_T_C_STRTERM)
 #define B1_T_ISDIGIT(C) (((B1_T_CHAR)(C) >= B1_T_C_0) && ((B1_T_CHAR)(C) <= B1_T_C_9))
@@ -132,6 +137,15 @@
 #define B1_TYPE_TEST_INT32(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_INT32)
 #ifdef B1_FEATURE_TYPE_SINGLE
 #define B1_TYPE_TEST_SINGLE(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_SINGLE)
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+#define B1_TYPE_TEST_DOUBLE(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_DOUBLE)
+#endif
+#if defined(B1_FEATURE_TYPE_SINGLE) && defined(B1_FEATURE_TYPE_DOUBLE)
+#define B1_TYPE_TEST_NUMERIC(TYPE) (B1_TYPE_TEST_SINGLE(TYPE) || B1_TYPE_TEST_DOUBLE(TYPE) || B1_TYPE_TEST_INT32(TYPE))
+#elif defined(B1_FEATURE_TYPE_DOUBLE)
+#define B1_TYPE_TEST_NUMERIC(TYPE) (B1_TYPE_TEST_DOUBLE(TYPE) || B1_TYPE_TEST_INT32(TYPE))
+#elif defined(B1_FEATURE_TYPE_SINGLE)
 #define B1_TYPE_TEST_NUMERIC(TYPE) (B1_TYPE_TEST_SINGLE(TYPE) || B1_TYPE_TEST_INT32(TYPE))
 #else
 #define B1_TYPE_TEST_NUMERIC(TYPE) (B1_TYPE_TEST_INT32(TYPE))
@@ -148,9 +162,16 @@
 // max. immediate string length
 #define B1_TYPE_STRING_IMM_MAX_LEN ((uint8_t)((4 / sizeof(B1_T_CHAR)) - 1))
 
-#ifdef B1_FEATURE_TYPE_SINGLE
+#if defined(B1_FEATURE_TYPE_SINGLE) || defined(B1_FEATURE_TYPE_DOUBLE)
 // in case of a fractional type absence INT and RND functions and RANDOMIZE statements are not available
+// and fractional numeric constant format is not supported
 #define B1_FRACTIONAL_TYPE_EXISTS
+// floating-point type for math. functions such as LOG, SIN, SQR, etc.
+#ifdef B1_FEATURE_TYPE_DOUBLE
+#define B1_TYPE_FP_HIGH_PREC B1_TYPE_DOUBLE
+#else
+#define B1_TYPE_FP_HIGH_PREC B1_TYPE_SINGLE
+#endif
 #endif
 
 
@@ -186,6 +207,9 @@ extern const B1_T_CHAR _INPUTECHO[];
 #ifdef B1_FEATURE_TYPE_SINGLE
 extern const B1_T_CHAR _SINGLE[];
 #endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+extern const B1_T_CHAR _DOUBLE[];
+#endif
 extern const B1_T_CHAR _STRING[];
 extern const B1_T_CHAR _INT[];
 
@@ -206,6 +230,10 @@ extern B1_T_ERROR b1_t_i32tostr(int32_t value, B1_T_CHAR *sbuf, B1_T_INDEX bufle
 extern B1_T_ERROR b1_t_strtosingle(const B1_T_CHAR *cs, float *value);
 extern B1_T_ERROR b1_t_singletostr(float value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, uint8_t max_len);
 #endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+extern B1_T_ERROR b1_t_strtodouble(const B1_T_CHAR *cs, double *value);
+extern B1_T_ERROR b1_t_doubletostr(double value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, uint8_t max_len);
+#endif
 extern int8_t b1_t_strcmpi(const B1_T_CHAR *s1, const B1_T_CHAR *s2data, B1_T_INDEX s2len);
 
 
@@ -214,16 +242,20 @@ extern int8_t b1_t_strcmpi(const B1_T_CHAR *s1, const B1_T_CHAR *s2data, B1_T_IN
 #error B1_FEATURE_DEBUG feature requires B1_FEATURE_INIT_FREE_MEMORY to be enabled
 #endif
 
-#if defined(B1_FEATURE_TYPE_SINGLE) && !defined(B1_FRACTIONAL_TYPE_EXISTS)
+#if (defined(B1_FEATURE_TYPE_SINGLE) || defined(B1_FEATURE_TYPE_DOUBLE)) && !defined(B1_FRACTIONAL_TYPE_EXISTS)
 #error floating point type(-s) support enabled without B1_FRACTIONAL_TYPE_EXISTS definition
 #endif
 
-#if !defined(B1_FEATURE_TYPE_SINGLE) && defined(B1_FRACTIONAL_TYPE_EXISTS)
+#if !(defined(B1_FEATURE_TYPE_SINGLE) || defined(B1_FEATURE_TYPE_DOUBLE)) && defined(B1_FRACTIONAL_TYPE_EXISTS)
 #error no one fractional type is supported, check B1_FRACTIONAL_TYPE_EXISTS definition
 #endif
 
-#if defined(B1_FEATURE_FUNCTIONS_MATH_EXTRA) && !defined(B1_FEATURE_TYPE_SINGLE)
+#if defined(B1_FEATURE_FUNCTIONS_MATH_EXTRA) && !(defined(B1_FEATURE_TYPE_SINGLE) || defined(B1_FEATURE_TYPE_DOUBLE))
 #error math functions are not allowed without floating point type(-s) support
+#endif
+
+#if defined(B1_FEATURE_FUNCTIONS_MATH_EXTRA) && !defined(B1_TYPE_FP_HIGH_PREC)
+#error B1_TYPE_FP_HIGH_PREC type must be defined for math functions
 #endif
 
 #if B1_MAX_STRING_LEN > B1_MAX_PROGLINE_LEN / 2

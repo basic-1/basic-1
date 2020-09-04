@@ -17,7 +17,9 @@
 #include "b1tok.h"
 
 
-#ifdef B1_FEATURE_TYPE_SINGLE
+#if defined(B1_FEATURE_TYPE_SINGLE) && defined(B1_FEATURE_TYPE_DOUBLE)
+#define B1_VAR_TYPE_COUNT ((uint8_t)4)
+#elif defined(B1_FEATURE_TYPE_SINGLE) || defined(B1_FEATURE_TYPE_DOUBLE)
 #define B1_VAR_TYPE_COUNT ((uint8_t)3)
 #else
 #define B1_VAR_TYPE_COUNT ((uint8_t)2)
@@ -39,6 +41,10 @@ typedef union
 #ifdef B1_FEATURE_TYPE_SINGLE
 	// single precision floating point value
 	float sval;
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	// double precision floating point value
+	double dval;
 #endif
 } B1_VAL;
 

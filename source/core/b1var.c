@@ -19,9 +19,15 @@
 
 
 // types should be defined according to their converting priorities (from highest to lowest)
-#ifdef B1_FEATURE_TYPE_SINGLE
+#if defined(B1_FEATURE_TYPE_DOUBLE) && defined(B1_FEATURE_TYPE_SINGLE)
+const uint8_t b1_var_types[B1_VAR_TYPE_COUNT] = { B1_TYPE_STRING, B1_TYPE_DOUBLE, B1_TYPE_SINGLE, B1_TYPE_INT32 };
+const B1_T_CHAR *b1_var_type_names[B1_VAR_TYPE_COUNT] = { _STRING, _DOUBLE, _SINGLE, _INT };
+#elif defined(B1_FEATURE_TYPE_SINGLE)
 const uint8_t b1_var_types[B1_VAR_TYPE_COUNT] = { B1_TYPE_STRING, B1_TYPE_SINGLE, B1_TYPE_INT32 };
 const B1_T_CHAR *b1_var_type_names[B1_VAR_TYPE_COUNT] = { _STRING, _SINGLE, _INT };
+#elif defined(B1_FEATURE_TYPE_DOUBLE)
+const uint8_t b1_var_types[B1_VAR_TYPE_COUNT] = { B1_TYPE_STRING, B1_TYPE_DOUBLE, B1_TYPE_INT32 };
+const B1_T_CHAR *b1_var_type_names[B1_VAR_TYPE_COUNT] = { _STRING, _DOUBLE, _INT };
 #else
 const uint8_t b1_var_types[B1_VAR_TYPE_COUNT] = { B1_TYPE_STRING, B1_TYPE_INT32 };
 const B1_T_CHAR *b1_var_type_names[B1_VAR_TYPE_COUNT] = { _STRING, _INT };
@@ -141,6 +147,9 @@ B1_T_ERROR b1_var_convert(B1_VAR *var, uint8_t otype)
 #ifdef B1_FEATURE_TYPE_SINGLE
 	float sval;
 #endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	double dval;
+#endif
 	int32_t i32val;
 
 	otype = B1_TYPE_GET(otype);
@@ -153,14 +162,53 @@ B1_T_ERROR b1_var_convert(B1_VAR *var, uint8_t otype)
 	}
 	else
 #endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(type == B1_TYPE_DOUBLE)
+	{
+		dval = (*var).value.dval;
+	}
+	else
+#endif
 	if(type == B1_TYPE_INT32)
 	{
 		i32val = (*var).value.i32val;
 	}
 
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(otype == B1_TYPE_DOUBLE)
+	{
+#ifdef B1_FEATURE_TYPE_SINGLE
+		if(type == B1_TYPE_SINGLE)
+		{
+			(*var).type = B1_TYPE_SET(B1_TYPE_DOUBLE, 0);
+			(*var).value.dval = (double)sval;
+		}
+		else
+#endif
+		if(type == B1_TYPE_INT32)
+		{
+			(*var).type = B1_TYPE_SET(B1_TYPE_DOUBLE, 0);
+			(*var).value.dval = (double)i32val;
+		}
+		else
+		if(type != B1_TYPE_DOUBLE)
+		{
+			return B1_RES_ETYPMISM;
+		}
+	}
+	else
+#endif
 #ifdef B1_FEATURE_TYPE_SINGLE
 	if(otype == B1_TYPE_SINGLE)
 	{
+#ifdef B1_FEATURE_TYPE_DOUBLE
+		if(type == B1_TYPE_DOUBLE)
+		{
+			(*var).type = B1_TYPE_SET(B1_TYPE_SINGLE, 0);
+			(*var).value.sval = (float)dval;
+		}
+		else
+#endif
 		if(type == B1_TYPE_INT32)
 		{
 			(*var).type = B1_TYPE_SET(B1_TYPE_SINGLE, 0);
@@ -186,6 +234,16 @@ B1_T_ERROR b1_var_convert(B1_VAR *var, uint8_t otype)
 		}
 		else
 #endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+		if(type == B1_TYPE_DOUBLE)
+		{
+			// convert floating point value to integer with rounding
+			(*var).type = B1_TYPE_SET(B1_TYPE_INT32, 0);
+			dval += (dval < 0.0) ? -0.5 : 0.5;
+			(*var).value.i32val = (int32_t)dval;
+		}
+		else
+#endif
 		if(type != B1_TYPE_INT32)
 		{
 			return B1_RES_ETYPMISM;
@@ -200,6 +258,17 @@ B1_T_ERROR b1_var_convert(B1_VAR *var, uint8_t otype)
 			if(type == B1_TYPE_SINGLE)
 			{
 				err = b1_t_singletostr(sval, b1_tmp_buf, B1_TMP_BUF_LEN, b1_int_print_zone_width - 2);
+				if(err != B1_RES_OK)
+				{
+					return err;
+				}
+			}
+			else
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+			if(type == B1_TYPE_DOUBLE)
+			{
+				err = b1_t_doubletostr(dval, b1_tmp_buf, B1_TMP_BUF_LEN, b1_int_print_zone_width - 2);
 				if(err != B1_RES_OK)
 				{
 					return err;
@@ -280,6 +349,14 @@ B1_T_ERROR b1_var_init_empty(uint8_t type, uint8_t argnum, const B1_T_SUBSCRIPT 
 	{
 		(*pvar).type = B1_TYPE_SET(B1_TYPE_SINGLE, 0);
 		(*pvar).value.sval = 0.0f;
+	}
+	else
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(type == B1_TYPE_DOUBLE)
+	{
+		(*pvar).type = B1_TYPE_SET(B1_TYPE_DOUBLE, 0);
+		(*pvar).value.dval = 0.0;
 	}
 	else
 #endif
@@ -367,6 +444,9 @@ static uint8_t b1_var_get_type_size(uint8_t type)
 #ifdef B1_FEATURE_TYPE_SINGLE
 		(type == B1_TYPE_SINGLE) ?	(uint8_t)sizeof(float) :
 #endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+		(type == B1_TYPE_DOUBLE) ?	(uint8_t)sizeof(double) :
+#endif
 		(type == B1_TYPE_INT32) ?	(uint8_t)sizeof(int32_t) :
 									(uint8_t)sizeof(B1_T_MEM_BLOCK_DESC);
 }
@@ -416,6 +496,13 @@ static B1_T_ERROR b1_var_array_alloc(B1_T_MEM_BLOCK_DESC arrdesc, uint8_t type, 
 		if(type == B1_TYPE_SINGLE)
 		{
 			*(((float *)data) + i) = 0.0f;
+		}
+		else
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+		if(type == B1_TYPE_DOUBLE)
+		{
+			*(((double *)data) + i) = 0.0;
 		}
 		else
 #endif
@@ -574,6 +661,14 @@ B1_T_ERROR b1_var_get(B1_NAMED_VAR *src_var, B1_VAR *dst_var, B1_VAR_REF *src_va
 			}
 			else
 #endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+			if(type == B1_TYPE_DOUBLE)
+			{
+				(*dst_var).type = B1_TYPE_SET(B1_TYPE_DOUBLE, 0);
+				(*dst_var).value.dval = *((double *)data);
+			}
+			else
+#endif
 			if(type == B1_TYPE_INT32)
 			{
 				(*dst_var).type = B1_TYPE_SET(B1_TYPE_INT32, 0);
@@ -647,6 +742,13 @@ B1_T_ERROR b1_var_set(B1_VAR *src_var, const B1_VAR_REF *dst_var_ref)
 		if(type == B1_TYPE_SINGLE)
 		{
 			*((float *)data) = (*src_var).value.sval;
+		}
+		else
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+		if(type == B1_TYPE_DOUBLE)
+		{
+			*((double *)data) = (*src_var).value.dval;
 		}
 		else
 #endif

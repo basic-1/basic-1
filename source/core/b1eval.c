@@ -46,6 +46,13 @@ B1_T_ERROR b1_eval_get_numeric_value(B1_VAR *var)
 	}
 	else
 #endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(c == B1_T_C_NUMBER)
+	{
+		type = B1_TYPE_DOUBLE;
+	}
+	else
+#endif
 	if(c == B1_T_C_PERCENT)
 	{
 		type = B1_TYPE_INT32;
@@ -56,6 +63,8 @@ B1_T_ERROR b1_eval_get_numeric_value(B1_VAR *var)
 		// default numeric type for values without type specificator
 #ifdef B1_FEATURE_TYPE_SINGLE
 		type = B1_TYPE_SINGLE;
+#elif defined(B1_FEATURE_TYPE_DOUBLE)
+		type = B1_TYPE_DOUBLE;
 #else
 		type = B1_TYPE_INT32;
 #endif
@@ -73,6 +82,13 @@ B1_T_ERROR b1_eval_get_numeric_value(B1_VAR *var)
 	{
 		(*var).type = B1_TYPE_SET(B1_TYPE_SINGLE, 0);
 		return b1_t_strtosingle(b1_tmp_buf + 1, &(*var).value.sval);
+	}
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(type == B1_TYPE_DOUBLE)
+	{
+		(*var).type = B1_TYPE_SET(B1_TYPE_DOUBLE, 0);
+		return b1_t_strtodouble(b1_tmp_buf + 1, &(*var).value.dval);
 	}
 #endif
 
@@ -121,9 +137,19 @@ B1_T_ERROR b1_eval_neg(B1_VAR *pvar, uint8_t optype, uint8_t abs)
 #ifdef B1_FEATURE_TYPE_SINGLE
 	if(optype == B1_TYPE_SINGLE)
 	{
-		if(!abs || (*pvar).value.sval < 0.0)
+		if(!abs || (*pvar).value.sval < 0.0f)
 		{
 			(*pvar).value.sval = -((*pvar).value.sval);
+		}
+	}
+	else
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(optype == B1_TYPE_DOUBLE)
+	{
+		if(!abs || (*pvar).value.dval < 0.0)
+		{
+			(*pvar).value.dval = -((*pvar).value.dval);
 		}
 	}
 	else
@@ -149,6 +175,13 @@ B1_T_ERROR b1_eval_add(B1_VAR *pvar1, uint8_t optype)
 	if(optype == B1_TYPE_SINGLE)
 	{
 		(*pvar1).value.sval += (*(pvar1 + 1)).value.sval;
+	}
+	else
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(optype == B1_TYPE_DOUBLE)
+	{
+		(*pvar1).value.dval += (*(pvar1 + 1)).value.dval;
 	}
 	else
 #endif
@@ -218,6 +251,13 @@ B1_T_ERROR b1_eval_sub(B1_VAR *pvar1, uint8_t optype)
 	}
 	else
 #endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(optype == B1_TYPE_DOUBLE)
+	{
+		(*pvar1).value.dval -= (*(pvar1 + 1)).value.dval;
+	}
+	else
+#endif
 	if(optype == B1_TYPE_INT32)
 	{
 		(*pvar1).value.i32val -= (*(pvar1 + 1)).value.i32val;
@@ -236,6 +276,13 @@ static B1_T_ERROR b1_eval_mul(B1_VAR *pvar1, uint8_t optype)
 	if(optype == B1_TYPE_SINGLE)
 	{
 		(*pvar1).value.sval *= (*(pvar1 + 1)).value.sval;
+	}
+	else
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(optype == B1_TYPE_DOUBLE)
+	{
+		(*pvar1).value.dval *= (*(pvar1 + 1)).value.dval;
 	}
 	else
 #endif
@@ -260,6 +307,13 @@ static B1_T_ERROR b1_eval_div(B1_VAR *pvar1, uint8_t optype)
 	}
 	else
 #endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(optype == B1_TYPE_DOUBLE)
+	{
+		(*pvar1).value.dval /= (*(pvar1 + 1)).value.dval;
+	}
+	else
+#endif
 	if(optype == B1_TYPE_INT32)
 	{
 		if((*(pvar1 + 1)).value.i32val == 0 || ((*(pvar1 + 1)).value.i32val == -1 && (*pvar1).value.i32val == INT32_MIN))
@@ -277,7 +331,7 @@ static B1_T_ERROR b1_eval_div(B1_VAR *pvar1, uint8_t optype)
 	return B1_RES_OK;
 }
 
-#ifndef B1_FEATURE_TYPE_SINGLE
+#ifndef B1_FRACTIONAL_TYPE_EXISTS
 static int32_t b1_eval_pow_int32(int32_t base, int32_t exp)
 {
 	int32_t power;
@@ -310,7 +364,38 @@ static int32_t b1_eval_pow_int32(int32_t base, int32_t exp)
 
 static B1_T_ERROR b1_eval_pow(B1_VAR *pvar1, uint8_t optype)
 {
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(B1_TYPE_TEST_NUMERIC(optype))
+	{
 #ifdef B1_FEATURE_TYPE_SINGLE
+		if(optype == B1_TYPE_SINGLE)
+		{
+			(*pvar1).value.dval = (double)(*pvar1).value.sval;
+			(*(pvar1 + 1)).value.dval = (double)(*(pvar1 + 1)).value.sval;
+		}
+		else
+#endif
+		if(optype == B1_TYPE_INT32)
+		{
+			(*pvar1).value.dval = (double)(*pvar1).value.i32val;
+			(*(pvar1 + 1)).value.dval = (double)(*(pvar1 + 1)).value.i32val;
+		}
+
+		(*pvar1).value.dval = pow((*pvar1).value.dval, (*(pvar1 + 1)).value.dval);
+
+#ifdef B1_FEATURE_TYPE_SINGLE
+		if(optype == B1_TYPE_SINGLE)
+		{
+			(*pvar1).value.sval = (float)(*pvar1).value.dval;
+		}
+		else
+#endif
+		if(optype == B1_TYPE_INT32)
+		{
+			(*pvar1).value.i32val = (int32_t)(*pvar1).value.dval;
+		}
+	}
+#elif defined(B1_FEATURE_TYPE_SINGLE)
 	if(B1_TYPE_TEST_NUMERIC(optype))
 	{
 		if(optype == B1_TYPE_INT32)
@@ -377,6 +462,16 @@ B1_T_ERROR b1_eval_cmp(B1_VAR *pvar1, B1_T_CHAR c, B1_T_CHAR c1, uint8_t optype)
 		if((cmp & 1) && ((*pvar1).value.sval == (*(pvar1 + 1)).value.sval)) scmp = 0;
 		// perform lt operation if needed
 		if((cmp & 2) && ((*pvar1).value.sval < (*(pvar1 + 1)).value.sval)) scmp = -1;
+	}
+	else
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(optype == B1_TYPE_DOUBLE)
+	{
+		// perform eq operation if needed
+		if((cmp & 1) && ((*pvar1).value.dval == (*(pvar1 + 1)).value.dval)) scmp = 0;
+		// perform lt operation if needed
+		if((cmp & 2) && ((*pvar1).value.dval < (*(pvar1 + 1)).value.dval)) scmp = -1;
 	}
 	else
 #endif

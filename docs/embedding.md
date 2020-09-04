@@ -21,15 +21,17 @@ Some interpreter's features can be turned on or off by editing application's `fe
   
 `B1_FEATURE_FUNCTIONS_STANDARD`: enables `LEN`, `ASC`, `CHR$`, `STR$`, `VAL`, `IIF`, `IIF$` functions.  
   
-`B1_FEATURE_FUNCTIONS_MATH_BASIC`: enables `ABS`, `INT`, `RND`, `SGN` functions and `RANDOMIZE` statement. No need to implement `b1_ex_rnd_randomize` and `b1_ex_rnd_rand` functions if the feature is disabled.  
+`B1_FEATURE_FUNCTIONS_MATH_BASIC`: enables `ABS`, `INT`, `RND`, `SGN` functions and `RANDOMIZE` statement. No need to implement `b1_ex_rnd_randomize` and `b1_ex_rnd_get_next_seed` functions if the feature is disabled. Also disabling floating-pont data types turns off random generator feature.  
   
-`B1_FEATURE_FUNCTIONS_MATH_EXTRA`: enables `ATN`, `COS`, `EXP`, `LOG`, `PI`, `SIN`, `SQR`, `TAN` functions.  
+`B1_FEATURE_FUNCTIONS_MATH_EXTRA`: enables `ATN`, `COS`, `EXP`, `LOG`, `PI`, `SIN`, `SQR`, `TAN` functions. The feature is not allowed without `SINGLE` or `DOUBLE` type enabled.  
   
 `B1_FEATURE_FUNCTIONS_STRING`: enables `MID$`, `INSTR`, `LTRIM$`, `RTRIM$`, `LEFT$`, `RIGHT$`, `LSET$`, `RSET$`, `UCASE$`, `LCASE$` functions.  
   
 `B1_FEATURE_FUNCTIONS_USER`: enables `DEF` statement and user defined functions. `b1_ex_ufn_init` and `b1_ex_ufn_get` functions have to be implemented if the feature is enabled.  
   
-`B1_FEATURE_TYPE_SINGLE`: enables `SINGLE` data type. `B1_FEATURE_FUNCTIONS_MATH_EXTRA` feature is not allowed without `SINGLE` type enabled. Also disabling floating-pont data types turns off random generator feature.  
+`B1_FEATURE_TYPE_SINGLE`: enables `SINGLE` data type.  
+  
+`B1_FEATURE_TYPE_DOUBLE`: enables `DOUBLE` data type.  
   
 `B1_FEATURE_RPN_CACHING`: enables expression postfix notation caching. `b1_ex_prg_rpn_cache` and `b1_ex_prg_rpn_get_cached` functions have to be implemented to do the caching if enabled.  
   
@@ -178,8 +180,8 @@ The simplest functions implementation: `./source/ext/exufn.cpp` (with C++ standa
 `extern void b1_ex_rnd_randomize(uint8_t init);`  
 `b1_ex_rnd_randomize` function should either reset random values generator to its initial state (if `init` is not zero) or initialize it with some random value for `RND` function to start to return new random values sequence if (`init` is zero).  
   
-`extern float b1_ex_rnd_rand();`  
-Returns new random value in range \[0 ... 1). The interpreter calls the function when processing `RND` function call.  
+`extern B1_T_RAND_SEED b1_ex_rnd_get_next_seed()`  
+Should return new random value in range \[0 ... `B1_T_RAND_SEED_MAX_VALUE`\]. The interpreter calls the function when processing `RND` function call.  
   
 See `./source/ext/exrnd.c` file for possible functions implementation.  
   

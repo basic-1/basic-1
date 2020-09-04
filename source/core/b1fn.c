@@ -78,11 +78,11 @@ static B1_T_ERROR b1_fn_bltin_lcase(B1_VAR *parg1);
 static const B1_BLTIN_FN b1_fn_bltin[B1_FN_BLTIN_COUNT] =
 {
 #ifdef B1_FEATURE_FUNCTIONS_MATH_EXTRA
-	{{{0x5af, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_log},
+	{{{0x5af, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_FP_HIGH_PREC}, B1_TYPE_FP_HIGH_PREC}, b1_fn_bltin_log},
 #endif
 #ifdef B1_FEATURE_FUNCTIONS_MATH_BASIC
 #ifdef B1_FRACTIONAL_TYPE_EXISTS
-	{{{0x1924, B1_IDENT_FLAGS_SET_FN(0, 1)}, {0}, B1_TYPE_SINGLE}, b1_fn_bltin_rnd},
+	{{{0x1924, B1_IDENT_FLAGS_SET_FN(0, 1)}, {0}, B1_TYPE_FP_HIGH_PREC}, b1_fn_bltin_rnd},
 #endif
 #endif
 #ifdef B1_FEATURE_FUNCTIONS_STRING
@@ -116,7 +116,7 @@ static const B1_BLTIN_FN b1_fn_bltin[B1_FN_BLTIN_COUNT] =
 	{{{0x621d, B1_IDENT_FLAGS_SET_FN(3, 1)}, {B1_TYPE_BOOL, B1_TYPE_ANY, B1_TYPE_ANY}, B1_TYPE_ANY}, b1_fn_bltin_iif},
 #endif
 #ifdef B1_FEATURE_FUNCTIONS_MATH_EXTRA
-	{{{0x6370, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_cos},
+	{{{0x6370, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_FP_HIGH_PREC}, B1_TYPE_FP_HIGH_PREC}, b1_fn_bltin_cos},
 #endif
 #ifdef B1_FEATURE_FUNCTIONS_STRING
 	{{{0x6d27, B1_IDENT_FLAGS_SET_FN(2, 1)}, {B1_TYPE_STRING, B1_TYPE_INT32}, B1_TYPE_STRING}, b1_fn_bltin_rset},
@@ -125,30 +125,30 @@ static const B1_BLTIN_FN b1_fn_bltin[B1_FN_BLTIN_COUNT] =
 	{{{0x6d38, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_STRING}, B1_TYPE_INT32}, b1_fn_bltin_asc},
 #endif
 #ifdef B1_FEATURE_FUNCTIONS_MATH_EXTRA
-	{{{0x71b5, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_atn},
+	{{{0x71b5, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_FP_HIGH_PREC}, B1_TYPE_FP_HIGH_PREC}, b1_fn_bltin_atn},
 #endif
 #ifdef B1_FEATURE_FUNCTIONS_MATH_BASIC
 #ifdef B1_FRACTIONAL_TYPE_EXISTS
-	{{{0x77af, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_int},
+	{{{0x77af, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_FP_HIGH_PREC}, B1_TYPE_FP_HIGH_PREC}, b1_fn_bltin_int},
 #endif
 #endif
 #ifdef B1_FEATURE_FUNCTIONS_MATH_BASIC
 	{{{0x834a, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_ANY}, B1_TYPE_ANY}, b1_fn_bltin_sgn},
 #endif
 #ifdef B1_FEATURE_FUNCTIONS_MATH_EXTRA
-	{{{0x8b0a, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_sin},
+	{{{0x8b0a, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_FP_HIGH_PREC}, B1_TYPE_FP_HIGH_PREC}, b1_fn_bltin_sin},
 #endif
 #ifdef B1_FEATURE_FUNCTIONS_MATH_EXTRA
-	{{{0x917c, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_exp},
+	{{{0x917c, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_FP_HIGH_PREC}, B1_TYPE_FP_HIGH_PREC}, b1_fn_bltin_exp},
 #endif
 #ifdef B1_FEATURE_FUNCTIONS_STRING
 	{{{0x9628, B1_IDENT_FLAGS_SET_FN(2, 1)}, {B1_TYPE_STRING, B1_TYPE_INT32}, B1_TYPE_STRING}, b1_fn_bltin_lset},
 #endif
 #ifdef B1_FEATURE_FUNCTIONS_MATH_EXTRA
-	{{{0xae97, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_sqr},
+	{{{0xae97, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_FP_HIGH_PREC}, B1_TYPE_FP_HIGH_PREC}, b1_fn_bltin_sqr},
 #endif
 #ifdef B1_FEATURE_FUNCTIONS_MATH_EXTRA
-	{{{0xd787, B1_IDENT_FLAGS_SET_FN(0, 1)}, {0}, B1_TYPE_SINGLE}, b1_fn_bltin_pi},
+	{{{0xd787, B1_IDENT_FLAGS_SET_FN(0, 1)}, {0}, B1_TYPE_FP_HIGH_PREC}, b1_fn_bltin_pi},
 #endif
 #ifdef B1_FEATURE_FUNCTIONS_STANDARD
 	{{{0xdfc8, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_STRING}, B1_TYPE_INT32}, b1_fn_bltin_len},
@@ -157,13 +157,13 @@ static const B1_BLTIN_FN b1_fn_bltin[B1_FN_BLTIN_COUNT] =
 	{{{0xeaa3, B1_IDENT_FLAGS_SET_FN(2, 1)}, {B1_TYPE_STRING, B1_TYPE_INT32}, B1_TYPE_STRING}, b1_fn_bltin_left},
 #endif
 #ifdef B1_FEATURE_FUNCTIONS_MATH_EXTRA
-	{{{0xf009, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_SINGLE}, B1_TYPE_SINGLE}, b1_fn_bltin_tan},
+	{{{0xf009, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_FP_HIGH_PREC}, B1_TYPE_FP_HIGH_PREC}, b1_fn_bltin_tan},
 #endif
 #ifdef B1_FEATURE_FUNCTIONS_STANDARD
 	{{{0xf7c3, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_STRING}, B1_TYPE_ANY}, b1_fn_bltin_val},
 #endif
 #ifdef B1_FEATURE_FUNCTIONS_STANDARD
-	{{{0xfae3, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_ANY}, B1_TYPE_STRING}, b1_fn_bltin_chr},
+	{{{0xfae3, B1_IDENT_FLAGS_SET_FN(1, 1)}, {B1_TYPE_INT32}, B1_TYPE_STRING}, b1_fn_bltin_chr},
 #endif
 #ifdef B1_FEATURE_FUNCTIONS_STRING
 	{{{0xff2d, B1_IDENT_FLAGS_SET_FN(3, 1)}, {B1_TYPE_ANY, B1_TYPE_STRING, B1_TYPE_STRING}, B1_TYPE_INT32}, b1_fn_bltin_instr},
@@ -246,25 +246,10 @@ static B1_T_ERROR b1_fn_bltin_asc(B1_VAR *parg1)
 static B1_T_ERROR b1_fn_bltin_chr(B1_VAR *parg1)
 {
 	B1_T_ERROR err;
-	uint8_t type;
 	B1_T_CHAR buf[2];
 
-	type = B1_TYPE_GET((*parg1).type);
-	switch(type)
-	{
-#ifdef B1_FEATURE_TYPE_SINGLE
-		case B1_TYPE_SINGLE:
-			buf[1] = (B1_T_CHAR)(*parg1).value.sval;
-			break;
-#endif
-		case B1_TYPE_INT32:
-			buf[1] = (B1_T_CHAR)(*parg1).value.i32val;
-			break;
-		default:
-			return B1_RES_ETYPMISM;
-	}
-
 	buf[0] = 1;
+	buf[1] = (B1_T_CHAR)(*parg1).value.i32val;
 
 	err = b1_var_str2var(buf, parg1);
 	if(err != B1_RES_OK)
@@ -305,6 +290,9 @@ static B1_T_ERROR b1_fn_bltin_val(B1_VAR *parg1)
 	{
 #ifdef B1_FEATURE_TYPE_SINGLE
 		case B1_TYPE_SINGLE:
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+		case B1_TYPE_DOUBLE:
 #endif
 		case B1_TYPE_INT32:
 			return B1_RES_OK;
@@ -376,14 +364,32 @@ static B1_T_ERROR b1_fn_bltin_abs(B1_VAR *parg1)
 #ifdef B1_FRACTIONAL_TYPE_EXISTS
 static B1_T_ERROR b1_fn_bltin_int(B1_VAR *parg1)
 {
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	(*parg1).value.dval = floor((*parg1).value.dval);
+#else
 	(*parg1).value.sval = floorf((*parg1).value.sval);
+#endif
 	return B1_RES_OK;
 }
 
 static B1_T_ERROR b1_fn_bltin_rnd(B1_VAR *parg1)
 {
+	B1_T_RAND_SEED seed;
+
+	seed = b1_ex_rnd_get_next_seed();
+	if(seed == B1_T_RAND_SEED_MAX_VALUE)
+	{
+		seed--;
+	}
+
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	(*parg1).type = B1_TYPE_SET(B1_TYPE_DOUBLE, 0);
+	(*parg1).value.dval = ((double)seed) / ((double)B1_T_RAND_SEED_MAX_VALUE);
+#else
 	(*parg1).type = B1_TYPE_SET(B1_TYPE_SINGLE, 0);
-	(*parg1).value.sval = b1_ex_rnd_rand();
+	(*parg1).value.sval = ((float)seed) / ((float)B1_T_RAND_SEED_MAX_VALUE);
+#endif
+
 	return B1_RES_OK;
 }
 #endif
@@ -400,6 +406,11 @@ static B1_T_ERROR b1_fn_bltin_sgn(B1_VAR *parg1)
 			(*parg1).value.sval = ((*parg1).value.sval < 0.0f) ? -1.0f : (((*parg1).value.sval == 0.0f) ? 0.0f : 1.0f);
 			break;
 #endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+		case B1_TYPE_DOUBLE:
+			(*parg1).value.dval = ((*parg1).value.dval < 0.0) ? -1.0 : (((*parg1).value.dval == 0.0) ? 0.0 : 1.0);
+			break;
+#endif
 		case B1_TYPE_INT32:
 			(*parg1).value.i32val = (int32_t)(((*parg1).value.i32val < 0) ? (int8_t)-1 : (((*parg1).value.i32val == 0) ? (int8_t)0 : (int8_t)1));
 			break;
@@ -414,50 +425,83 @@ static B1_T_ERROR b1_fn_bltin_sgn(B1_VAR *parg1)
 #ifdef B1_FEATURE_FUNCTIONS_MATH_EXTRA
 static B1_T_ERROR b1_fn_bltin_atn(B1_VAR *parg1)
 {
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	(*parg1).value.dval = atan((*parg1).value.dval);
+#else
 	(*parg1).value.sval = atanf((*parg1).value.sval);
+#endif
 	return B1_RES_OK;
 }
 
 static B1_T_ERROR b1_fn_bltin_cos(B1_VAR *parg1)
 {
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	(*parg1).value.dval = cos((*parg1).value.dval);
+#else
 	(*parg1).value.sval = cosf((*parg1).value.sval);
+#endif
 	return B1_RES_OK;
 }
 
 static B1_T_ERROR b1_fn_bltin_exp(B1_VAR *parg1)
 {
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	(*parg1).value.dval = exp((*parg1).value.dval);
+#else
 	(*parg1).value.sval = expf((*parg1).value.sval);
+#endif
 	return B1_RES_OK;
 }
 
 static B1_T_ERROR b1_fn_bltin_log(B1_VAR *parg1)
 {
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	(*parg1).value.dval = log((*parg1).value.dval);
+#else
 	(*parg1).value.sval = logf((*parg1).value.sval);
+#endif
 	return B1_RES_OK;
 }
 
 static B1_T_ERROR b1_fn_bltin_pi(B1_VAR *parg1)
 {
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	(*parg1).type = B1_TYPE_SET(B1_TYPE_DOUBLE, 0);
+	(*parg1).value.dval = 3.14159265358979323846;
+#else
 	(*parg1).type = B1_TYPE_SET(B1_TYPE_SINGLE, 0);
 	(*parg1).value.sval = (float)3.14159265358979323846;
+#endif
 	return B1_RES_OK;
 }
 
 static B1_T_ERROR b1_fn_bltin_sin(B1_VAR *parg1)
 {
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	(*parg1).value.dval = sin((*parg1).value.dval);
+#else
 	(*parg1).value.sval = sinf((*parg1).value.sval);
+#endif
 	return B1_RES_OK;
 }
 
 static B1_T_ERROR b1_fn_bltin_sqr(B1_VAR *parg1)
 {
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	(*parg1).value.dval = sqrt((*parg1).value.dval);
+#else
 	(*parg1).value.sval = sqrtf((*parg1).value.sval);
+#endif
 	return B1_RES_OK;
 }
 
 static B1_T_ERROR b1_fn_bltin_tan(B1_VAR *parg1)
 {
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	(*parg1).value.dval = tan((*parg1).value.dval);
+#else
 	(*parg1).value.sval = tanf((*parg1).value.sval);
+#endif
 	return B1_RES_OK;
 }
 #endif

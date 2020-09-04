@@ -74,6 +74,8 @@
 #define B1_T_LINE_NUM_FIRST ((B1_T_LINE_NUM)(B1_T_LINE_NUM_MAX_VALUE + 2))
 #define B1_T_LINE_NUM_NEXT ((B1_T_LINE_NUM)(B1_T_LINE_NUM_MAX_VALUE + 1))
 
+#define B1_T_RAND_SEED_MAX_VALUE (UINT16_MAX)
+
 
 // type for error codes
 typedef uint8_t B1_T_ERROR;
@@ -114,5 +116,8 @@ typedef uint16_t B1_T_PROG_LINE_CNT;
 typedef uint16_t B1_T_LINE_NUM;
 // type of idendifier hash
 typedef uint16_t B1_T_IDHASH;
+// type for random generator (an unsigned integer type, floating point value returned by RND function
+// is the result of the next expression: ((float)(seed - ((seed == B1_T_RAND_SEED_MAX_VALUE) ? 1 : 0))) / (float)B1_T_RAND_SEED_MAX_VALUE
+typedef uint16_t B1_T_RAND_SEED;
 
 #endif

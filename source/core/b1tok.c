@@ -111,6 +111,9 @@ B1_T_ERROR b1_tok_get(B1_T_INDEX offset, uint8_t options, B1_TOKENDATA *tokendat
 #ifdef B1_FEATURE_TYPE_SINGLE
 				c == B1_T_C_EXCLAMATION ||
 #endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+				c == B1_T_C_NUMBER ||
+#endif
 				c == B1_T_C_PERCENT	?	B1_CTYPE_TYPE_SPEC :
 					B1_CTYPE_UNKNOWN;
 
@@ -282,7 +285,14 @@ B1_T_ERROR b1_tok_get(B1_T_INDEX offset, uint8_t options, B1_TOKENDATA *tokendat
 			else
 			if(extra & (B1_NUMERIC_PART_INT | B1_NUMERIC_PART_FRAC | B1_NUMERIC_PART_EXP3))
 			{
-				if(c == B1_T_C_PERCENT || c == B1_T_C_EXCLAMATION)
+				if(c == B1_T_C_PERCENT
+#ifdef B1_FEATURE_TYPE_SINGLE
+					|| c == B1_T_C_EXCLAMATION
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+					|| c == B1_T_C_NUMBER
+#endif
+					)
 				{
 					extra = B1_NUMERIC_PART_TYPE_SPEC;
 					toktype = B1_TOKEN_TYPE_NUMERIC;

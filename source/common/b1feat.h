@@ -35,6 +35,9 @@
 // enable SINGLE type
 #define B1_FEATURE_TYPE_SINGLE
 
+// enable DOUBLE type
+#define B1_FEATURE_TYPE_DOUBLE
+
 // enable RPN caching
 #define B1_FEATURE_RPN_CACHING
 

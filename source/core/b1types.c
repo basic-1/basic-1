@@ -38,6 +38,9 @@ const B1_T_CHAR _INPUTECHO[] = { 9, 'I', 'N', 'P', 'U', 'T', 'E', 'C', 'H', 'O' 
 #ifdef B1_FEATURE_TYPE_SINGLE
 const B1_T_CHAR _SINGLE[] = { 6, 'S', 'I', 'N', 'G', 'L', 'E' };
 #endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+const B1_T_CHAR _DOUBLE[] = { 6, 'D', 'O', 'U', 'B', 'L', 'E' };
+#endif
 const B1_T_CHAR _STRING[] = { 6, 'S', 'T', 'R', 'I', 'N', 'G' };
 const B1_T_CHAR _INT[] = { 3, 'I', 'N', 'T' };
 
@@ -368,7 +371,7 @@ B1_T_ERROR b1_t_strtoi32(const B1_T_CHAR *cs, int32_t *value)
 
 B1_T_ERROR b1_t_i32tostr(int32_t value, B1_T_CHAR *sbuf, B1_T_INDEX buflen)
 {
-#ifdef B1_FEATURE_TYPE_SINGLE
+#if defined(B1_FEATURE_TYPE_SINGLE) || defined(B1_FEATURE_TYPE_DOUBLE)
 #ifdef B1_FEATURE_UNICODE_UCS2
 	char tmpbuf[50];
 	B1_T_INDEX len, i;
@@ -447,36 +450,9 @@ B1_T_ERROR b1_t_i32tostr(int32_t value, B1_T_CHAR *sbuf, B1_T_INDEX buflen)
 #endif
 }
 
-#ifdef B1_FEATURE_TYPE_SINGLE
-// temporary implementation: just a replace to atof
-B1_T_ERROR b1_t_strtosingle(const B1_T_CHAR *cs, float *value)
-{
-#ifdef B1_FEATURE_UNICODE_UCS2
-	char tmpbuf[50];
-	B1_T_INDEX i;
-
-	for(i = 0; i < 49; i++)
-	{
-		if(cs[i] == 0)
-		{
-			break;
-		}
-
-		tmpbuf[i] = (uint8_t)cs[i];
-	}
-
-	tmpbuf[i] = 0;
-
-	*value = (float)atof(tmpbuf);
-#else
-	*value = (float)atof((const char *)cs);
-#endif
-
-	return B1_RES_OK;
-}
-
+#if defined(B1_FEATURE_TYPE_SINGLE) || defined(B1_FEATURE_TYPE_DOUBLE)
 // trims trailing zeroes and point
-static uint8_t b1_t_single_trim_zeroes(B1_T_CHAR *s)
+static uint8_t b1_t_fp_trim_zeroes(B1_T_CHAR *s)
 {
 	B1_T_INDEX start, i, len;
 	B1_T_CHAR c;
@@ -515,7 +491,7 @@ static uint8_t b1_t_single_trim_zeroes(B1_T_CHAR *s)
 	return (c == B1_T_C_POINT) && (i == start);
 }
 
-static int8_t b1_t_single_round(B1_T_CHAR *s, B1_T_INDEX extra_digits)
+static int8_t b1_t_fp_round(B1_T_CHAR *s, B1_T_INDEX extra_digits)
 {
 	B1_T_INDEX i, out, start;
 	uint8_t carry;
@@ -578,7 +554,7 @@ static int8_t b1_t_single_round(B1_T_CHAR *s, B1_T_INDEX extra_digits)
 
 // converts floating point values to exp. form, supports large values without fractional part and values less than 1
 // (doesn't work for values with point in th middle of the significand)
-static void b1_t_single_to_exp_form(B1_T_CHAR *s, int8_t e, uint8_t max_len)
+static void b1_t_fp_to_exp_form(B1_T_CHAR *s, int8_t e, uint8_t max_len)
 {
 	B1_T_INDEX start, end, cend;
 
@@ -615,9 +591,9 @@ static void b1_t_single_to_exp_form(B1_T_CHAR *s, int8_t e, uint8_t max_len)
 		cend = start;
 	}
 
-	e += b1_t_single_round(s, end - cend);
+	e += b1_t_fp_round(s, end - cend);
 	
-	b1_t_single_trim_zeroes(s);
+	b1_t_fp_trim_zeroes(s);
 	
 	end = *s;
 
@@ -662,6 +638,35 @@ static void b1_t_single_to_exp_form(B1_T_CHAR *s, int8_t e, uint8_t max_len)
 	// write string length
 	*s = end;
 }
+#endif
+
+#ifdef B1_FEATURE_TYPE_SINGLE
+// temporary implementation: just a replace to atof
+B1_T_ERROR b1_t_strtosingle(const B1_T_CHAR *cs, float *value)
+{
+#ifdef B1_FEATURE_UNICODE_UCS2
+	char tmpbuf[51];
+	B1_T_INDEX i;
+
+	for(i = 0; i < 50; i++)
+	{
+		if(cs[i] == 0)
+		{
+			break;
+		}
+
+		tmpbuf[i] = (uint8_t)cs[i];
+	}
+
+	tmpbuf[i] = 0;
+
+	*value = (float)atof(tmpbuf);
+#else
+	*value = (float)atof((const char *)cs);
+#endif
+
+	return B1_RES_OK;
+}
 
 B1_T_ERROR b1_t_singletostr(float value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, uint8_t max_len)
 {
@@ -669,7 +674,7 @@ B1_T_ERROR b1_t_singletostr(float value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, uin
 	uint8_t neg, use_exp, lt1;
 	int8_t e;
 #ifdef B1_FEATURE_UNICODE_UCS2
-	char tmpbuf[50];
+	char tmpbuf[51];
 #endif
 
 	// negative value
@@ -730,6 +735,208 @@ B1_T_ERROR b1_t_singletostr(float value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, uin
 
 	*(sbuf) = n;
 
+	// find significand (from start to end), exponent (e)
+	start = neg + 1;
+	end = n;
+	if(lt1)
+	{
+		// integer part length is not needed for less than 1 values
+		// take into account leading zero and point
+		start += 2;
+		// calculate e and start
+		e = (int8_t)start;
+		for(; *(sbuf + start) == B1_T_C_0; start++);
+		e -= start;
+		e--;
+
+		if(e < -3 && max_len + e < 3)
+		{
+			use_exp++;
+		}
+		else
+		{
+			// digits to leave
+			n = max_len - 1;
+			
+			if(n <= -(e + 1))
+			{
+				// value length exceeds max_len, copy at least one digit of significand
+				n = -e;
+			}
+
+			b1_t_fp_round(sbuf, 47 - n);
+		}
+	}
+	else
+	{
+		// find integer part length, exponent is not needed here
+		for(n = 0; *(sbuf + start + n) != B1_T_C_POINT; n++);
+
+		if(n > max_len)
+		{
+			use_exp++;
+		}
+		else
+		{
+			// fractional part length
+			e = max_len - n;
+			// reserve one place for point
+			if(e != 0)
+			{
+				e--;
+			}
+
+			// round value
+			if(e < 9)
+			{
+				n += b1_t_fp_round(sbuf, 9 - e);
+
+				if(n > max_len)
+				{
+					use_exp++;
+				}
+			}
+		}
+	}
+
+	if(use_exp)
+	{
+		if(!lt1)
+		{
+			// calculate new value length and exponent
+			end = neg + n;
+			e = end - start;
+		}
+
+		// move significand at the beginning of the string
+		for(n = start - neg - 1; start <= end; start++)
+		{
+			*(sbuf + start - n) = *(sbuf + start);
+		}
+		*sbuf = end - n;
+
+		b1_t_fp_to_exp_form(sbuf, e, max_len);
+	}
+	else
+	{
+		b1_t_fp_trim_zeroes(sbuf);
+	}
+
+	if(*(sbuf + neg + 1) == B1_T_C_0)
+	{
+		// remove first zero if he value is less than 1
+		end = *sbuf;
+		*sbuf = end - 1;
+
+		for(start = neg + 1; start < end; start++)
+		{
+			*(sbuf + start) = *(sbuf + start + 1);
+		}
+	}
+
+	return B1_RES_OK;
+}
+#endif
+
+#ifdef B1_FEATURE_TYPE_DOUBLE
+// temporary implementation: just a replace to atof
+B1_T_ERROR b1_t_strtodouble(const B1_T_CHAR *cs, double *value)
+{
+#ifdef B1_FEATURE_UNICODE_UCS2
+	char tmpbuf[51];
+	B1_T_INDEX i;
+
+	for(i = 0; i < 50; i++)
+	{
+		if(cs[i] == 0)
+		{
+			break;
+		}
+
+		tmpbuf[i] = (uint8_t)cs[i];
+	}
+
+	tmpbuf[i] = 0;
+
+	*value = atof(tmpbuf);
+#else
+	*value = atof((const char *)cs);
+#endif
+
+	return B1_RES_OK;
+}
+
+B1_T_ERROR b1_t_doubletostr(double value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, uint8_t max_len)
+{
+	B1_T_INDEX start, end, n;
+	uint8_t neg, use_exp, lt1;
+	int8_t e;
+#ifdef B1_FEATURE_UNICODE_UCS2
+	char tmpbuf[51];
+#endif
+
+	// negative value
+	neg = 0;
+	// use exponential form
+	use_exp = 0;
+	// less than 1 value
+	lt1 = 0;
+
+	// <string length><unary minus>0.<up to 47 characters long significand><C string terminator>
+	// 0              1            234                                   5051
+	if(buflen < 52)
+	{
+		return B1_RES_EBUFSMALL;
+	}
+
+	// check for negative value
+#ifdef signbit
+	if(signbit(value))
+#else
+	if(
+		// IEEE 754 single precision fp value
+		(sizeof(value) == 4 && *((int32_t *)&value) < 0) ||
+		// IEEE 754 double precision fp value
+		(sizeof(value) == 8 && *((int64_t *)&value) < 0)
+		)
+#endif
+	{
+		neg++;
+		value = -value;
+	}
+
+	// process zero values separately
+	if(value == 0.0)
+	{
+		*sbuf = neg + 1;
+		*(sbuf + 1) = neg ? B1_T_C_MINUS : B1_T_C_0;
+		*(sbuf + 2) = B1_T_C_0;
+		return B1_RES_OK;
+	}
+
+	if(value < 1.0)
+	{
+		lt1++;
+	}
+
+#ifdef B1_FEATURE_UNICODE_UCS2
+	n = (B1_T_INDEX)sprintf(tmpbuf, lt1 ? "%.47f" : "%.18f", value);
+	for(start = 0; start <= n; start++)
+	{
+		*(sbuf + neg + 1 + start) = (uint8_t)tmpbuf[start];
+	}
+#else
+	n = (B1_T_INDEX)sprintf((char *)(sbuf + neg + 1), lt1 ? "%.47f" : "%.18f", value);
+#endif
+
+	if(neg)
+	{
+		*(sbuf + 1) = B1_T_C_MINUS;
+		n++;
+	}
+
+	*(sbuf) = n;
+
 
 	// find significand (from start to end), exponent (e)
 	start = neg + 1;
@@ -760,8 +967,7 @@ B1_T_ERROR b1_t_singletostr(float value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, uin
 				n = -e;
 			}
 
-			b1_t_single_round(sbuf, 47 - n);
-			b1_t_single_trim_zeroes(sbuf);
+			b1_t_fp_round(sbuf, 47 - n);
 		}
 	}
 	else
@@ -784,14 +990,14 @@ B1_T_ERROR b1_t_singletostr(float value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, uin
 			}
 
 			// round value
-			n += b1_t_single_round(sbuf, 9 - e);
-			if(n > max_len)
+			if(e < 18)
 			{
-				use_exp++;
-			}
-			else
-			{
-				b1_t_single_trim_zeroes(sbuf);
+				n += b1_t_fp_round(sbuf, 18 - e);
+
+				if(n > max_len)
+				{
+					use_exp++;
+				}
 			}
 		}
 	}
@@ -812,7 +1018,11 @@ B1_T_ERROR b1_t_singletostr(float value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, uin
 		}
 		*sbuf = end - n;
 
-		b1_t_single_to_exp_form(sbuf, e, max_len);
+		b1_t_fp_to_exp_form(sbuf, e, max_len);
+	}
+	else
+	{
+		b1_t_fp_trim_zeroes(sbuf);
 	}
 
 	if(*(sbuf + neg + 1) == B1_T_C_0)
