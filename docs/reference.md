@@ -63,10 +63,11 @@ Variable is a named program object used for storing values. In BASIC program var
   
 Data types supported by the interpreter:  
 - `STRING` - used for storing textual data  
-- `SINGLE` - single precision floating point (32-bit)  
+- `SINGLE` - single precision floating-point (32-bit)  
+- `DOUBLE` - double precision floating-point (64-bit)  
 - `INT` - 32-bit integer type  
   
-Every constant, variable, function or function argument is processed according to its data type. Default numeric data type is `SINGLE`. String constants are enclosed in double-quotes and string variables names, names of functions returning string values or names of function string arguments must end with `$` character. BASIC1 interpreter automatically converts operands to the common data type when evaluating every operator. The common data type is selected according to data types priority: `STRING` data type has the highest priority and `INT` - the lowest. When assigning values to variables they are converted to variable data type if possibly.  
+Every constant, variable, function or function argument is processed according to its data type. Default numeric data type is `SINGLE`. String constants are enclosed in double-quotes and string variables names, names of functions returning string values or names of function string arguments must end with `$` character. BASIC1 interpreter automatically converts operands to the common data type when evaluating every operator. The common data type is selected according to data types priority: `STRING` (the highest priority), `DOUBLE`, `SINGLE`, `INT` (the lowest priority). When assigning values to variables they are converted to variable data type if possibly.  
   
 **Examples of data types:**  
 `s$ = "text"` - assign string constant to the `s$` string variable  
@@ -79,19 +80,21 @@ Every constant, variable, function or function argument is processed according t
   
 Data type specifiers can be used to define types of constants, variables, functions arguments and values returning with functions. Data type specifier has to be the last character of an identifier or constant. BASIC1 language supports the next data type specifiers:  
 - `$` (dollar sign) - used to define string identifier  
-- `!` (exclamation mark) - single precision floating point identifier or constant  
+- `!` (exclamation mark) - single precision floating-point identifier or constant  
+- `#` (number sign) - double precision floating-point identifier or constant  
 - `%` (percent) - integer identifier or constant  
   
-String data type specifier cannot be used with constants.  Identifiers with the same names differ in data type specifiers only are different identifiers. The interpreter assigns default numeric data type (`SINGLE`) to identifiers or numeric constants without data type specifiers. `DIM` statement can declare variables of any numeric data type without data type specifiers in their names.  
+String data type specifier cannot be used with constants. Identifiers with the same names but different data type specifiers are different identifiers. The interpreter assigns default numeric data type (`SINGLE`) to identifiers or numeric constants without data type specifiers. `DIM` statement can declare variables of any numeric data type without data type specifiers in their names.  
 
 **Examples of data type specifiers usage:**  
-`a! = 10% + 0.5` - 10.5 floating point value is assigned to `a!` variable  
+`a! = 10% + 0.5` - 10.5 floating-point value is assigned to `a!` variable  
 `a% = 10% + 0.5` - 11 integer value is assigned to `a%` variable (10.5 rounded to 11 because `a%` variable has integer data type specifier)  
 `a = 10.0%` - an error will be reported because 10.0 is not a valid integer number  
 `a! = 10 / 3` - 3.33333 value is assigned to `a!`  
 `a% = 10 / 3` - 3 value is assigned to `a%` because of rounding  
 `a! = 10% / 3` - 3.33333 value is assigned to `a!`  
 `a! = 10% / 3%` - 3 value is assigned to `a!` because of integer division  
+`a# = 10# / 3#` - 3.33333 double precision floating-point value is assigned to `a#` variable  
   
 ## Operators and expressions  
   
@@ -258,6 +261,8 @@ A user-defined function must be defined before being used. Function arguments ar
 `DIM IARR1%(-10 TO 10)` 'integer array with subscript range \[-10 ... 10\]  
 `DIM MAP(0 TO 10, 0 TO 10), MSG$(10)` 'two-dimensional floating-point array and one-dimensional string array  
 `DIM A3(5, 5, 5)` 'declare three-dimensional array  
+`DIM DA(100) AS DOUBLE` 'declare one-dimensional array of `DOUBLE` values  
+`DIM DA#(100)` 'another way of declaring `DOUBLE` array  
 `ERASE MAP, MSG$` 'free memory occupied by `MAP` and `MSG$` variables  
 `ERASE I%, I, I1%` 'delete three variables  
   
