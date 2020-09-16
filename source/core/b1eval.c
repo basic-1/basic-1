@@ -649,6 +649,35 @@ B1_T_ERROR b1_eval(uint8_t options, B1_VAR_REF *var_ref)
 			break;
 		}
 
+		var1 = b1_rpn_eval + tmptop;
+
+#ifdef B1_FEATURE_MINIMAL_EVALUATION
+		if(B1_RPNREC_TEST_SPEC_ARG(tflags))
+		{
+			if(	(tflags == B1_RPNREC_TYPE_SPEC_ARG_1 && !(*(var1 - 1)).value.bval) ||
+				(tflags == B1_RPNREC_TYPE_SPEC_ARG_2)
+				)
+			{
+				var1->type = B1_TYPE_SET(B1_TYPE_INT32, 0);
+				var1->value.i32val = 0;
+				tmptop++;
+
+				arg = (*(b1_rpn + i)).data.nestlevel;
+				while(1)
+				{
+					i++;
+					if(B1_RPNREC_TEST_SPEC_ARG((*(b1_rpn + i)).flags) && arg == (*(b1_rpn + i)).data.nestlevel)
+					{
+						break;
+					}
+				}
+			}
+
+			i++;
+			continue;
+		}
+#endif
+
 		if(B1_RPNREC_TEST_TYPES(tflags, B1_RPNREC_TYPE_FNVAR | B1_RPNREC_TYPE_FN_ARG))
 		{
 			var_type = (*(b1_rpn + i)).data.id.flags;
@@ -666,8 +695,6 @@ B1_T_ERROR b1_eval(uint8_t options, B1_VAR_REF *var_ref)
 			c = *(b1_int_progline + (*ptoken).offset);
 			c1 = ((*ptoken).length == 1 ? B1_T_C_STRTERM : *(b1_int_progline + (*ptoken).offset + 1));
 		}
-
-		var1 = b1_rpn_eval + tmptop;
 
 		if(B1_RPNREC_TEST_TYPES(tflags, B1_RPNREC_TYPE_IMM_VALUE))
 		{

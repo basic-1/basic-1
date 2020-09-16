@@ -53,6 +53,8 @@ Some interpreter's features can be turned on or off by editing application's `fe
   
 `B1_FEATURE_3_DIM_ARRAYS`: enables three-dimensional arrays support.  
   
+`B1_FEATURE_MINIMAL_EVALUATION`: enables minimal (short-circuit) evaluation of arguments of `IIF` and `IIF$` functions. If the feature enabled the interpreter evaluates the first argument of the function and then evaluates only one argument of the next two depending on the first argument evaluation result.  
+  
 ## Interpreter's global variables and functions  
   
 Hosting application can control the interpreter core by reading/writing special global variables and calling some functions. The most of them are described below.  

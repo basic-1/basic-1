@@ -61,32 +61,16 @@ static B1_T_ERROR b1_rpn_test_type_copy(B1_T_INDEX stack_top_index, uint8_t type
 // build RPN for expressions without assignment operation
 B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_INDEX *continue_offset)
 {
-	B1_T_INDEX i, top, argtop, len;
+	B1_T_INDEX i, top, len;
 	B1_RPNREC rr;
 	B1_T_ERROR err;
-	uint8_t ttype, tmp, tmp1, lassoc, unop, argnum, argstk[B1_MAX_RPN_BRACK_NEST_DEPTH];
+	uint8_t ttype, tmp, tmp1, lassoc, unop, argnum, argtop, argstk[B1_MAX_RPN_BRACK_NEST_DEPTH];
 	B1_T_CHAR c, cprev;
-
 #ifdef B1_FEATURE_RPN_CACHING
 	B1_T_INDEX init_offset;
-
-	b1_rpn = b1_rpn_buf;
-	b1_rpn_buf[0].flags = 0;
-	
-	init_offset = offset;
-
-	err = b1_ex_prg_rpn_get_cached(offset, continue_offset);
-	if(err != B1_RES_OK)
-	{
-		return err;
-	}
-
-	if(b1_rpn[0].flags != 0)
-	{
-		return B1_RES_OK;
-	}
-#else
-	b1_rpn = b1_rpn_buf;
+#endif
+#ifdef B1_FEATURE_MINIMAL_EVALUATION
+	uint8_t iif;
 #endif
 
 	// use the same array for both output queue and operator stack
@@ -96,6 +80,8 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 	top = B1_MAX_RPN_LEN;
 	// token type
 	ttype = 0;
+	// function or subscripted variable argument number
+	argnum = 0;
 	// argument count stack top pointer
 	argtop = 0;
 	// first character of the current token
@@ -104,6 +90,30 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 	unop = 1;
 	// token length
 	len = 0;
+
+#ifdef B1_FEATURE_RPN_CACHING
+	b1_rpn = b1_rpn_buf;
+	b1_rpn_buf[0].flags = 0;
+
+	init_offset = offset;
+
+	err = b1_ex_prg_rpn_get_cached(offset, continue_offset);
+	if (err != B1_RES_OK)
+	{
+		return err;
+	}
+
+	if (b1_rpn[0].flags != 0)
+	{
+		return B1_RES_OK;
+	}
+#else
+	b1_rpn = b1_rpn_buf;
+#endif
+
+#ifdef B1_FEATURE_MINIMAL_EVALUATION
+	iif = 0;
+#endif
 
 	while(1)
 	{
@@ -210,10 +220,36 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 			}
 
 			argnum++;
+#ifdef B1_FEATURE_MINIMAL_EVALUATION
+			// iif here stands for processing arguments of IIF or IIF$ function
+			iif = argnum & 0x80;
+			// tmp is the current argument number (one-based)
+			tmp = argnum & 0x7F;
+
+			if(tmp > B1_MAX_FN_ARGS_NUM)
+#else
 			if(argnum > B1_MAX_FN_ARGS_NUM)
+#endif
 			{
 				return B1_RES_EWRARGCNT;
 			}
+
+#ifdef B1_FEATURE_MINIMAL_EVALUATION
+			if(iif)
+			{
+				iif = 0;
+
+				if(i == top)
+				{
+					return B1_RES_EEXPLONG;
+				}
+
+				rr.flags =	tmp == 1 ? B1_RPNREC_TYPE_SPEC_ARG_1 :
+							tmp == 2 ? B1_RPNREC_TYPE_SPEC_ARG_2 : B1_RPNREC_TYPE_SPEC_ARG_3;
+				rr.data.nestlevel = argtop;
+				QUEUE_PUT(i, rr);
+			}
+#endif
 
 			if(c == B1_T_C_CLBRACK)
 			{
@@ -221,8 +257,11 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 
 				if(!STACK_IS_EMPTY(top, B1_MAX_RPN_LEN) && STACK_TSTTYPE_COPY(top, B1_RPNREC_TYPE_FNVAR, i) != 0)
 				{
+#ifdef B1_FEATURE_MINIMAL_EVALUATION
+					b1_rpn_buf[i].flags = B1_RPNREC_TYPE_FNVAR | (uint8_t)(tmp << (B1_RPNREC_FNVAR_ARG_NUM_SHIFT));
+#else
 					b1_rpn_buf[i].flags = B1_RPNREC_TYPE_FNVAR | (uint8_t)(argnum << (B1_RPNREC_FNVAR_ARG_NUM_SHIFT));
-
+#endif
 					i++;
 					top++;
 				}
@@ -262,13 +301,19 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 					return B1_RES_EMANYBRAC;
 				}
 
-				if(argtop) argstk[argtop] = (B1_T_CHAR)argnum;
+				argstk[argtop] = argnum;
+#ifdef B1_FEATURE_MINIMAL_EVALUATION
+				// the first bit of argnum variable stands for processing arguments of IIF or IIF$ function
+				argnum = iif ? (uint8_t)0x80 : (uint8_t)0;
+				iif = 0;
+#else
 				argnum = 0;
+#endif
 				argtop++;
 			}
 
 			rr.flags = (c == B1_T_C_OPBRACK) ? (B1_RPNREC_TYPE_OPEN_BRAC) : (B1_RPNREC_TYPE_FNVAR);
-			
+
 			if(rr.flags == B1_RPNREC_TYPE_FNVAR)
 			{
 #ifdef B1_FEATURE_DEBUG
@@ -276,6 +321,13 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 				rr.data.id.length = len;
 #endif
 				rr.data.id.hash = b1_id_calc_hash(b1_int_progline + offset, len * B1_T_CHAR_SIZE);
+#ifdef B1_FEATURE_MINIMAL_EVALUATION
+				// set iif flag if hash corresponds to IIF or IIF$ name
+				if(rr.data.id.hash == B1_FN_IIF_FN_HASH || rr.data.id.hash == B1_FN_STRIIF_FN_HASH)
+				{
+					iif++;
+				}
+#endif
 				b1_int_get_type_by_type_spec(*(b1_int_progline + offset + len - 1), B1_TYPE_NULL, &rr.data.id.flags);
 			}
 

@@ -15,7 +15,7 @@ goto _success
 
 :_fail
 del gitrev.h
-echo. >>gitrev.h
+echo: >>gitrev.h
 
 :_success
 del gitrev.tmp

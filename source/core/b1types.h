@@ -238,6 +238,10 @@ extern int8_t b1_t_strcmpi(const B1_T_CHAR *s1, const B1_T_CHAR *s2data, B1_T_IN
 
 
 // checks
+#if defined(B1_FEATURE_MINIMAL_EVALUATION) && !defined(B1_FEATURE_FUNCTIONS_STANDARD)
+#error B1_FEATURE_FUNCTIONS_STANDARD must be enabled for B1_FEATURE_MINIMAL_EVALUATION feature
+#endif
+
 #if defined(B1_FEATURE_DEBUG) && !defined(B1_FEATURE_INIT_FREE_MEMORY)
 #error B1_FEATURE_DEBUG feature requires B1_FEATURE_INIT_FREE_MEMORY to be enabled
 #endif

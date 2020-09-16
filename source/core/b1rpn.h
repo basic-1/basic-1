@@ -27,6 +27,14 @@
 #define B1_RPNREC_TYPE_FN_ARG ((uint8_t)0x8)
 #define B1_RPNREC_TYPE_MASK ((uint8_t)0xF)
 
+#ifdef B1_FEATURE_MINIMAL_EVALUATION
+// special type values
+#define B1_RPNREC_TYPE_SPEC_ARG_1 ((uint8_t)0xFF)
+#define B1_RPNREC_TYPE_SPEC_ARG_2 ((uint8_t)0x7F)
+#define B1_RPNREC_TYPE_SPEC_ARG_3 ((uint8_t)0x3F)
+#define B1_RPNREC_TEST_SPEC_ARG(FLAGS) ((((uint8_t)FLAGS) & ((uint8_t)0x3F)) == (uint8_t)0x3F)
+#endif
+
 #define B1_RPNREC_IMM_VALUE_NULL_ARG ((uint8_t)0x10)
 
 #define B1_RPNREC_FNVAR_ARG_NUM_MASK ((uint8_t)0x70)
@@ -68,6 +76,9 @@ typedef union
 {
 	B1_TOKENDATA token;
 	B1_T_RPN_ID id;
+#ifdef B1_FEATURE_MINIMAL_EVALUATION
+	uint8_t nestlevel;
+#endif
 } B1_RPN_DATA;
 
 typedef struct

@@ -69,7 +69,7 @@ Data types supported by the interpreter:
   
 Every constant, variable, function or function argument is processed according to its data type. Default numeric data type is `SINGLE`. String constants are enclosed in double-quotes and string variables names, names of functions returning string values or names of function string arguments must end with `$` character. BASIC1 interpreter automatically converts operands to the common data type when evaluating every operator. The common data type is selected according to data types priority: `STRING` (the highest priority), `DOUBLE`, `SINGLE`, `INT` (the lowest priority). When assigning values to variables they are converted to variable data type if possibly.  
   
-**Examples of data types:**  
+**Examples:**  
 `s$ = "text"` - assign string constant to the `s$` string variable  
 `s = "text"` - not correct, `s` cannot be a string variable name because of `$` type specifier absence  
 `var = 0.5` - assign numeric value to the `var` numeric variable  
@@ -164,7 +164,7 @@ There are two types of functions in BASIC1: built-in functions and user-defined 
 `ASC(<string>)` - returns integer code of the first character of a specified text string  
 `LEN(<string>)` - returns number of characters in a string  
 `CHR$(<numeric>)` - returns string consisting of a single character corresponding to integer code specified as function argument  
-`IIF(<logical>, <numeric1>, <numeric2>)` - takes three arguments: a logical expression, and two numeric expressions; evaluates the logical expression and if the result of the expression is `TRUE` the function returns result of evaluation of the first numeric expression and result of the second numeric exprssion is returned otherwise  
+`IIF(<logical>, <numeric1>, <numeric2>)` - takes three arguments: a logical expression, and two numeric expressions; evaluates the logical expression and if the result of the expression is `TRUE` the function returns result of evaluation of the first numeric expression and result of the second numeric exprssion is returned otherwise. The function behavior depends on `B1_FEATURE_MINIMAL_EVALUATION` feature: if it is enabled the interpreter does not evaluate an unnecessary argument  
 `IIF$(<logical>, <string1>, <string2>)` - takes three arguments: a logical expression, and two string expressions, is similar to `IIF` function but works with string arguments and returns string value  
 `STR$(<numeric>)` - converts numeric value to string  
 `VAL(<string>)` - converts textual representation of a number to numeric value if possibly  
@@ -197,6 +197,7 @@ There are two types of functions in BASIC1: built-in functions and user-defined 
 `S$ = LEFT("BASIC1", 5)` 'get first five characters of "BASIC1" string  
 `S$ = MID$("BASIC1", 1, 5)` 'the same as previous  
 `MIN = IIF(A > B, B, A)` 'get the minimum of two values  
+`C% = IIF(B% = 0%, 0%, A% / B%)` 'the `IIF` function call will return zero value if `B%` is zero and `B1_FEATURE_MINIMAL_EVALUATION` is enabled. If the minimal evaluation feature is not enabled the call causes "integer divide by zero" error if `B%` is zero  
   
 ## Statements  
   

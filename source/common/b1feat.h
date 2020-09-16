@@ -74,6 +74,10 @@
 // enable three-dimensional arrays
 #define B1_FEATURE_3_DIM_ARRAYS
 
+// enables minimal (short-circuit) evaluation of expresions passed to IIF and IIF$ functions
+// (depends on the logical expression evaluation result)
+#define B1_FEATURE_MINIMAL_EVALUATION
+
 // constraints and memory usage
 #define B1_MAX_PROGLINE_LEN 255
 #define B1_MAX_STRING_LEN (B1_MAX_PROGLINE_LEN / 2)
@@ -87,7 +91,7 @@
 #endif
 #define B1_DEF_SUBSCRIPT_UBOUND 10
 #define B1_MAX_RPN_LEN 64
-#define B1_MAX_RPN_EVAL_BUFFER_LEN 9
+#define B1_MAX_RPN_EVAL_BUFFER_LEN 12
 #define B1_MAX_RPN_BRACK_NEST_DEPTH 7
 
 #ifdef B1_FEATURE_FUNCTIONS_USER
