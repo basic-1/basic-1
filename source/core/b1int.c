@@ -2843,6 +2843,60 @@ static B1_T_ERROR b1_int_interpret_stmt(uint8_t stmt, B1_T_LINE_NUM *linen)
 	}
 #endif
 
+#ifdef B1_FEATURE_STMT_BREAK_CONTINUE
+	if(stmt == B1_ID_STMT_BREAK || stmt == B1_ID_STMT_CONTINUE)
+	{
+		if(b1_int_curr_stmt_state & B1_INT_STATE_IF)
+		{
+			err = b1_int_restore_stmt_state();
+			if(err != B1_RES_OK)
+			{
+				return err;
+			}
+		}
+
+#ifdef B1_FEATURE_STMT_WHILE_WEND
+		if(!(b1_int_curr_stmt_state & (B1_INT_STATE_FOR | B1_INT_STATE_WHILE)))
+#else
+		if(!(b1_int_curr_stmt_state & B1_INT_STATE_FOR))
+#endif
+		{
+			return B1_RES_ENOTINLOOP;
+		}
+
+		// go to FOR or WHILE satement
+		b1_int_curr_prog_line_cnt = (*(b1_int_stmt_stack + b1_int_stmt_stack_ptr - 1)).ret_line_cnt;
+
+#ifdef B1_FEATURE_STMT_WHILE_WEND
+		err = B1_RES_OK;
+
+		if(b1_int_curr_stmt_state & B1_INT_STATE_FOR)
+		{
+#endif
+			// in case of FOR loop go to corresponding NEXT statement
+			err = b1_ex_prg_for_go_next();
+#ifdef B1_FEATURE_STMT_WHILE_WEND
+		}
+		else
+		if(stmt == B1_ID_STMT_BREAK)
+		{
+			err = b1_ex_prg_while_go_wend();
+		}
+#endif
+		if(err != B1_RES_OK)
+		{
+			return err;
+		}
+
+		if(stmt == B1_ID_STMT_CONTINUE)
+		{
+			b1_int_curr_prog_line_cnt--;
+		}
+
+		return B1_RES_OK;
+	}
+#endif
+
 #ifdef B1_FEATURE_STMT_DATA_READ
 	if(stmt == B1_ID_STMT_READ)
 	{

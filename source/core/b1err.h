@@ -15,7 +15,7 @@
 
 // return codes
 #define B1_RES_FIRSTERRCODE ((B1_T_ERROR)100)
-#define B1_RES_LASTERRCODE ((B1_T_ERROR)144)
+#define B1_RES_LASTERRCODE ((B1_T_ERROR)145)
 // OK, no error
 #define B1_RES_OK ((B1_T_ERROR)0)
 // OK, execution reached END statement
@@ -110,5 +110,7 @@
 #define B1_RES_ERESKWRD ((B1_T_ERROR)143)
 // EWHILEWOWND error: WHILE without WEND
 #define B1_RES_EWHILEWOWND ((B1_T_ERROR)144)
+// BREAK or CONTINUE statement not within a loop
+#define B1_RES_ENOTINLOOP ((B1_T_ERROR)145)
 
 #endif

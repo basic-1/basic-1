@@ -497,7 +497,7 @@ The statement is used to write remarks or comments in program text. Interpreter 
   
 Here `<logical_expr>` is a logical expression evaluated before every loop iteration. If the expression evaluates as `TRUE` interpreter executes code fragment between `WHILE` and `WEND` statements once and goes to the `WHILE` statement execution again. Statements within `WHILE` - `WEND` loop can include another loop called inner or nested.  
   
-**Examples**  
+**Examples:**  
 `REM print numbers from 0 to 3`  
 `I = 0`  
 `WHILE I <= 3`  
@@ -515,3 +515,32 @@ Here `<logical_expr>` is a logical expression evaluated before every loop iterat
 `WHILE I > 0`  
 `PRINT "never executes"`  
 `WEND`  
+  
+### `BREAK` statement  
+  
+`BREAK` statement exits the enclosing loop.  
+  
+**Usage:**  
+`BREAK`  
+  
+**Examples:**  
+`REM the loop below will be terminated at the end of the second iteration`  
+`FOR I = 0 TO 10`  
+`PRINT I`  
+`IF I > 0 THEN BREAK`  
+`NEXT I`  
+  
+### `CONTINUE` statement  
+  
+The statement makes the interpreter starting the next loop iteration.  
+  
+**Usage:**  
+`CONTINUE`  
+  
+**Examples:**  
+`REM print non-negative numbers only`  
+`FOR I = 0 TO 10`  
+`IF ARR(I) < 0 THEN CONTINUE`  
+`PRINT ARR(I)`  
+`NEXT I`  
+  

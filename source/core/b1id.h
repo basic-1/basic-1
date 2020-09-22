@@ -80,6 +80,10 @@
 #define B1_ID_STMT_WEND ((uint8_t)0x17)
 #define B1_ID_STMT_WHILE ((uint8_t)0x18)
 #endif
+#ifdef B1_FEATURE_STMT_BREAK_CONTINUE
+#define B1_ID_STMT_BREAK ((uint8_t)0x19)
+#define B1_ID_STMT_CONTINUE ((uint8_t)0x1A)
+#endif
 
 
 typedef struct

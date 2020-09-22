@@ -22,6 +22,8 @@
   
 # Statements  
   
+- BREAK  
+- CONTINUE  
 - DATA  
 - DEF  
 - DIM  

@@ -27,7 +27,7 @@ extern "C"
 #define B1_ENV_PROG_LINES_INC 10
 
 
-#if B1_T_PROG_LINE_CNT_MAX_VALUE > UINT32_MAX || B1_T_INDEX_MAX_VALUE > UINT32_MAX
+#if B1_T_PROG_LINE_CNT_MAX_VALUE > UINT16_MAX || B1_T_INDEX_MAX_VALUE > UINT16_MAX
 #error current RPN caching implementation does not work with B1_T_PROG_LINE_CNT and B1_T_INDEX types larger than 16 bit
 #endif
 
@@ -237,7 +237,7 @@ extern "C" B1_T_ERROR b1_ex_prg_cache_curr_line_num(B1_T_LINE_NUM curr_line_num,
 		b1_ex_prg_for_line_cnt_stack.pop();
 	}
 
-#ifdef B1_FEATURE_STMT_DATA_READ
+#ifdef B1_FEATURE_STMT_WHILE_WEND
 	// move WHILE statement line counter to tmp. stack
 	if(stmt == B1_ID_STMT_WHILE)
 	{

@@ -16,6 +16,9 @@ static const uint8_t b1_id_stmts[] =
 #ifdef B1_FEATURE_STMT_ERASE
 	B1_ID_STMT_ERASE,
 #endif
+#ifdef B1_FEATURE_STMT_BREAK_CONTINUE
+	B1_ID_STMT_BREAK,
+#endif
 	B1_ID_STMT_RETURN,
 	B1_ID_STMT_PRINT,
 	B1_ID_STMT_OPTION,
@@ -31,6 +34,9 @@ static const uint8_t b1_id_stmts[] =
 #endif
 	B1_ID_STMT_GOSUB,
 	B1_ID_STMT_END,
+#ifdef B1_FEATURE_STMT_BREAK_CONTINUE
+	B1_ID_STMT_CONTINUE,
+#endif
 	B1_ID_STMT_SET,
 	B1_ID_STMT_GOTO,
 #ifdef B1_FEATURE_FUNCTIONS_MATH_BASIC
@@ -63,6 +69,9 @@ static const B1_T_IDHASH b1_id_stmt_hashes[] =
 #ifdef B1_FEATURE_STMT_ERASE
 	0x22d,
 #endif
+#ifdef B1_FEATURE_STMT_BREAK_CONTINUE
+	0xbb3,
+#endif
 	0x104e,
 	0x10ac,
 	0x129e,
@@ -78,6 +87,9 @@ static const B1_T_IDHASH b1_id_stmt_hashes[] =
 #endif
 	0x6119,
 	0x65af,
+#ifdef B1_FEATURE_STMT_BREAK_CONTINUE
+	0x68be,
+#endif
 	0x7c57,
 	0x7edc,
 #ifdef B1_FEATURE_FUNCTIONS_MATH_BASIC

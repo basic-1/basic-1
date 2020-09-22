@@ -78,6 +78,9 @@
 // (depends on the logical expression evaluation result)
 #define B1_FEATURE_MINIMAL_EVALUATION
 
+// BREAK and CONTINUE statements
+#define B1_FEATURE_STMT_BREAK_CONTINUE
+
 // constraints and memory usage
 #define B1_MAX_PROGLINE_LEN 255
 #define B1_MAX_STRING_LEN (B1_MAX_PROGLINE_LEN / 2)

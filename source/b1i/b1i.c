@@ -113,6 +113,7 @@ static const char *err_msgs[] =
 	"end of file",
 	"use of a reserved keyword as identifer forbidden",
 	"WHILE without WEND",
+	"BREAK or CONTINUE statement not within a loop",
 };
 
 

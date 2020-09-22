@@ -1,3 +1,9 @@
+b1i (1.0.0-46) unstable; urgency=low
+
+  * B1_FEATURE_STMT_BREAK_CONTINUE feature added: BREAK and CONTINUE statements
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Tue, 22 Sep 2020 18:12:32 +0300
+
 b1i (1.0.0-45) unstable; urgency=low
 
   * B1_FEATURE_MINIMAL_EVALUATION feature added: minimal evaluation of
