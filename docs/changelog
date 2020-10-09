@@ -1,3 +1,9 @@
+b1i (1.0.0-47) unstable; urgency=low
+
+  * minor changes in Linux build scripts
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Fri, 10 Oct 2020 20:27:02 +0300
+
 b1i (1.0.0-46) unstable; urgency=low
 
   * B1_FEATURE_STMT_BREAK_CONTINUE feature added: BREAK and CONTINUE statements
