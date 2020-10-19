@@ -47,6 +47,7 @@
 - RESTORE  
 - RETURN  
 - SET MARGIN | ZONEWIDTH | INPUTECHO  
+- STOP  
 - WHILE ... WEND  
   
 # More features  

@@ -81,6 +81,9 @@
 // BREAK and CONTINUE statements
 #define B1_FEATURE_STMT_BREAK_CONTINUE
 
+// STOP statement
+//#define B1_FEATURE_STMT_STOP
+
 // constraints and memory usage
 #define B1_MAX_PROGLINE_LEN 255
 #define B1_MAX_STRING_LEN (B1_MAX_PROGLINE_LEN / 2)

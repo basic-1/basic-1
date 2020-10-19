@@ -72,6 +72,10 @@ extern B1_T_PROG_LINE_CNT b1_int_data_curr_line_cnt;
 extern B1_T_INDEX b1_int_data_curr_line_offset;
 #endif
 
+#ifdef B1_FEATURE_STMT_STOP
+extern uint8_t b1_int_exec_stop;
+#endif
+
 
 extern B1_T_ERROR b1_int_reset();
 extern B1_T_ERROR b1_int_get_type_by_type_spec(B1_T_CHAR type_spec_char, uint8_t expl_type, uint8_t *res_type);

@@ -29,6 +29,9 @@ static const uint8_t b1_id_stmts[] =
 #ifdef B1_FEATURE_STMT_DATA_READ
 	B1_ID_STMT_RESTORE,
 #endif
+#ifdef B1_FEATURE_STMT_STOP
+	B1_ID_STMT_STOP,
+#endif
 #ifdef B1_FEATURE_STMT_WHILE_WEND
 	B1_ID_STMT_WHILE,
 #endif
@@ -81,6 +84,9 @@ static const B1_T_IDHASH b1_id_stmt_hashes[] =
 	0x31fd,
 #ifdef B1_FEATURE_STMT_DATA_READ
 	0x3b4c,
+#endif
+#ifdef B1_FEATURE_STMT_STOP
+	0x480a,
 #endif
 #ifdef B1_FEATURE_STMT_WHILE_WEND
 	0x5087,

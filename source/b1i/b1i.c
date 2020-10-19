@@ -222,6 +222,7 @@ int main(int argc, char **argv)
 	clock_t start, end;
 	int print_err_desc = 0;
 	int print_version = 0;
+	int input_echo = 0;
 #ifdef B1_FEATURE_LOCALES
 	int get_locale = 0, ss, se;
 	char *locale = NULL;
@@ -290,7 +291,7 @@ int main(int argc, char **argv)
 			(argv[i][1] == 'E' || argv[i][1] == 'e') &&
 			argv[i][2] == 0)
 		{
-			b1_int_input_echo = 1;
+			input_echo = 1;
 			continue;
 		}
 
@@ -381,6 +382,11 @@ int main(int argc, char **argv)
 	}
 	else
 	{
+		if(input_echo)
+		{
+			b1_int_input_echo = 1;
+		}
+
 		// perform the initial program run to cache line numbers and make some checks 
 		err = b1_int_prerun();
 		if(err != B1_RES_OK)

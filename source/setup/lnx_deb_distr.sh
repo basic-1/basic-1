@@ -52,7 +52,8 @@ mkdir -p -m 775 $tmp_dir$project_name/usr/share/doc
 mkdir -p -m 775 $tmp_dir$project_name/usr/share/doc/$project_name
 
 #copy executable modules, samples, docs and README
-cp -a ../../bin/lnx/$platform/$compiler/rel/. $tmp_dir$project_name/usr/bin/
+cp ../../bin/lnx/$platform/$compiler/rel/b1i $tmp_dir$project_name/usr/bin/
+cp ../../bin/lnx/$platform/$compiler/rel/b1iu $tmp_dir$project_name/usr/bin/
 cp -a ../../docs $tmp_dir$project_name/usr/share/doc/$project_name/
 cp -a ../../samples $tmp_dir$project_name/usr/share/doc/$project_name/
 cp ../../README.md $tmp_dir$project_name/usr/share/doc/$project_name/

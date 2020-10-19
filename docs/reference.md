@@ -6,7 +6,7 @@ BASIC1 language program is a sequence of text strings (program lines). The inter
   
 Line number is a number in the range \[1 ... 65530\]  
   
-Statement is one of the next BASIC1 language statements: `DATA`, `DEF`, `DIM`, `ELSE`, `ELSEIF`, `ERASE`, `FOR`, `GOTO`, `GOSUB`, `IF`, `INPUT`, `LET`, `NEXT`, `ON`, `OPTION`, `PRINT`, `RANDOMIZE`, `READ`, `REM`, `RESTORE`, `RETURN`, `SET` and implicit assignment statement (with omitted `LET` keyword). Every statement should start from statement keyword except for the implicit assignment.  
+Statement is a minimal unit of program which can be executed by the interpreter. Every statement should start from statement keyword except for the implicit assignment (`LET` keyword can be omitted). Statement keywords of BASIC1 language are: `BREAK`, `CONTINUE`, `DATA`, `DEF`, `DIM`, `ELSE`, `ELSEIF`, `ERASE`, `FOR`, `GOTO`, `GOSUB`, `IF`, `INPUT`, `LET`, `NEXT`, `ON`, `OPTION`, `PRINT`, `RANDOMIZE`, `READ`, `REM`, `RESTORE`, `RETURN`, `SET`, `STOP`, `WHILE`, `WEND`.  
   
 **Examples of program lines:**  
 `10 REM RANDOMIZE statement`  
@@ -543,4 +543,8 @@ The statement makes the interpreter starting the next loop iteration.
 `IF ARR(I) < 0 THEN CONTINUE`  
 `PRINT ARR(I)`  
 `NEXT I`  
+  
+### `STOP` statement  
+  
+The statement stops program execution. Unlike `END` statement the program execution can be resumed. Usually the statement is used to bring some debugging abilities.  
   

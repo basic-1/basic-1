@@ -84,6 +84,9 @@
 #define B1_ID_STMT_BREAK ((uint8_t)0x19)
 #define B1_ID_STMT_CONTINUE ((uint8_t)0x1A)
 #endif
+#ifdef B1_FEATURE_STMT_STOP
+#define B1_ID_STMT_STOP ((uint8_t)0x1B)
+#endif
 
 
 typedef struct

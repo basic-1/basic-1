@@ -58,7 +58,9 @@ copy ..\..\docs\*.* docs
 
 rem create temp. bin directory and copy binaries
 mkdir bin
-copy ..\..\bin\win\%platform%\%compiler%\rel\*.* bin
+copy ..\..\bin\win\%platform%\%compiler%\rel\b1i.exe bin
+copy ..\..\bin\win\%platform%\%compiler%\rel\b1iu.exe bin
+copy ..\..\bin\win\%platform%\%compiler%\rel\lib*.dll bin
 
 rem delete output file
 del %out_file_path%*.zip

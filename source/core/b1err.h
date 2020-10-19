@@ -20,6 +20,8 @@
 #define B1_RES_OK ((B1_T_ERROR)0)
 // OK, execution reached END statement
 #define B1_RES_END ((B1_T_ERROR)1)
+// OK, execution stopped
+#define B1_RES_STOP ((B1_T_ERROR)2)
 // EINVTOK error: invalid token
 #define B1_RES_EINVTOK ((B1_T_ERROR)100)
 // ELINLONG error: program line too long

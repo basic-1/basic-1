@@ -57,6 +57,8 @@ Some interpreter's features can be turned on or off by editing application's `fe
   
 `B1_FEATURE_STMT_BREAK_CONTINUE`: enables `BREAK` and `CONTINUE` statements.  
   
+`B1_FEATURE_STMT_STOP`: enables possibility to stop program execution with `STOP` statement. See `b1_int_run` function description for details.  
+  
 ## Interpreter's global variables and functions  
   
 Hosting application can control the interpreter core by reading/writing special global variables and calling some functions. The most of them are described below.  
@@ -86,7 +88,7 @@ The function reset the interpreter core to its initial state. Has to be called b
 The function performs the first idle program run to check line numbers, proper `FOR` and `NEXT` statements placement, etc. Also the function calls `b1_ex_prg_cache_curr_line_num` function for every program line.  
   
 `extern B1_T_ERROR b1_int_run();`  
-Runs the program.  
+Runs the program. If `B1_FEATURE_STMT_STOP` feature is enabled the function can return `B1_RES_STOP` value indicating that the program is stopped. The next `b1_int_run` function call resumes the program execution.  
   
 `extern B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_INDEX buflen);`  
 Returns a string consisting of a variable name, type and value (or values if the variable is array). `var` argument specifies the variable to dump content of, `sbuf` should be a pointer to buffer to receive the resulting string, `buflen` is the buffer length (number of `B1_T_CHAR` characters). The result is zero character terminating string.  
