@@ -1,6 +1,6 @@
 /*
  BASIC1 interpreter
- Copyright (c) 2020 Nikolay Pletnev
+ Copyright (c) 2021 Nikolay Pletnev
  MIT license
 
  feat.h: interpreter features
@@ -62,7 +62,7 @@
 #define B1_FEATURE_INIT_FREE_MEMORY
 
 // enables storing identifier names (not only hashes) in B1_ID structure, allows reading variables
-// created during program execution, makes b1_dbg_get_var_dump function available
+// created during program execution, makes b1_dbg_* functions and variables available
 #define B1_FEATURE_DEBUG
 
 // forbid using statement keywords as variable names
@@ -103,6 +103,10 @@
 #ifdef B1_FEATURE_FUNCTIONS_USER
 #define B1_MAX_UDEF_FN_RPN_LEN (768 / sizeof(B1_RPNREC))
 #define B1_MAX_UDEF_CALL_NEST_DEPTH 3
+#endif
+
+#ifdef B1_FEATURE_DEBUG
+#define B1_MAX_BREAKPOINT_NUM 32
 #endif
 
 #endif

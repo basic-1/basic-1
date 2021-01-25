@@ -1,6 +1,6 @@
 /*
  BASIC1 interpreter
- Copyright (c) 2020 Nikolay Pletnev
+ Copyright (c) 2021 Nikolay Pletnev
  MIT license
 
  b1i.c: command line BASIC interpreter main file
@@ -114,6 +114,7 @@ static const char *err_msgs[] =
 	"use of a reserved keyword as identifer forbidden",
 	"WHILE without WEND",
 	"BREAK or CONTINUE statement not within a loop",
+	"too many breakpoints",
 };
 
 

@@ -45,7 +45,7 @@ Some interpreter's features can be turned on or off by editing application's `fe
   
 `B1_FEATURE_INIT_FREE_MEMORY`: if the macro is defined `b1_int_reset` function frees memory allocated during preceding program execution (in the most cases the feature must be enabled to allow resetting program state). `b1_ex_var_enum` function has to be implemented for the feature to work.  
   
-`B1_FEATURE_DEBUG`: extends `B1_NAMED_VAR` structure to save variable name (not only name hash), presents `b1_dbg_get_var_dump` function allowing displaying variables content in human-readable format.  
+`B1_FEATURE_DEBUG`: extends `B1_NAMED_VAR` structure to save variable name (not only name hash), enables debugging abilities (`b1_dbg_*` functions and variables).  
   
 `B1_FEATURE_CHECK_KEYWORDS`: forbids creating variables with the same names as statements and existing functions.  
   
@@ -57,7 +57,7 @@ Some interpreter's features can be turned on or off by editing application's `fe
   
 `B1_FEATURE_STMT_BREAK_CONTINUE`: enables `BREAK` and `CONTINUE` statements.  
   
-`B1_FEATURE_STMT_STOP`: enables possibility to stop program execution with `STOP` statement. See `b1_int_run` function description for details.  
+`B1_FEATURE_STMT_STOP`: enables possibility to stop program execution with `STOP` statement, makes `b1_int_exec_stop` variable available. See `b1_int_run` function description for details.  
   
 ## Interpreter's global variables and functions  
   
@@ -78,6 +78,9 @@ One-based counter of the current `DATA` statement program line. `b1_ex_prg_data_
 `extern B1_T_INDEX b1_int_data_curr_line_offset;`  
 Zero-based offset the next `DATA` statement value. The value can bne read with the next `READ` statement. The variable has to be set by `b1_ex_prg_data_go_next` function and the value can be previously stored by `b1_ex_prg_cache_curr_line_num` function.
   
+`extern uint8_t b1_int_exec_stop;`  
+The variable can be used to stop program execution. Set it to any non-zero value to interrupt execution: this causes `b1_int_run` function termination with `B1_RES_STOP` code. The program execution can be resumed by calling the function again. The variable is available only if `B1_FEATURE_STMT_STOP` feature is enabled.  
+  
 `extern const B1_RPNREC *b1_rpn;`  
 The variable should be used by `b1_ex_prg_rpn_cache` and `b1_ex_prg_rpn_get_cached` functions to cache expressions' postfix notation.  
   
@@ -88,12 +91,29 @@ The function reset the interpreter core to its initial state. Has to be called b
 The function performs the first idle program run to check line numbers, proper `FOR` and `NEXT` statements placement, etc. Also the function calls `b1_ex_prg_cache_curr_line_num` function for every program line.  
   
 `extern B1_T_ERROR b1_int_run();`  
-Runs the program. If `B1_FEATURE_STMT_STOP` feature is enabled the function can return `B1_RES_STOP` value indicating that the program is stopped. The next `b1_int_run` function call resumes the program execution.  
+Runs the program. If `B1_FEATURE_STMT_STOP` feature is enabled the function can return `B1_RES_STOP` value indicating that the program is stopped. Other possibilities to stop program execution are setting `b1_int_exec_stop` variable to a non-zero value and using breakpoints. The next `b1_int_run` function call resumes the program execution.  
   
 `extern B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_INDEX buflen);`  
 Returns a string consisting of a variable name, type and value (or values if the variable is array). `var` argument specifies the variable to dump content of, `sbuf` should be a pointer to buffer to receive the resulting string, `buflen` is the buffer length (number of `B1_T_CHAR` characters). The result is zero character terminating string.  
   
-`b1_rpn` variable is declared in `./source/core/b1rpn.h` file, `b1_int_xxx` variables and functions are declared in `./source/core/b1int.h` file, `b1_dbg_get_var_dump` function is declared in `./source/core/b1dbg.h`.  
+`extern B1_T_ERROR b1_dbg_add_breakpoint(B1_T_PROG_LINE_CNT line_cnt);`  
+Adds breakpoint on the program line identified with `line_cnt` program line counter.  
+  
+`extern B1_T_ERROR b1_dbg_remove_breakpoint(B1_T_PROG_LINE_CNT line_cnt);`  
+Removes breakpoint located on line `line_cnt`.  
+  
+`extern B1_T_ERROR b1_dbg_remove_all_breakpoints();`  
+Removes all breakpoints.  
+  
+`extern B1_T_ERROR b1_dbg_get_break_line_cnt(B1_T_PROG_LINE_CNT *line_cnt);`  
+Returns counter of a program line the program stopped on. Can be called after `b1_int_run` function termination with `B1_RES_STOP` code.  
+  
+`extern B1_T_INDEX b1_dbg_check_breakpoint(B1_T_PROG_LINE_CNT line_cnt);`  
+Checks if breakpoint was added on the program line specified with `line_cnt` program line counter. Returns either breakpoint index or `B1_MAX_BREAKPOINT_NUM` constant value if there's no breakpoint on the line.  
+  
+`b1_dbg_*` functions can be called only when the interpreter is stopped (with `STOP` statement, `b1_int_exec_stop` variable or breakpoint). Also breakpoints can be added before program execution start (before the first `b1_int_run` function call). `STOP` statement stops program before the next line execution and breakpoint - before execution of the line it is added on.  
+  
+`b1_rpn` variable is declared in `./source/core/b1rpn.h` file, `b1_int_*` variables and functions are declared in `./source/core/b1int.h` file, `b1_dbg_*` functions and variables are declared in `./source/core/b1dbg.h`.  
   
 ## External functions needed for the interpreter core  
   
@@ -196,7 +216,7 @@ See `./source/ext/exrnd.c` file for possible functions implementation.
 The functions are called by interpreter to navigate through program lines when executing a program.  
   
 `extern B1_T_ERROR b1_ex_prg_cache_curr_line_num(B1_T_LINE_NUM curr_line_num, uint8_t stmt);`  
-The function is called by the interpreter during the idle program run (see `b1_int_prerun` function description for details) allowing caching line numbers of every program line. The cached values can be used then with other navigation functions to make program line search faster. `curr_line_num` argument value is a program line number of the current program line (identified with a value of `b1_int_curr_prog_line_cnt` global variable). If a program line does not have line number the argument variable is set to `B1_T_LINE_NUM_ABSENT` value. `stmt` argument variable identifies the current program line statement and can be one of the `B1_ID_STMT_XXXX` values defined in `./source/core/b1int.h` file.  
+The function is called by the interpreter during the idle program run (see `b1_int_prerun` function description for details) allowing caching line numbers of every program line. The cached values can be used then with other navigation functions to make program line search faster. `curr_line_num` argument value is a program line number of the current program line (identified with a value of `b1_int_curr_prog_line_cnt` global variable). If a program line does not have line number the argument variable is set to `B1_T_LINE_NUM_ABSENT` value. `stmt` argument variable identifies the current program line statement and can be one of the `B1_ID_STMT_*` values defined in `./source/core/b1int.h` file.  
   
 `extern B1_T_ERROR b1_ex_prg_get_prog_line(B1_T_LINE_NUM next_line_num);`  
 `b1_ex_prg_get_prog_line` function is called by the interpreter to navigate to another program line depending on `next_line_num` argument variable value: `B1_T_LINE_NUM_FIRST` and `B1_T_LINE_NUM_NEXT` special values corresponds to the first line of the program and to the line coming after the current one. Other values are line numbers identifying program lines (e.g. the interpreter calls this function when executing `GOTO` statement). The function should return `B1_RES_ELINENNOTFND` code if the line number is not found and `B1_RES_EPROGUNEND` code if it reached the end of the program and the next program line does not exist. If the requested program line is found the function has to change `b1_int_progline` and `b1_int_curr_prog_line_cnt` variables properly.  
@@ -205,7 +225,7 @@ The function is called by the interpreter during the idle program run (see `b1_i
 The function should find program line counter of a `NEXT` statement corresponding to the current `FOR` statement (identified with `b1_int_curr_prog_line_cnt` variable value). The resulting line counter should be written to the same `b1_int_curr_prog_line_cnt` variable. If the program line is not found the function should return `B1_RES_EFORWONXT` value.  
   
 `extern B1_T_ERROR b1_ex_prg_data_go_next(B1_T_LINE_NUM next_line_num);`  
-The function is called by the interpreter when processing `READ` statement and all the data of the current `DATA` statement is already read or when processing `RESTORE` statement. `next_line_num` argument variable can be equal to either `B1_T_LINE_NUM_FIRST` and `B1_T_LINE_NUM_NEXT` values or to a program line number identifing a program line with `DATA` statement. `B1_T_LINE_NUM_FIRST` and `B1_T_LINE_NUM_NEXT` constants correspond to the first and the next program lines with `DATA` statements. The function should return `B1_RES_ELINENNOTFND` code if the line number is not found and `B1_RES_EDATAEND` if there's no more `DATA` statements in the program. If the program line is found the function has to change `b1_int_data_curr_line_cnt` and `b1_int_data_curr_line_offset` variables properly. Note that the function should work with `b1_int_data_curr_line_xxx` global variables not with `b1_int_curr_prog_line_xxx` ones.  
+The function is called by the interpreter when processing `READ` statement and all the data of the current `DATA` statement is already read or when processing `RESTORE` statement. `next_line_num` argument variable can be equal to either `B1_T_LINE_NUM_FIRST` and `B1_T_LINE_NUM_NEXT` values or to a program line number identifing a program line with `DATA` statement. `B1_T_LINE_NUM_FIRST` and `B1_T_LINE_NUM_NEXT` constants correspond to the first and the next program lines with `DATA` statements. The function should return `B1_RES_ELINENNOTFND` code if the line number is not found and `B1_RES_EDATAEND` if there's no more `DATA` statements in the program. If the program line is found the function has to change `b1_int_data_curr_line_cnt` and `b1_int_data_curr_line_offset` variables properly. Note that the function should work with `b1_int_data_curr_line_*` global variables not with `b1_int_curr_prog_line_*` ones.  
   
 `extern B1_T_ERROR b1_ex_prg_while_go_wend();`  
 The function should find program line counter of a `WEND` statement corresponding to the current `WHILE` statement (identified with `b1_int_curr_prog_line_cnt` variable value). The resulting line counter should be written to the same `b1_int_curr_prog_line_cnt` variable. If the program line is not found the function should return `B1_RES_EWHILEWOWND` value. The function has to be implemented if `B1_FEATURE_STMT_WHILE_WEND` feature is enabled.  

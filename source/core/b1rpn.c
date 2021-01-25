@@ -1,6 +1,6 @@
 /*
  BASIC1 interpreter
- Copyright (c) 2020 Nikolay Pletnev
+ Copyright (c) 2021 Nikolay Pletnev
  MIT license
 
  b1rpn.c: converting expressions to RPN form
@@ -14,6 +14,7 @@
 #include "b1rpn.h"
 #include "b1types.h"
 #include "b1int.h"
+#include "b1dbg.h"
 #include "b1err.h"
 
 
@@ -92,21 +93,32 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 	len = 0;
 
 #ifdef B1_FEATURE_RPN_CACHING
-	b1_rpn = b1_rpn_buf;
-	b1_rpn_buf[0].flags = 0;
-
-	init_offset = offset;
-
-	err = b1_ex_prg_rpn_get_cached(offset, continue_offset);
-	if (err != B1_RES_OK)
+#ifdef B1_FEATURE_DEBUG
+	if(b1_dbg_rpn_caching_enabled)
 	{
-		return err;
-	}
+#endif
+		b1_rpn = b1_rpn_buf;
+		b1_rpn_buf[0].flags = 0;
 
-	if (b1_rpn[0].flags != 0)
-	{
-		return B1_RES_OK;
+		init_offset = offset;
+
+		err = b1_ex_prg_rpn_get_cached(offset, continue_offset);
+		if (err != B1_RES_OK)
+		{
+			return err;
+		}
+
+		if (b1_rpn[0].flags != 0)
+		{
+			return B1_RES_OK;
+		}
+#ifdef B1_FEATURE_DEBUG
 	}
+	else
+	{
+		b1_rpn = b1_rpn_buf;
+	}
+#endif
 #else
 	b1_rpn = b1_rpn_buf;
 #endif

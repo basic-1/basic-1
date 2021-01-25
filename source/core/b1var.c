@@ -1,6 +1,6 @@
 /*
  BASIC1 interpreter
- Copyright (c) 2020 Nikolay Pletnev
+ Copyright (c) 2021 Nikolay Pletnev
  MIT license
 
  b1var.c: managing variables
@@ -546,6 +546,7 @@ B1_T_ERROR b1_var_array_get_data_ptr(B1_T_MEM_BLOCK_DESC arr_data_desc, uint8_t 
 
 // copies value from named variable to temp. stack variable (dst_var must point on a temp. stack variable that can consist of
 // the variable itself and its subscripts), fills B1_VAR_REF structure if src_var_ref parameter is not NULL
+// the function always returns references to string data if src_var is a string variable (B1_TYPE_SET(B1_TYPE_STRING, B1_TYPE_REF_FLAG))
 B1_T_ERROR b1_var_get(B1_NAMED_VAR *src_var, B1_VAR *dst_var, B1_VAR_REF *src_var_ref)
 {
 	B1_T_ERROR err;

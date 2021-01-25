@@ -1,6 +1,6 @@
 /*
  BASIC1 interpreter
- Copyright (c) 2020 Nikolay Pletnev
+ Copyright (c) 2021 Nikolay Pletnev
  MIT license
 
  b1eval.c: expressions evaluation
@@ -806,6 +806,13 @@ B1_T_ERROR b1_eval(uint8_t options, B1_VAR_REF *var_ref)
 							// the variable was created
 							if(b1_int_opt_explicit_val)
 							{
+#ifdef B1_FEATURE_DEBUG
+								// delete variable in case of debugging because the function
+								// can be used for debug purpose so the error does not mean
+								// the interpreter termination
+								b1_int_var_mem_free(var);
+								b1_ex_var_free(name_hash);
+#endif
 								return B1_RES_EUNKIDENT;
 							}
 						}

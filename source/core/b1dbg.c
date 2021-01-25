@@ -1,6 +1,6 @@
 /*
  BASIC1 interpreter
- Copyright (c) 2020 Nikolay Pletnev
+ Copyright (c) 2021 Nikolay Pletnev
  MIT license
 
  b1dbg.c: functions for debugging
@@ -11,11 +11,20 @@
 
 #ifdef B1_FEATURE_DEBUG
 #include <string.h>
+#include <stdlib.h>
 
 #include "b1ex.h"
 #include "b1err.h"
 #include "b1int.h"
 #include "b1dbg.h"
+
+
+B1_T_INDEX b1_dbg_breakpoints_num;
+B1_T_PROG_LINE_CNT b1_dbg_breakpoints[B1_MAX_BREAKPOINT_NUM];
+
+#ifdef B1_FEATURE_RPN_CACHING
+uint8_t b1_dbg_rpn_caching_enabled;
+#endif
 
 
 static uint8_t b1_dbg_copy_str(const B1_T_CHAR *str, B1_T_CHAR **sbuf, B1_T_INDEX *buflen)
@@ -251,4 +260,88 @@ B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_IN
 
 	return B1_RES_OK;
 }
+
+static int b1_dbg_cmp_line_cnt(const void *lcnt1, const void *lcnt2)
+{
+	B1_T_IDHASH l1, l2;
+
+	l1 = *((const B1_T_PROG_LINE_CNT *)lcnt1);
+	l2 = *((const B1_T_PROG_LINE_CNT *)lcnt2);
+
+	return	l1 < l2 ? -1 :
+		l1 == l2 ? 0 : 1;
+}
+
+B1_T_INDEX b1_dbg_check_breakpoint(B1_T_PROG_LINE_CNT line_cnt)
+{
+	B1_T_PROG_LINE_CNT *line_cnt_ptr;
+
+	line_cnt_ptr = (B1_T_PROG_LINE_CNT *)bsearch(&line_cnt, b1_dbg_breakpoints, b1_dbg_breakpoints_num, sizeof(B1_T_PROG_LINE_CNT), b1_dbg_cmp_line_cnt);
+	return (line_cnt_ptr == NULL) ? (B1_T_INDEX)B1_MAX_BREAKPOINT_NUM : (B1_T_INDEX)(line_cnt_ptr - b1_dbg_breakpoints);
+}
+
+B1_T_ERROR b1_dbg_add_breakpoint(B1_T_PROG_LINE_CNT line_cnt)
+{
+	if(b1_dbg_check_breakpoint(line_cnt) == B1_MAX_BREAKPOINT_NUM)
+	{
+		if(b1_dbg_breakpoints_num == (B1_T_INDEX)(B1_MAX_BREAKPOINT_NUM - 1))
+		{
+			return B1_RES_EMANYBRKPNT;
+		}
+
+		b1_dbg_breakpoints[b1_dbg_breakpoints_num++] = line_cnt;
+		qsort(b1_dbg_breakpoints, b1_dbg_breakpoints_num, sizeof(B1_T_PROG_LINE_CNT), b1_dbg_cmp_line_cnt);
+	}
+
+	return B1_RES_OK;
+}
+
+B1_T_ERROR b1_dbg_remove_breakpoint(B1_T_PROG_LINE_CNT line_cnt)
+{
+	B1_T_INDEX brk_off;
+	B1_T_PROG_LINE_CNT *line_cnt_ptr;
+
+	brk_off = b1_dbg_check_breakpoint(line_cnt);
+	if(brk_off != B1_MAX_BREAKPOINT_NUM)
+	{
+		line_cnt_ptr = b1_dbg_breakpoints + brk_off;
+		b1_dbg_breakpoints_num--;
+		memmove(line_cnt_ptr, line_cnt_ptr + 1, b1_dbg_breakpoints_num - brk_off);
+	}
+
+	return B1_RES_OK;
+}
+
+B1_T_ERROR b1_dbg_remove_all_breakpoints()
+{
+	b1_dbg_breakpoints_num = 0;
+
+	return B1_RES_OK;
+}
+
+B1_T_ERROR b1_dbg_get_break_line_cnt(B1_T_PROG_LINE_CNT *line_cnt)
+{
+	B1_T_ERROR err;
+	B1_T_PROG_LINE_CNT prev_line_cnt;
+	const B1_T_CHAR *prev_prg_line;
+
+
+	prev_line_cnt = b1_int_curr_prog_line_cnt;
+	prev_prg_line = b1_int_progline;
+
+	err = (b1_int_curr_prog_line_offset == 0) ?
+		b1_ex_prg_get_prog_line(b1_int_next_line_num) :
+		B1_RES_OK;
+
+	if(err == B1_RES_OK)
+	{
+		*line_cnt = b1_int_curr_prog_line_cnt;
+	}
+
+	b1_int_progline = prev_prg_line;
+	b1_int_curr_prog_line_cnt = prev_line_cnt;
+
+	return err;
+}
+
 #endif

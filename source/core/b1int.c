@@ -1,6 +1,6 @@
 /*
  BASIC1 interpreter
- Copyright (c) 2020 Nikolay Pletnev
+ Copyright (c) 2021 Nikolay Pletnev
  MIT license
 
  b1int.c: the interpreter main file
@@ -17,6 +17,7 @@
 #include "b1fn.h"
 #include "b1eval.h"
 #include "b1int.h"
+#include "b1dbg.h"
 #include "b1err.h"
 
 
@@ -45,7 +46,7 @@ static uint8_t b1_int_curr_stmt_state;
 // b1_int_interpret_stmt function sets the variable for the next b1_ex_prg_get_prog_line
 // function call to read proper program line (initially the variable is set to
 // B1_T_LINE_NUM_NEXT value)
-static B1_T_LINE_NUM b1_int_next_line_num;
+B1_T_LINE_NUM b1_int_next_line_num;
 
 // options can appear in the program beginning only
 static uint8_t b1_int_options_allowed;
@@ -77,6 +78,10 @@ B1_T_INDEX b1_int_data_curr_line_offset;
 uint8_t b1_int_exec_stop;
 #endif
 
+#ifdef B1_FEATURE_DEBUG
+static uint8_t b1_int_continue_after_break;
+#endif
+
 
 static const B1_T_CHAR *LET_STOP_TOKENS[2] = { _EQ, NULL };
 static const B1_T_CHAR *IF_STOP_TOKENS[2] = { _THEN, NULL };
@@ -86,11 +91,6 @@ static const B1_T_CHAR *INPUT_STOP_TOKEN[2] = { _COMMA, NULL };
 static const B1_T_CHAR *DIM_STOP_TOKENS[4] = { _TO, _CLBRACKET, _COMMA, NULL };
 static const B1_T_CHAR *FOR_STOP_TOKEN1[2] = { _TO, NULL };
 static const B1_T_CHAR *FOR_STOP_TOKEN2[2] = { _STEP, NULL };
-
-
-#ifdef B1_FEATURE_INIT_FREE_MEMORY
-static B1_T_ERROR b1_int_var_mem_free(B1_NAMED_VAR *var);
-#endif
 
 
 // initializes or resets interpreter
@@ -161,6 +161,15 @@ B1_T_ERROR b1_int_reset()
 #ifdef B1_FEATURE_FUNCTIONS_MATH_BASIC
 #ifdef B1_FRACTIONAL_TYPE_EXISTS
 	b1_ex_rnd_randomize(1);
+#endif
+#endif
+
+#ifdef B1_FEATURE_DEBUG
+	b1_int_continue_after_break = 0;
+	b1_dbg_breakpoints_num = 0;
+
+#ifdef B1_FEATURE_RPN_CACHING
+	b1_dbg_rpn_caching_enabled = 1;
 #endif
 #endif
 
@@ -1402,7 +1411,7 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 }
 
 #if defined(B1_FEATURE_STMT_ERASE) || defined(B1_FEATURE_INIT_FREE_MEMORY)
-static B1_T_ERROR b1_int_var_mem_free(B1_NAMED_VAR *var)
+B1_T_ERROR b1_int_var_mem_free(B1_NAMED_VAR *var)
 {
 	B1_T_ERROR err;
 	uint8_t type, dimsnum;
@@ -3114,6 +3123,18 @@ B1_T_ERROR b1_int_run()
 			{
 				return err;
 			}
+
+#ifdef B1_FEATURE_DEBUG
+			if(!b1_int_continue_after_break &&
+				b1_dbg_check_breakpoint(b1_int_curr_prog_line_cnt) != B1_MAX_BREAKPOINT_NUM)
+			{
+				b1_int_curr_prog_line_cnt--;
+				b1_int_continue_after_break++;
+				return B1_RES_STOP;
+			}
+
+			b1_int_continue_after_break = 0;
+#endif
 		}
 
 		err = b1_int_stmt_init(&stmt);
