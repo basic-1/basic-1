@@ -28,8 +28,8 @@
 #include "b1dbg.h"
 #endif
 
-#include "version.h"
-#include "gitrev.h"
+#include "../b1icommon/version.h"
+#include "../b1icommon/gitrev.h"
 
 
 #ifdef B1_FEATURE_UNICODE_UCS2

@@ -10,14 +10,15 @@
 - interpreter core written in C  
 - embeddable: memory functions, input/output and caching detached from core  
 - command-line interpreter built for Windows x86, Windows x64, Linux i386, Linux amd64, Linux armhf  
-- optional Unicode support
+- interpreter with graphical IDE and debugger built for various platforms (uses wxWidgets GUI library)  
+- optional Unicode support  
 - licensed under MIT license  
   
 # Data types  
   
 - STRING  
 - SINGLE (32-bit floating-point)  
-- DOUBLE (64-bit floating-point)
+- DOUBLE (64-bit floating-point)  
 - INT (32-bit integer)  
   
 # Statements  
@@ -66,11 +67,11 @@
   
 ## Building  
   
-Use CMake 3.1 tools to build **b1i** or **b1iu** simple command-line interpreter. **b1iu** interpreter uses Unicode for characters representation. Use one of the next C/C++ toolchains: MinGW-W64 (x86 and x64) under Windows, MSVC 2010 (x86 and x64) under Windows, MSVC 2019 (x86 and x64) under Windows, gcc/g++ (x86, x64 and armhf) under Linux. Other compilers/toolchains are probably compatible too.  
+Use CMake 3.1 tools to build **b1i** or **b1iu** simple command-line interpreter or **b1ig** interpreter with graphical IDE. **b1iu** interpreter uses Unicode for characters representation. wxWidgets GUI library is needed to build **b1ig** interpreter with graphical IDE. Use one of the next C/C++ toolchains: MinGW-W64 (x86 and x64) under Windows, MSVC 2010 (x86 and x64) under Windows, MSVC 2019 (x86 and x64) under Windows, gcc/g++ (x86, x64 and armhf) under Linux. Other compilers/toolchains are probably compatible too.  
   
-To build the interpreter under Windows go to `./source/b1i` directory and run corresponding batch file depending on your compiler and target platform: `b1i_win_x86_mingw_rel.bat` and `b1i_win_x64_mingw_rel.bat` for MinGW-W64, `b1i_win_x86_msvc10_rel.bat` and `b1i_win_x64_msvc10_rel.bat` for MSVC10, etc. Under Linux the procedure is the same but shell script names are `b1i_lnx_x86_gcc_rel.sh`, `b1i_lnx_x64_gcc_rel.sh` and `b1i_lnx_armhf_gcc_rel.sh`. Use scripts with `b1iu_` prefix to build Unicode version of the interpreter.  
+To build the interpreter under Windows go to `./source/b1i` or `./source/b1ig` directory and run corresponding batch file depending on your compiler and target platform: `b1i_win_x86_mingw_rel.bat` and `b1i_win_x64_mingw_rel.bat` for MinGW-W64, `b1i_win_x86_msvc10_rel.bat` and `b1i_win_x64_msvc10_rel.bat` for MSVC10, etc. Under Linux the procedure is the same but shell script names are `b1i_lnx_x86_gcc_rel.sh`, `b1i_lnx_x64_gcc_rel.sh` and `b1i_lnx_armhf_gcc_rel.sh`. Use scripts with `b1iu_` prefix to build Unicode version of the interpreter.  
   
-**Important note:** The batch files mentioned above run corresponding `<platform_toolchain_name>_env.bat` files if they exist to set compiler-specific environment variables(PATH, INCLUDE, LIB, etc.). So the file names are: `win_x86_mingw_env.bat`, `win_x64_mingw_env.bat`, `win_x86_msvc10_env.bat`, etc. Create them if necessary before building the project.  
+**Important note:** The batch files mentioned above run corresponding `<platform_toolchain_name>_env` scripts from `./source/b1icommon` directory if they exist to set compiler-specific environment variables(PATH, INCLUDE, LIB, etc.). So the file names are: `win_x86_mingw_env.bat`, `win_x64_mingw_env.bat`, `win_x86_msvc10_env.bat`, `lnx_x64_gcc_env.sh`, etc. Create them if necessary before building the project. CMake build and setup scripts for **b1ig** interpreter use `wx-config` utility to locate wxWidgets libraries and compiler settings. Specify the utility executable file name (with path if needed) by setting `WX_CONFIG` environment variable before running **b1ig** build or setup scripts (the mentioned above `<platform_toolchain_name>_env` scripts can be used for this purpose, the samples can be found in `./source/b1icommon` directory: they have `sample_` prefix).  
   
 ## Usage  
   
@@ -99,6 +100,8 @@ Examples:
 - `./samples` - some basic samples  
 - `./source` - source directory  
 - `./source/b1i` - source files of a simple command-line interpreter  
+- `./source/b1icommon` - some common source files and scripts for building interpreter executables and distributives  
+- `./source/b1ig` - source files of interpreter with graphical IDE and debugger (wxWidgets GUI library is needed to build it)  
 - `./source/common` - common source files  
 - `./source/core` - interpreter core source files  
 - `./source/ext` - a separate directory for environment-specific source files  

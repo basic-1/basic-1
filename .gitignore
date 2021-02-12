@@ -1,4 +1,4 @@
 bin/
 build/
-source/b1i/*_env.bat
-source/b1i/*_env.sh
+source/b1icommon/win_*_env.bat
+source/b1icommon/lnx_*_env.sh

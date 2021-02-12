@@ -1,0 +1,1 @@
+call win_7zip_zip_distr.bat b1ig x64 mingw %1
