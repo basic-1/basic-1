@@ -1,3 +1,9 @@
+b1i (1.0.0-51) unstable; urgency=low
+
+  * some screenshots added
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Fri, 19 Feb 2021 21:16:11 +0300
+
 b1i (1.0.0-50) unstable; urgency=low
 
   * b1ig interpreter and IDE with graphical interface first release

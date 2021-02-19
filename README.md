@@ -2,6 +2,8 @@
   
 *just one more BASIC interpreter*  
   
+![b1ig program on Windows](./docs/images/b1win.png "b1ig program on Windows")  
+  
 # Brief  
   
 - supports classic BASIC dialect with various extensions  
@@ -115,4 +117,7 @@ Examples:
 [BASIC1 interpreter limitations](./docs/limits.md)  
 [BASIC1 interpreter core embedding](./docs/embedding.md)  
 [Change log](./docs/changelog)  
+  
+![b1ig program on Ubuntu 18.04](./docs/images/b1ub1804.png "b1ig program on Ubuntu 18.04")  
+![b1ig program on Kubuntu 20.10](./docs/images/b1kub2010.png "b1ig program on Kubuntu 20.10")  
   
