@@ -1,3 +1,4 @@
+#include "B1igApp.h"
 #include "B1igFrame.h"
 
 #include <wx/persist/toplevel.h>
@@ -6,6 +7,7 @@
 #include <wx/fontdlg.h>
 #include <wx/aboutdlg.h>
 #include <wx/artprov.h>
+#include <wx/filename.h>
 
 #include "errors.h"
 
@@ -110,6 +112,7 @@ B1igFrame::B1igFrame(const wxString &title)
     , m_nIntPrevState(B1_INT_STATE_IDLE)
     , m_nCurrentLine(-1)
     , m_nBreakPointsCount(0)
+    , m_nErrorLineNum(0)
 {
     wxMenuBar *pMenuBar = new wxMenuBar();
     
@@ -306,10 +309,19 @@ B1igFrame::B1igFrame(const wxString &title)
     m_pTxtPrg->MarkerDefine(B1_MARKER_BREAKPOINT, wxSTC_MARK_CIRCLE, wxBROWN, wxBROWN);
     m_pTxtPrg->MarkerDefine(B1_MARKER_CURRENT_LINE, wxSTC_MARK_BACKGROUND);
     m_pTxtPrg->MarkerSetBackground(B1_MARKER_CURRENT_LINE, *wxYELLOW);
+    m_pTxtPrg->MarkerDefine(B1_MARKER_ERROR, wxSTC_MARK_BACKGROUND);
+    m_pTxtPrg->MarkerSetBackground(B1_MARKER_ERROR, wxColour(0xFF, 0x40, 0x40));
     
 
     wxCommandEvent ce;
     OnNew(ce);
+
+    if(wxGetApp().argc > 1)
+    {
+        wxFileName fn(wxGetApp().argv[1]);
+        fn.MakeAbsolute();
+        Open(fn.GetFullPath());
+    }
 }
 
 B1igFrame::~B1igFrame()
@@ -406,6 +418,14 @@ void B1igFrame::UpdateTitle()
 
 void B1igFrame::OnTxtPrgModified(wxStyledTextEvent &event)
 {
+    if(m_nErrorLineNum > 0)
+    {
+        // calling MarkerDelete fires this event again so clear m_nErrorLineNum first
+        auto line_num = m_nErrorLineNum;
+        m_nErrorLineNum = 0;
+        m_pTxtPrg->MarkerDelete(line_num - 1, B1_MARKER_ERROR);
+    }
+
     UpdateChangedFlag();
 }
 
@@ -521,6 +541,16 @@ void B1igFrame::OnNew(wxCommandEvent &event)
     UpdateMenu();
 }
 
+void B1igFrame::Open(const wxString &filename)
+{
+    if(m_pTxtPrg->LoadFile(filename))
+    {
+        SetEOLMode();
+        m_sFileName = filename;
+        UpdateTitle();
+    }
+}
+
 void B1igFrame::OnOpen(wxCommandEvent &event)
 {
     if( m_nIntState != B1_INT_STATE_IDLE &&
@@ -564,14 +594,7 @@ void B1igFrame::OnOpen(wxCommandEvent &event)
         return;
     }
     
-    wxString filename = opdlg.GetPath();
-    
-    if(m_pTxtPrg->LoadFile(filename))
-    {
-        SetEOLMode();
-        m_sFileName = filename;
-        UpdateTitle();
-    }
+    Open(opdlg.GetPath());
 }
 
 void B1igFrame::OnSave(wxCommandEvent &event)
@@ -1054,7 +1077,11 @@ void B1igFrame::OnFinish(wxThreadEvent &event)
         // go to the program line that caused the error
         if(line_num > 0)
         {
-            m_pTxtPrg->GotoLine(line_num - 1);
+            // set m_nErrorLineNum after MarkerAdd call because it fires EVT_STC_MODIFIED event
+            // which clears error marker
+            m_pTxtPrg->MarkerAdd(line_num - 1, B1_MARKER_ERROR);
+            m_nErrorLineNum = line_num;
+            m_pTxtPrg->GotoLine(m_nErrorLineNum - 1);
         }
 
         m_pTxtPrg->SetFocus();

@@ -65,6 +65,8 @@ copy ..\..\samples\*.* samples
 rem create docs temp. directory and copy document files there
 mkdir docs
 copy ..\..\docs\*.* docs
+mkdir docs\images
+copy ..\..\docs\images\*.* docs\images
 
 rem create temp. bin directory and copy binaries
 mkdir bin

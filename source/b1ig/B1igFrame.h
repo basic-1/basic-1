@@ -57,6 +57,7 @@ enum
 {
     B1_MARKER_BREAKPOINT = 0,
     B1_MARKER_CURRENT_LINE = 1,
+    B1_MARKER_ERROR = 2,
 };
 
 enum B1_INT_STATE
@@ -112,6 +113,8 @@ protected:
     int m_nBreakPointsCount;
     int m_nBreakpointLineNum;
 
+    int m_nErrorLineNum;
+
     wxString m_sProgramOutput;
 
     int m_nDefaultEOLMode;
@@ -158,6 +161,7 @@ protected:
     bool SaveModified(const wxString &text, bool noCancel = false);
     void UpdateChangedFlag();
     void UpdateTitle();
+    void Open(const wxString &filename);
     bool Save(const wxString &sCustomTitle = wxEmptyString);
     bool TerminateProgram(bool askforterm);
     

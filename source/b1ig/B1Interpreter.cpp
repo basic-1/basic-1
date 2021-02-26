@@ -180,7 +180,7 @@ wxThread::ExitCode B1Interpreter::Entry()
     {
         te = new wxThreadEvent(wxEVT_THREAD, wxID_B1THREAD_FINISHED);
         te->SetInt(err);
-        te->SetExtraLong(-1);
+        te->SetExtraLong(b1_int_curr_prog_line_cnt);
         wxQueueEvent(wxGetApp().GetTopWindow(), te);
         return (wxThread::ExitCode)0;
     }

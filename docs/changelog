@@ -1,3 +1,13 @@
+b1i (1.0.0-52) unstable; urgency=low
+
+  * now program line caused an error is highlighted with red color
+  * better errors processing: b1_int_prerun function reports program
+    line number in case of error
+  * b1ig executable accepts program file name as command line argument
+    to show it in IDE editor
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Fri, 26 Feb 2021 19:32:03 +0300
+
 b1i (1.0.0-51) unstable; urgency=low
 
   * some screenshots added

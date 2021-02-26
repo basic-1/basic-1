@@ -451,11 +451,6 @@ static uint8_t b1_var_get_type_size(uint8_t type)
 									(uint8_t)sizeof(B1_T_MEM_BLOCK_DESC);
 }
 
-static B1_T_MEMOFFSET b1_var_array_get_data_offset(uint8_t type, B1_T_MEMOFFSET index)
-{
-	return index * b1_var_get_type_size(type);
-}
-
 static B1_T_ERROR b1_var_array_alloc(B1_T_MEM_BLOCK_DESC arrdesc, uint8_t type, uint8_t argnum, B1_T_MEMOFFSET size, B1_T_MEM_BLOCK_DESC *arrdatadesc)
 {
 	B1_T_ERROR err;
