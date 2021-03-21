@@ -588,14 +588,14 @@ static uint8_t b1_eval_get_common_type(uint8_t type1, uint8_t type2)
 	B1_T_INDEX i;
 
 	// start finding common type from the highest priority type
-	for(i = 0; i < B1_VAR_TYPE_COUNT; i++)
+	for(i = 0; i < B1_TYPE_COUNT; i++)
 	{
-		if(b1_var_types[i] == type1)
+		if(b1_t_types[i] == type1)
 		{
 			return type1;
 		}
 
-		if(b1_var_types[i] == type2)
+		if(b1_t_types[i] == type2)
 		{
 			return type2;
 		}
@@ -692,8 +692,8 @@ B1_T_ERROR b1_eval(uint8_t options, B1_VAR_REF *var_ref)
 			// pointer to the current expression token structure
 			ptoken = &(*(b1_rpn + i)).data.token;
 			// the first and the second characters of the token
-			c = *(b1_int_progline + (*ptoken).offset);
-			c1 = ((*ptoken).length == 1 ? B1_T_C_STRTERM : *(b1_int_progline + (*ptoken).offset + 1));
+			c = *(b1_progline + (*ptoken).offset);
+			c1 = ((*ptoken).length == 1 ? B1_T_C_STRTERM : *(b1_progline + (*ptoken).offset + 1));
 		}
 
 		if(B1_RPNREC_TEST_TYPES(tflags, B1_RPNREC_TYPE_IMM_VALUE))
@@ -800,11 +800,11 @@ B1_T_ERROR b1_eval(uint8_t options, B1_VAR_REF *var_ref)
 						if(err == B1_RES_OK)
 						{
 #ifdef B1_FEATURE_DEBUG
-							memcpy((*var).id.name + 1, b1_int_progline + id_off, id_len * B1_T_CHAR_SIZE);
+							memcpy((*var).id.name + 1, b1_progline + id_off, id_len * B1_T_CHAR_SIZE);
 							(*var).id.name[0] = (B1_T_CHAR)id_len;
 #endif
 							// the variable was created
-							if(b1_int_opt_explicit_val)
+							if(b1_opt_explicit_val)
 							{
 #ifdef B1_FEATURE_DEBUG
 								// delete variable in case of debugging because the function
@@ -929,7 +929,7 @@ B1_T_ERROR b1_eval(uint8_t options, B1_VAR_REF *var_ref)
 					}
 
 					// save current program line
-					b1_fn_udef_call_stack[rpn_stack_ptr].prev_line_cnt = b1_int_curr_prog_line_cnt;
+					b1_fn_udef_call_stack[rpn_stack_ptr].prev_line_cnt = b1_curr_prog_line_cnt;
 
 					// save current RPN pointer (rpn and i)
 					b1_fn_udef_call_stack[rpn_stack_ptr].prev_rpn = b1_rpn;
@@ -950,7 +950,7 @@ B1_T_ERROR b1_eval(uint8_t options, B1_VAR_REF *var_ref)
 					tmptop += argnum;
 
 					// switch to DEF program line
-					b1_int_curr_prog_line_cnt = (*((B1_UDEF_FN *)fn)).def_line_cnt - 1;
+					b1_curr_prog_line_cnt = (*((B1_UDEF_FN *)fn)).def_line_cnt - 1;
 					err = b1_ex_prg_get_prog_line(B1_T_LINE_NUM_NEXT);
 					if(err != B1_RES_OK)
 					{
@@ -1008,7 +1008,7 @@ B1_T_ERROR b1_eval(uint8_t options, B1_VAR_REF *var_ref)
 		{
 			rpn_stack_ptr--;
 
-			b1_int_curr_prog_line_cnt = b1_fn_udef_call_stack[rpn_stack_ptr].prev_line_cnt - 1;
+			b1_curr_prog_line_cnt = b1_fn_udef_call_stack[rpn_stack_ptr].prev_line_cnt - 1;
 
 			b1_rpn = b1_fn_udef_call_stack[rpn_stack_ptr].prev_rpn;
 			rpn_end = b1_fn_udef_call_stack[rpn_stack_ptr].prev_rpn_end;

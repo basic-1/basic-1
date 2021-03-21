@@ -9,11 +9,11 @@
 
 #include <stdlib.h>
 
+#include "b1.h"
 #include "b1ex.h"
 #include "b1tok.h"
 #include "b1rpn.h"
 #include "b1types.h"
-#include "b1int.h"
 #include "b1dbg.h"
 #include "b1err.h"
 
@@ -153,7 +153,7 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 		else
 		{
 			// get the first token character
-			c = *(b1_int_progline + offset);
+			c = *(b1_progline + offset);
 		}
 
 		// process variables with subscripts and functions (tmp here is type of the previous token)
@@ -175,7 +175,7 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 				{
 					if(*(stop_tokens + tmp) == NULL) break;
 
-					if(!b1_t_strcmpi(*(stop_tokens + tmp), b1_int_progline + offset, len))
+					if(!b1_t_strcmpi(*(stop_tokens + tmp), b1_progline + offset, len))
 					{
 						c = 0;
 						
@@ -332,7 +332,7 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 				rr.data.id.offset = offset;
 				rr.data.id.length = len;
 #endif
-				rr.data.id.hash = b1_id_calc_hash(b1_int_progline + offset, len * B1_T_CHAR_SIZE);
+				rr.data.id.hash = b1_id_calc_hash(b1_progline + offset, len * B1_T_CHAR_SIZE);
 #ifdef B1_FEATURE_MINIMAL_EVALUATION
 				// set iif flag if hash corresponds to IIF or IIF$ name
 				if(rr.data.id.hash == B1_FN_IIF_FN_HASH || rr.data.id.hash == B1_FN_STRIIF_FN_HASH)
@@ -340,7 +340,7 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 					iif++;
 				}
 #endif
-				b1_int_get_type_by_type_spec(*(b1_int_progline + offset + len - 1), B1_TYPE_NULL, &rr.data.id.flags);
+				b1_t_get_type_by_type_spec(*(b1_progline + offset + len - 1), B1_TYPE_NULL, &rr.data.id.flags);
 			}
 
 			STACK_PUSH(top, rr);

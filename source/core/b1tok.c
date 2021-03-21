@@ -11,9 +11,10 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "b1.h"
 #include "b1tok.h"
+#include "b1id.h"
 #include "b1types.h"
-#include "b1int.h"
 #include "b1err.h"
 
 
@@ -67,7 +68,7 @@ B1_T_ERROR b1_tok_get(B1_T_INDEX offset, uint8_t options, B1_TOKENDATA *tokendat
 	{
 		offset++;
 
-		c = *(b1_int_progline + offset);
+		c = *(b1_progline + offset);
 
 		if(offset == B1_T_INDEX_MAX_VALUE && !B1_T_ISCSTRTERM(c))
 		{
@@ -379,6 +380,101 @@ B1_T_ERROR b1_tok_get(B1_T_INDEX offset, uint8_t options, B1_TOKENDATA *tokendat
 	{
 		out_index--;
 		*(b1_tmp_buf) = (B1_T_CHAR)out_index;
+	}
+
+	return B1_RES_OK;
+}
+
+// reads line number from (b1_progline + *offset) into b1_next_line_num variable,
+// updates *offset value with position of the next character after the line number
+B1_T_ERROR b1_tok_get_line_num(B1_T_INDEX *offset)
+{
+	B1_T_ERROR err;
+	B1_T_INDEX len;
+	B1_TOKENDATA td;
+	B1_T_CHAR buf[6];
+
+	err = b1_tok_get(*offset, 0, &td);
+	if(err != B1_RES_OK)
+	{
+		return err;
+	}
+
+	b1_next_line_num = B1_T_LINE_NUM_ABSENT;
+
+	len = td.length;
+
+	if(len != 0)
+	{
+		if((td.type & B1_TOKEN_TYPE_DIGITS))
+		{
+			if(len <= B1_MAX_LINE_NUM_LEN)
+			{
+				memcpy(buf, b1_progline + td.offset, len * B1_T_CHAR_SIZE);
+				buf[len] = 0;
+
+				err = b1_t_strtoui16(buf, &b1_next_line_num);
+				if(err != B1_RES_OK)
+				{
+					return err;
+				}
+
+				if(b1_next_line_num > B1_T_LINE_NUM_MAX_VALUE)
+				{
+					return B1_RES_EINVLINEN;
+				}
+
+				*offset = td.offset + len;
+			}
+		}
+	}
+
+	return B1_RES_OK;
+}
+
+B1_T_ERROR b1_tok_stmt_init(uint8_t *stmt)
+{
+	B1_T_ERROR err;
+	B1_T_INDEX offset, len;
+	B1_TOKENDATA td;
+	B1_T_IDHASH hash;
+
+	*stmt = B1_ID_STMT_ABSENT;
+
+	// get line number
+	err = b1_tok_get_line_num(&b1_curr_prog_line_offset);
+	if(err != B1_RES_OK)
+	{
+		return err;
+	}
+
+	// get statement
+	err = b1_tok_get(b1_curr_prog_line_offset, 0, &td);
+	if(err != B1_RES_OK)
+	{
+		return err;
+	}
+
+	// no statement
+	len = td.length;
+	if(!len)
+	{
+		return B1_RES_OK;
+	}
+
+	// check statement
+	if(!(td.type & B1_TOKEN_TYPE_IDNAME))
+	{
+		return B1_RES_EINVSTAT;
+	}
+
+	offset = td.offset;
+
+	hash = b1_id_calc_hash(b1_progline + offset, len * B1_T_CHAR_SIZE);
+	*stmt = b1_id_get_stmt_by_hash(hash);
+	if(*stmt != B1_ID_STMT_UNKNOWN)
+	{
+		b1_curr_prog_line_offset = offset + len;
 	}
 
 	return B1_RES_OK;

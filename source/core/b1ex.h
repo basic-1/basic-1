@@ -55,7 +55,7 @@ extern B1_T_ERROR b1_ex_io_input_char(B1_T_CHAR *c);
 
 // caches line numbers (allowing faster program navigation), the cached data can be used by b1_ex_prg_get_prog_line ant other functions
 extern B1_T_ERROR b1_ex_prg_cache_curr_line_num(B1_T_LINE_NUM curr_line_num, uint8_t stmt);
-// the function should set b1_int_progline and b1_int_curr_prog_line_cnt global variables according to the program line
+// the function should set b1_progline and b1_curr_prog_line_cnt global variables according to the program line
 // number requested via next_line_num argument. the argument can be either BASIC line number or one of the next constants:
 // B1_T_LINE_NUM_FIRST, B1_T_LINE_NUM_NEXT. can return the next values (error codes): B1_RES_OK, B1_RES_ELINENNOTFND,
 // B1_RES_EPROGUNEND, B1_RES_EENVFAT
@@ -67,7 +67,7 @@ extern B1_T_ERROR b1_ex_prg_for_go_next();
 extern B1_T_ERROR b1_ex_prg_while_go_wend();
 #endif
 #ifdef B1_FEATURE_STMT_DATA_READ
-// sets the next DATA stamtement line counter (b1_int_data_curr_line_cnt and b1_int_data_curr_line_offset),
+// sets the next DATA stamtement line counter (b1_data_curr_line_cnt and b1_data_curr_line_offset),
 // next_line_num can be either valid line number or B1_T_LINE_NUM_FIRST, B1_T_LINE_NUM_NEXT constants.
 // possible return codes: B1_RES_OK, B1_RES_EDATAEND, B1_RES_ELINENNOTFND, B1_RES_EENVFAT, etc.
 extern B1_T_ERROR b1_ex_prg_data_go_next(B1_T_LINE_NUM next_line_num);

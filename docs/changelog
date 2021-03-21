@@ -1,3 +1,11 @@
+b1i (1.0.0-53) unstable; urgency=low
+
+  * some code revision
+  * small improvements in b1ig IDE (saving column sizes of Watch variables
+    grid, etc.)
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Sun, 21 Mar 2021 18:16:11 +0300
+
 b1i (1.0.0-52) unstable; urgency=low
 
   * now program line caused an error is highlighted with red color

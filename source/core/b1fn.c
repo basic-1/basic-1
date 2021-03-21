@@ -317,11 +317,11 @@ static B1_T_ERROR b1_fn_bltin_val(B1_VAR *parg1)
 
 	*(b1_tmp_buf1 + len + 1) = 0;
 
-	s = b1_int_progline;
-	b1_int_progline = b1_tmp_buf1;
+	s = b1_progline;
+	b1_progline = b1_tmp_buf1;
 	// copy value to b1_tmp_buf
 	err = b1_tok_get(1, B1_TOK_ALLOW_UNARY_OPER | B1_TOK_COPY_VALUE, &td);
-	b1_int_progline = s;
+	b1_progline = s;
 	
 	if(err != B1_RES_OK)
 	{
@@ -335,10 +335,10 @@ static B1_T_ERROR b1_fn_bltin_val(B1_VAR *parg1)
 		return B1_RES_EINVNUM;
 	}
 
-	s = b1_int_progline;
-	b1_int_progline = b1_tmp_buf1;
+	s = b1_progline;
+	b1_progline = b1_tmp_buf1;
 	err = b1_tok_get(td.offset + len, 0, &td);
-	b1_int_progline = s;
+	b1_progline = s;
 
 	if(err != B1_RES_OK)
 	{

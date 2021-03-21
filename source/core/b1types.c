@@ -16,6 +16,21 @@
 #include "b1err.h"
 
 
+// types should be defined according to their converting priorities (from highest to lowest)
+#if defined(B1_FEATURE_TYPE_DOUBLE) && defined(B1_FEATURE_TYPE_SINGLE)
+const uint8_t b1_t_types[B1_TYPE_COUNT] = { B1_TYPE_STRING, B1_TYPE_DOUBLE, B1_TYPE_SINGLE, B1_TYPE_INT32 };
+const B1_T_CHAR *b1_t_type_names[B1_TYPE_COUNT] = { _STRING, _DOUBLE, _SINGLE, _INT };
+#elif defined(B1_FEATURE_TYPE_SINGLE)
+const uint8_t b1_t_types[B1_TYPE_COUNT] = { B1_TYPE_STRING, B1_TYPE_SINGLE, B1_TYPE_INT32 };
+const B1_T_CHAR *b1_t_type_names[B1_TYPE_COUNT] = { _STRING, _SINGLE, _INT };
+#elif defined(B1_FEATURE_TYPE_DOUBLE)
+const uint8_t b1_t_types[B1_TYPE_COUNT] = { B1_TYPE_STRING, B1_TYPE_DOUBLE, B1_TYPE_INT32 };
+const B1_T_CHAR *b1_t_type_names[B1_TYPE_COUNT] = { _STRING, _DOUBLE, _INT };
+#else
+const uint8_t b1_t_types[B1_TYPE_COUNT] = { B1_TYPE_STRING, B1_TYPE_INT32 };
+const B1_T_CHAR *b1_t_type_names[B1_TYPE_COUNT] = { _STRING, _INT };
+#endif
+
 // global string constants
 const B1_T_CHAR _EQ[] = { 1, B1_T_C_EQ };
 const B1_T_CHAR _THEN[] = { 4, 'T', 'H', 'E', 'N' };
@@ -55,6 +70,15 @@ const B1_T_CHAR _DBG_INVALID[] = { 9, B1_T_C_LT, 'I', 'N', 'V', 'A', 'L', 'I', '
 const B1_T_CHAR _DBG_UNALLOC[] = { 9, B1_T_C_LT, 'U', 'N', 'A', 'L', 'L', 'O', 'C', B1_T_C_GT };
 const B1_T_CHAR _DBG_DELIM[] = { 2, B1_T_C_COMMA, B1_T_C_SPACE };
 #endif
+
+const B1_T_CHAR *LET_STOP_TOKENS[2] = { _EQ, NULL };
+const B1_T_CHAR *IF_STOP_TOKENS[2] = { _THEN, NULL };
+const B1_T_CHAR *ON_STOP_TOKENS[3] = { _GOTO, _GOSUB, NULL };
+const B1_T_CHAR *PRINT_STOP_TOKENS[3] = { _COMMA, _SEMICOLON, NULL };
+const B1_T_CHAR *INPUT_STOP_TOKEN[2] = { _COMMA, NULL };
+const B1_T_CHAR *DIM_STOP_TOKENS[4] = { _TO, _CLBRACKET, _COMMA, NULL };
+const B1_T_CHAR *FOR_STOP_TOKEN1[2] = { _TO, NULL };
+const B1_T_CHAR *FOR_STOP_TOKEN2[2] = { _STEP, NULL };
 
 
 // converts C string to uint16_t value
@@ -1083,4 +1107,87 @@ int8_t b1_t_strcmpi(const B1_T_CHAR *s1, const B1_T_CHAR *s2data, B1_T_INDEX s2l
 	}
 
 	return 0;
+}
+
+B1_T_ERROR b1_t_get_type_by_type_spec(B1_T_CHAR type_spec_char, uint8_t expl_type, uint8_t *res_type)
+{
+	uint8_t type;
+
+	type = B1_TYPE_NULL;
+
+	switch(type_spec_char)
+	{
+		case B1_T_C_DOLLAR:
+			type = B1_TYPE_STRING;
+			break;
+#ifdef B1_FEATURE_TYPE_SINGLE
+		case B1_T_C_EXCLAMATION:
+			type = B1_TYPE_SINGLE;
+			break;
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+		case B1_T_C_NUMBER:
+			type = B1_TYPE_DOUBLE;
+			break;
+#endif
+		case B1_T_C_PERCENT:
+			type = B1_TYPE_INT32;
+	}
+
+	if(expl_type == B1_TYPE_NULL)
+	{
+		if(type == B1_TYPE_NULL)
+		{
+			// default type for variabe without type specificator
+#ifdef B1_FEATURE_TYPE_SINGLE
+			type = B1_TYPE_SINGLE;
+#elif defined(B1_FEATURE_TYPE_DOUBLE)
+			type = B1_TYPE_DOUBLE;
+#else
+			type = B1_TYPE_INT32;
+#endif
+		}
+	}
+	else
+	{
+		if(type == B1_TYPE_NULL)
+		{
+			if(expl_type == B1_TYPE_STRING)
+			{
+				return B1_RES_ETYPMISM;
+			}
+
+			type = expl_type;
+		}
+
+		if(type != expl_type)
+		{
+			return B1_RES_ETYPMISM;
+		}
+	}
+
+	*res_type = type;
+
+	return B1_RES_OK;
+}
+
+B1_T_ERROR b1_t_get_type_by_name(const B1_T_CHAR *str, B1_T_INDEX len, uint8_t *type)
+{
+	B1_T_INDEX i;
+
+	for(i = 0; ; i++)
+	{
+		if(i == B1_TYPE_COUNT)
+		{
+			return B1_RES_ESYNTAX;
+		}
+
+		if(!b1_t_strcmpi(b1_t_type_names[i], str, len))
+		{
+			*type = b1_t_types[i];
+			break;
+		}
+	}
+
+	return B1_RES_OK;
 }

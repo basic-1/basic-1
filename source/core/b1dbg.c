@@ -13,9 +13,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "b1.h"
 #include "b1ex.h"
 #include "b1err.h"
-#include "b1int.h"
 #include "b1dbg.h"
 
 
@@ -92,11 +92,11 @@ B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_IN
 	}
 
 	// copy variable type
-	for(i = 0; i < B1_VAR_TYPE_COUNT; i++)
+	for(i = 0; i < B1_TYPE_COUNT; i++)
 	{
-		if(b1_var_types[i] == type)
+		if(b1_t_types[i] == type)
 		{
-			if(b1_dbg_copy_str(b1_var_type_names[i], &sbuf, &buflen))
+			if(b1_dbg_copy_str(b1_t_type_names[i], &sbuf, &buflen))
 			{
 				return B1_RES_OK;
 			}
@@ -326,20 +326,20 @@ B1_T_ERROR b1_dbg_get_break_line_cnt(B1_T_PROG_LINE_CNT *line_cnt)
 	const B1_T_CHAR *prev_prg_line;
 
 
-	prev_line_cnt = b1_int_curr_prog_line_cnt;
-	prev_prg_line = b1_int_progline;
+	prev_line_cnt = b1_curr_prog_line_cnt;
+	prev_prg_line = b1_progline;
 
-	err = (b1_int_curr_prog_line_offset == 0) ?
-		b1_ex_prg_get_prog_line(b1_int_next_line_num) :
+	err = (b1_curr_prog_line_offset == 0) ?
+		b1_ex_prg_get_prog_line(b1_next_line_num) :
 		B1_RES_OK;
 
 	if(err == B1_RES_OK)
 	{
-		*line_cnt = b1_int_curr_prog_line_cnt;
+		*line_cnt = b1_curr_prog_line_cnt;
 	}
 
-	b1_int_progline = prev_prg_line;
-	b1_int_curr_prog_line_cnt = prev_line_cnt;
+	b1_progline = prev_prg_line;
+	b1_curr_prog_line_cnt = prev_line_cnt;
 
 	return err;
 }

@@ -12,8 +12,7 @@
 
 #include <stdint.h>
 
-#include "b1feat.h"
-#include "b1itypes.h"
+#include "b1.h"
 #include "b1var.h"
 
 
@@ -50,28 +49,10 @@ typedef struct
 } B1_INT_STMT_STK_REC;
 
 
-extern B1_T_CHAR b1_tmp_buf[B1_TMP_BUF_LEN];
-extern B1_T_CHAR b1_tmp_buf1[B1_TMP_BUF_LEN];
-
-extern const B1_T_CHAR *b1_int_progline;
-extern B1_T_PROG_LINE_CNT b1_int_curr_prog_line_cnt;
-extern B1_T_INDEX b1_int_curr_prog_line_offset;
-extern B1_T_LINE_NUM b1_int_next_line_num;
-
-extern uint8_t b1_int_opt_base_val;
-extern uint8_t b1_int_opt_explicit_val;
-
 extern uint8_t b1_int_print_zone_width;
 extern uint8_t b1_int_print_curr_pos;
 
 extern uint8_t b1_int_input_echo;
-
-#ifdef B1_FEATURE_STMT_DATA_READ
-// DATA statement counters
-extern uint8_t b1_int_data_state;
-extern B1_T_PROG_LINE_CNT b1_int_data_curr_line_cnt;
-extern B1_T_INDEX b1_int_data_curr_line_offset;
-#endif
 
 #ifdef B1_FEATURE_STMT_STOP
 extern uint8_t b1_int_exec_stop;
@@ -79,7 +60,6 @@ extern uint8_t b1_int_exec_stop;
 
 
 extern B1_T_ERROR b1_int_reset();
-extern B1_T_ERROR b1_int_get_type_by_type_spec(B1_T_CHAR type_spec_char, uint8_t expl_type, uint8_t *res_type);
 extern B1_T_ERROR b1_int_prerun();
 extern B1_T_ERROR b1_int_run();
 

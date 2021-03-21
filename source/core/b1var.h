@@ -17,15 +17,6 @@
 #include "b1tok.h"
 
 
-#if defined(B1_FEATURE_TYPE_SINGLE) && defined(B1_FEATURE_TYPE_DOUBLE)
-#define B1_VAR_TYPE_COUNT ((uint8_t)4)
-#elif defined(B1_FEATURE_TYPE_SINGLE) || defined(B1_FEATURE_TYPE_DOUBLE)
-#define B1_VAR_TYPE_COUNT ((uint8_t)3)
-#else
-#define B1_VAR_TYPE_COUNT ((uint8_t)2)
-#endif
-
-
 typedef union
 {
 	// token record pointer
@@ -66,9 +57,6 @@ typedef struct
 	B1_T_MEMOFFSET val_off;
 } B1_VAR_REF;
 
-
-extern const uint8_t b1_var_types[B1_VAR_TYPE_COUNT];
-extern const B1_T_CHAR *b1_var_type_names[B1_VAR_TYPE_COUNT];
 
 extern B1_T_ERROR b1_var_str2var(const B1_T_CHAR *s, B1_VAR *var);
 extern B1_T_ERROR b1_var_var2str(const B1_VAR *var, B1_T_CHAR *sbuf);

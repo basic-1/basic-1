@@ -18,22 +18,6 @@
 #include "b1err.h"
 
 
-// types should be defined according to their converting priorities (from highest to lowest)
-#if defined(B1_FEATURE_TYPE_DOUBLE) && defined(B1_FEATURE_TYPE_SINGLE)
-const uint8_t b1_var_types[B1_VAR_TYPE_COUNT] = { B1_TYPE_STRING, B1_TYPE_DOUBLE, B1_TYPE_SINGLE, B1_TYPE_INT32 };
-const B1_T_CHAR *b1_var_type_names[B1_VAR_TYPE_COUNT] = { _STRING, _DOUBLE, _SINGLE, _INT };
-#elif defined(B1_FEATURE_TYPE_SINGLE)
-const uint8_t b1_var_types[B1_VAR_TYPE_COUNT] = { B1_TYPE_STRING, B1_TYPE_SINGLE, B1_TYPE_INT32 };
-const B1_T_CHAR *b1_var_type_names[B1_VAR_TYPE_COUNT] = { _STRING, _SINGLE, _INT };
-#elif defined(B1_FEATURE_TYPE_DOUBLE)
-const uint8_t b1_var_types[B1_VAR_TYPE_COUNT] = { B1_TYPE_STRING, B1_TYPE_DOUBLE, B1_TYPE_INT32 };
-const B1_T_CHAR *b1_var_type_names[B1_VAR_TYPE_COUNT] = { _STRING, _DOUBLE, _INT };
-#else
-const uint8_t b1_var_types[B1_VAR_TYPE_COUNT] = { B1_TYPE_STRING, B1_TYPE_INT32 };
-const B1_T_CHAR *b1_var_type_names[B1_VAR_TYPE_COUNT] = { _STRING, _INT };
-#endif
-
-
 static B1_T_ERROR b1_var_put_str_to_mem(const B1_T_CHAR *s, B1_T_MEM_BLOCK_DESC *mem_desc)
 {
 	B1_T_ERROR err;
@@ -331,7 +315,7 @@ B1_T_ERROR b1_var_init_empty(uint8_t type, uint8_t argnum, const B1_T_SUBSCRIPT 
 			}
 			else
 			{
-				*(data + i) = (i & 1) ? (uint8_t)(B1_DEF_SUBSCRIPT_UBOUND) : b1_int_opt_base_val;
+				*(data + i) = (i & 1) ? (uint8_t)(B1_DEF_SUBSCRIPT_UBOUND) : b1_opt_base_val;
 			}
 		}
 

@@ -35,6 +35,7 @@ include_directories(${B1_CORE_SRC_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(${B1_PROJECT_NAME} b1i.c
+	${B1_CORE_SRC_DIR}/b1.c
 	${B1_CORE_SRC_DIR}/b1types.c
 	${B1_CORE_SRC_DIR}/b1id.c
 	${B1_CORE_SRC_DIR}/b1tok.c

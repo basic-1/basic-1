@@ -124,7 +124,7 @@ static void b1_print_error(uint8_t err_code, int print_line_cnt, int print_err_d
 	
 	if(print_line_cnt)
 	{
-		FPRINTF(stderr, " at line %d", (int)b1_int_curr_prog_line_cnt);
+		FPRINTF(stderr, " at line %d", (int)b1_curr_prog_line_cnt);
 	}
 
 	if(print_err_desc && err_code >= B1_RES_FIRSTERRCODE && err_code <= B1_RES_LASTERRCODE)

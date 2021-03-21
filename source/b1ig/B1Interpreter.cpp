@@ -180,7 +180,7 @@ wxThread::ExitCode B1Interpreter::Entry()
     {
         te = new wxThreadEvent(wxEVT_THREAD, wxID_B1THREAD_FINISHED);
         te->SetInt(err);
-        te->SetExtraLong(b1_int_curr_prog_line_cnt);
+        te->SetExtraLong(b1_curr_prog_line_cnt);
         wxQueueEvent(wxGetApp().GetTopWindow(), te);
         return (wxThread::ExitCode)0;
     }
@@ -255,7 +255,7 @@ wxThread::ExitCode B1Interpreter::Entry()
     
     te = new wxThreadEvent(wxEVT_THREAD, wxID_B1THREAD_FINISHED);
     te->SetInt(err);
-    te->SetExtraLong(b1_int_curr_prog_line_cnt);
+    te->SetExtraLong(b1_curr_prog_line_cnt);
     wxQueueEvent(wxGetApp().GetTopWindow(), te);
     return (wxThread::ExitCode)0;
 }
@@ -338,8 +338,8 @@ B1_T_ERROR B1Interpreter::Eval(const wxString &expr, wxString &type, wxString &v
     }
     *(expr_buf + i) = 0;
 
-    auto prev_prgline = b1_int_progline;
-    b1_int_progline = expr_buf;
+    auto prev_prgline = b1_progline;
+    b1_progline = expr_buf;
 
     // turn off RPN caching
     auto prev_rpn_caching = b1_dbg_rpn_caching_enabled;
@@ -349,28 +349,28 @@ B1_T_ERROR B1Interpreter::Eval(const wxString &expr, wxString &type, wxString &v
     b1_dbg_rpn_caching_enabled = prev_rpn_caching;
     if(err != B1_RES_OK)
     {
-        b1_int_progline = prev_prgline;
+        b1_progline = prev_prgline;
         return err;
     }
 
     // set OPTION EXPLICIT
-    auto prev_expl = b1_int_opt_explicit_val;
-    b1_int_opt_explicit_val = 1;
+    auto prev_expl = b1_opt_explicit_val;
+    b1_opt_explicit_val = 1;
     // evaluate the expression
     err = b1_eval(0, NULL);
-    b1_int_progline = prev_prgline;
-    b1_int_opt_explicit_val = prev_expl;
+    b1_progline = prev_prgline;
+    b1_opt_explicit_val = prev_expl;
     if(err != B1_RES_OK)
     {
         return err;
     }
 
     // get result type name
-    for(auto t = 0; t < B1_VAR_TYPE_COUNT; t++)
+    for(auto t = 0; t < B1_TYPE_COUNT; t++)
     {
-        if(b1_var_types[t] == B1_TYPE_GET(b1_rpn_eval[0].type))
+        if(b1_t_types[t] == B1_TYPE_GET(b1_rpn_eval[0].type))
         {
-            type = fromb1str(b1_var_type_names[t]);
+            type = fromb1str(b1_t_type_names[t]);
             break;
         }
     }

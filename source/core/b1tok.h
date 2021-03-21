@@ -44,5 +44,7 @@ typedef struct
 
 
 extern B1_T_ERROR b1_tok_get(B1_T_INDEX offset, uint8_t options, B1_TOKENDATA *tokendata);
+extern B1_T_ERROR b1_tok_stmt_init(uint8_t *stmt);
+extern B1_T_ERROR b1_tok_get_line_num(B1_T_INDEX *offset);
 
 #endif

@@ -35,6 +35,9 @@ extern "C"
 #define B1_MW_FONT_SIZE "MWFntSz"
 #define B1_MW_FONT_STYLE "MWFntSt"
 #define B1_MW_FONT_WEIGHT "MWFntNW"
+#define B1_WATCH_VAR_GRID_WIDTH_NAME "MWDPVNamW"
+#define B1_WATCH_VAR_GRID_WIDTH_TYPE "MWDPVTypW"
+#define B1_WATCH_VAR_GRID_WIDTH_VALUE "MWDPVValW"
 
 #define B1_MW_MAIN_WINDOW_DEF_SIZE wxSize(900, 500)
 #define B1_MW_OUTPUT_PANE_DEF_SIZE wxSize(420, 350)
@@ -282,14 +285,14 @@ B1igFrame::B1igFrame(const wxString &title)
     pNB->AddPage(m_pGridVars, _("Watch:"));
     m_pGridVars->SetLabelFont(m_Font);
     m_pGridVars->SetDefaultCellFont(m_Font);
-    InitGridVars();
-    UpdateGridVars();
 
     wxAuiPaneInfo pid;
     // add the dubug control to AUI manager
     m_AuiManager.AddPane(pNB, 
         pid.Dockable().Bottom().Name(B1_MW_AUI_DEBUG_PANE_NAME)
-            .Caption(_("Debug:")).CaptionVisible().Show(false).MinSize(100, 100));
+            .Caption(_("Debug:")).CaptionVisible().MinSize(100, 100));
+
+    bool bNoAuiSettings = true;
     
     if(wxPersistentRegisterAndRestore(this, B1_MW_MAIN_WINDOW))
     {
@@ -298,11 +301,29 @@ B1igFrame::B1igFrame(const wxString &title)
         if(wxConfig::Get()->Read(B1_MW_AUI_PERSPECTIVE, &auipers))
         {
             m_AuiManager.LoadPerspective(auipers, false);
+            bNoAuiSettings = false;
         }
     }
-    
+
     m_AuiManager.Update();
-    
+
+
+    InitGridVars();
+    UpdateGridVars();
+
+
+    // restore watch variables grid column sizes
+    int colWidth[3];
+    if(wxConfig::Get()->Read(B1_WATCH_VAR_GRID_WIDTH_NAME, colWidth) &&
+       wxConfig::Get()->Read(B1_WATCH_VAR_GRID_WIDTH_TYPE, colWidth + 1) &&
+       wxConfig::Get()->Read(B1_WATCH_VAR_GRID_WIDTH_VALUE, colWidth + 2))
+    {
+        m_pGridVars->SetColSize(0, colWidth[0]);
+        m_pGridVars->SetColSize(1, colWidth[1]);
+        m_pGridVars->SetColSize(2, colWidth[2]);
+    }
+
+
     // for wxStyledTextCtrl::SaveFile and wxStyledTextCtrl::LoadFile to use UTF-8 encoding
     wxConvCurrent = &wxConvUTF8;
     
@@ -311,7 +332,14 @@ B1igFrame::B1igFrame(const wxString &title)
     m_pTxtPrg->MarkerSetBackground(B1_MARKER_CURRENT_LINE, *wxYELLOW);
     m_pTxtPrg->MarkerDefine(B1_MARKER_ERROR, wxSTC_MARK_BACKGROUND);
     m_pTxtPrg->MarkerSetBackground(B1_MARKER_ERROR, wxColour(0xFF, 0x40, 0x40));
-    
+
+
+    // do not show Debug pane on the first run
+    if(bNoAuiSettings)
+    {
+        wxCommandEvent ceDP(wxEVT_MENU, wxID_MENU_DEBUG_PANE);
+        AddPendingEvent(ceDP);
+    }
 
     wxCommandEvent ce;
     OnNew(ce);
@@ -339,6 +367,17 @@ B1igFrame::~B1igFrame()
     wxAuiPaneInfo &pid = m_AuiManager.GetPane(B1_MW_AUI_DEBUG_PANE_NAME);
     wxConfig::Get()->Write(B1_MW_AUI_DEBUG_PANE_WIDTH, pid.rect.GetWidth());
     wxConfig::Get()->Write(B1_MW_AUI_DEBUG_PANE_HEIGHT, pid.rect.GetHeight());
+
+    int colWidth[3] =
+    {
+        m_pGridVars->GetColSize(0),
+        m_pGridVars->GetColSize(1),
+        m_pGridVars->GetColSize(2)
+    };
+
+    wxConfig::Get()->Write(B1_WATCH_VAR_GRID_WIDTH_NAME, colWidth[0]);
+    wxConfig::Get()->Write(B1_WATCH_VAR_GRID_WIDTH_TYPE, colWidth[1]);
+    wxConfig::Get()->Write(B1_WATCH_VAR_GRID_WIDTH_VALUE, colWidth[2]);
 
     wxConfig::Get()->Write(B1_MW_AUI_PERSPECTIVE, m_AuiManager.SavePerspective());
 

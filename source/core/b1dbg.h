@@ -6,11 +6,10 @@
  b1dbg.c: functions for debugging
 */
 
-#include "b1feat.h"
-
 #ifndef _B1_DEBUG_
 #define _B1_DEBUG_
 
+#include "b1feat.h"
 
 #ifdef B1_FEATURE_DEBUG
 #include "b1var.h"

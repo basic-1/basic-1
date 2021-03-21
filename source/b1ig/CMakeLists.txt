@@ -49,6 +49,7 @@ add_executable(${B1_PROJECT_NAME} ${B1_ADD_EXEC_PLATFORM_SPECIFIC} B1igApp.cpp
 	B1Interpreter.cpp
 	errors.cpp
 	exprg.cpp
+	${B1_CORE_SRC_DIR}/b1.c
 	${B1_CORE_SRC_DIR}/b1types.c
 	${B1_CORE_SRC_DIR}/b1id.c
 	${B1_CORE_SRC_DIR}/b1tok.c

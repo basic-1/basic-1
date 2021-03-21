@@ -20,8 +20,6 @@
 #endif
 
 
-#define B1_TMP_BUF_LEN ((B1_T_INDEX)(((B1_MAX_STRING_LEN) > (B1_MAX_IDENTIFIER_LEN) ? (B1_MAX_STRING_LEN) : (B1_MAX_IDENTIFIER_LEN)) + 1))
-
 // user data types
 #ifdef B1_FEATURE_TYPE_SINGLE
 // 4-byte floating-point value
@@ -58,6 +56,14 @@
 
 // variable reference (no need to free)
 #define B1_TYPE_REF_FLAG ((uint8_t)0x80)
+
+#if defined(B1_FEATURE_TYPE_SINGLE) && defined(B1_FEATURE_TYPE_DOUBLE)
+#define B1_TYPE_COUNT ((uint8_t)4)
+#elif defined(B1_FEATURE_TYPE_SINGLE) || defined(B1_FEATURE_TYPE_DOUBLE)
+#define B1_TYPE_COUNT ((uint8_t)3)
+#else
+#define B1_TYPE_COUNT ((uint8_t)2)
+#endif
 
 #define B1_T_C_STRTERM ((B1_T_CHAR)0)
 #define B1_T_C_0 ((B1_T_CHAR)'0')
@@ -186,6 +192,9 @@
 #endif
 
 
+extern const uint8_t b1_t_types[B1_TYPE_COUNT];
+extern const B1_T_CHAR *b1_t_type_names[B1_TYPE_COUNT];
+
 extern const B1_T_CHAR _EQ[];
 extern const B1_T_CHAR _THEN[];
 extern const B1_T_CHAR _GOTO[];
@@ -222,6 +231,15 @@ extern const B1_T_CHAR _DBG_UNALLOC[];
 extern const B1_T_CHAR _DBG_DELIM[];
 #endif
 
+extern const B1_T_CHAR *LET_STOP_TOKENS[];
+extern const B1_T_CHAR *IF_STOP_TOKENS[];
+extern const B1_T_CHAR *ON_STOP_TOKENS[];
+extern const B1_T_CHAR *PRINT_STOP_TOKENS[];
+extern const B1_T_CHAR *INPUT_STOP_TOKEN[];
+extern const B1_T_CHAR *DIM_STOP_TOKENS[];
+extern const B1_T_CHAR *FOR_STOP_TOKEN1[];
+extern const B1_T_CHAR *FOR_STOP_TOKEN2[];
+
 
 extern B1_T_ERROR b1_t_strtoui16(const B1_T_CHAR *cs, uint16_t *value);
 extern B1_T_ERROR b1_t_strtoi32(const B1_T_CHAR *cs, int32_t *value);
@@ -235,6 +253,8 @@ extern B1_T_ERROR b1_t_strtodouble(const B1_T_CHAR *cs, double *value);
 extern B1_T_ERROR b1_t_doubletostr(double value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, uint8_t max_len);
 #endif
 extern int8_t b1_t_strcmpi(const B1_T_CHAR *s1, const B1_T_CHAR *s2data, B1_T_INDEX s2len);
+extern B1_T_ERROR b1_t_get_type_by_type_spec(B1_T_CHAR type_spec_char, uint8_t expl_type, uint8_t *res_type);
+extern B1_T_ERROR b1_t_get_type_by_name(const B1_T_CHAR *str, B1_T_INDEX len, uint8_t *type);
 
 
 // checks

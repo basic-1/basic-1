@@ -31,29 +31,8 @@
 
 
 // global data
-// temp. buffers for string operations
-B1_T_CHAR b1_tmp_buf[B1_TMP_BUF_LEN];
-B1_T_CHAR b1_tmp_buf1[B1_TMP_BUF_LEN];
-
-// pointer to a null terminated string, maximal string length is B1_MAX_PROGLINE_LEN
-const B1_T_CHAR *b1_int_progline;
-// program line counter, 0 value corresponds to before execution state
-B1_T_PROG_LINE_CNT b1_int_curr_prog_line_cnt;
-// offset of the currently processing item within program line
-B1_T_INDEX b1_int_curr_prog_line_offset;
 // current statement state (some statements have execution states)
 static uint8_t b1_int_curr_stmt_state;
-// b1_int_interpret_stmt function sets the variable for the next b1_ex_prg_get_prog_line
-// function call to read proper program line (initially the variable is set to
-// B1_T_LINE_NUM_NEXT value)
-B1_T_LINE_NUM b1_int_next_line_num;
-
-// options can appear in the program beginning only
-static uint8_t b1_int_options_allowed;
-// OPTION BASE value
-uint8_t b1_int_opt_base_val;
-// OPTION EXPLICIT value
-uint8_t b1_int_opt_explicit_val;
 
 // statement call stack (used with IF, GOSUB and FOR statements)
 static B1_T_INDEX b1_int_stmt_stack_ptr;
@@ -68,12 +47,6 @@ uint8_t b1_int_print_curr_pos;
 // echo input
 uint8_t b1_int_input_echo;
 
-#ifdef B1_FEATURE_STMT_DATA_READ
-// DATA statement counters
-B1_T_PROG_LINE_CNT b1_int_data_curr_line_cnt;
-B1_T_INDEX b1_int_data_curr_line_offset;
-#endif
-
 #ifdef B1_FEATURE_STMT_STOP
 uint8_t b1_int_exec_stop;
 #endif
@@ -81,16 +54,6 @@ uint8_t b1_int_exec_stop;
 #ifdef B1_FEATURE_DEBUG
 static uint8_t b1_int_continue_after_break;
 #endif
-
-
-static const B1_T_CHAR *LET_STOP_TOKENS[2] = { _EQ, NULL };
-static const B1_T_CHAR *IF_STOP_TOKENS[2] = { _THEN, NULL };
-static const B1_T_CHAR *ON_STOP_TOKENS[3] = { _GOTO, _GOSUB, NULL };
-static const B1_T_CHAR *PRINT_STOP_TOKENS[3] = { _COMMA, _SEMICOLON, NULL };
-static const B1_T_CHAR *INPUT_STOP_TOKEN[2] = { _COMMA, NULL };
-static const B1_T_CHAR *DIM_STOP_TOKENS[4] = { _TO, _CLBRACKET, _COMMA, NULL };
-static const B1_T_CHAR *FOR_STOP_TOKEN1[2] = { _TO, NULL };
-static const B1_T_CHAR *FOR_STOP_TOKEN2[2] = { _STEP, NULL };
 
 
 // initializes or resets interpreter
@@ -102,16 +65,10 @@ B1_T_ERROR b1_int_reset()
 
 	var = NULL;
 #endif
-	b1_int_curr_prog_line_cnt = 0;
-	b1_int_curr_prog_line_offset = 0;
-	b1_int_curr_stmt_state = 0;
-	b1_int_next_line_num = B1_T_LINE_NUM_NEXT;
 
-	b1_int_options_allowed = 1;
-	// set OPTION BASE to 0
-	b1_int_opt_base_val = 0;
-	// set OPTION EXPLICIT turned off
-	b1_int_opt_explicit_val = 0;
+	b1_reset();
+
+	b1_int_curr_stmt_state = 0;
 
 #ifdef B1_FEATURE_INIT_FREE_MEMORY
 	while(1)
@@ -153,11 +110,6 @@ B1_T_ERROR b1_int_reset()
 
 	b1_int_input_echo = 0;
 
-#ifdef B1_FEATURE_STMT_DATA_READ
-	// reset DATA statement counters
-	b1_int_data_curr_line_cnt = 0;
-#endif
-
 #ifdef B1_FEATURE_FUNCTIONS_MATH_BASIC
 #ifdef B1_FRACTIONAL_TYPE_EXISTS
 	b1_ex_rnd_randomize(1);
@@ -181,53 +133,6 @@ B1_T_ERROR b1_int_reset()
 	return b1_ex_mem_init();
 }
 
-// reads line number from (b1_int_progline + *offset) into b1_int_next_line_num variable,
-// updates *offset value with position of the next character after the line number
-static B1_T_ERROR b1_int_get_line_num(B1_T_INDEX *offset)
-{
-	B1_T_ERROR err;
-	B1_T_INDEX len;
-	B1_TOKENDATA td;
-	B1_T_CHAR buf[6];
-
-	err = b1_tok_get(*offset, 0, &td);
-	if(err != B1_RES_OK)
-	{
-		return err;
-	}
-
-	b1_int_next_line_num = B1_T_LINE_NUM_ABSENT;
-
-	len = td.length;
-
-	if(len != 0)
-	{
-		if((td.type & B1_TOKEN_TYPE_DIGITS))
-		{
-			if(len <= B1_MAX_LINE_NUM_LEN)
-			{
-				memcpy(buf, b1_int_progline + td.offset, len * B1_T_CHAR_SIZE);
-				buf[len] = 0;
-
-				err = b1_t_strtoui16(buf, &b1_int_next_line_num);
-				if(err != B1_RES_OK)
-				{
-					return err;
-				}
-
-				if(b1_int_next_line_num > B1_T_LINE_NUM_MAX_VALUE)
-				{
-					return B1_RES_EINVLINEN;
-				}
-
-				*offset = td.offset + len;
-			}
-		}
-	}
-
-	return B1_RES_OK;
-}
-
 // interpret LET statement
 static B1_T_ERROR b1_int_st_let(B1_T_INDEX offset, B1_VAR_REF *dst_var_ref, const B1_T_CHAR **stop_tokens, B1_T_INDEX *continue_offset)
 {
@@ -247,7 +152,7 @@ static B1_T_ERROR b1_int_st_let(B1_T_INDEX offset, B1_VAR_REF *dst_var_ref, cons
 		right_exp_off = td.offset;
 		if(td.length == 0) return B1_RES_ESYNTAX;
 		// only one stop token for LET statement ("=")
-		stop = !b1_t_strcmpi(LET_STOP_TOKENS[0], b1_int_progline + right_exp_off, td.length);
+		stop = !b1_t_strcmpi(LET_STOP_TOKENS[0], b1_progline + right_exp_off, td.length);
 		right_exp_off += td.length;
 	}
 
@@ -438,7 +343,7 @@ static B1_T_ERROR b1_int_st_print(B1_T_INDEX offset)
 		newline = 1;
 
 		// get next print zone flag
-		next_print_zone = offset && B1_T_ISCOMMA(b1_int_progline[offset]);
+		next_print_zone = offset && B1_T_ISCOMMA(b1_progline[offset]);
 
 		err = b1_eval(B1_EVAL_OPT_PRINT_FUNCTIONS, NULL);
 		if(err != B1_RES_OK)
@@ -605,7 +510,7 @@ static B1_T_ERROR b1_int_input_line(B1_T_CHAR *sbuf, B1_T_INDEX buflen)
 	return err;
 }
 
-// reads the next value from (b1_int_progline + *offset) to b1_tmp_buf
+// reads the next value from (b1_progline + *offset) to b1_tmp_buf
 static B1_T_ERROR b1_int_input_read_get_value(uint8_t allow_comments, B1_T_INDEX *offset, uint8_t *options)
 {
 	B1_T_ERROR err;
@@ -632,7 +537,7 @@ static B1_T_ERROR b1_int_input_read_get_value(uint8_t allow_comments, B1_T_INDEX
 
 	for(i = 0, j = *b1_tmp_buf + 1; ; (*offset)++)
 	{
-		c = *(b1_int_progline + *offset);
+		c = *(b1_progline + *offset);
 
 		if(i == 0 && B1_T_ISBLANK(c))
 		{
@@ -857,10 +762,10 @@ static B1_T_ERROR b1_int_st_input(B1_T_INDEX offset)
 
 				// get next value
 				repeat_input = 0;
-				s = b1_int_progline;
-				b1_int_progline = b1_tmp_buf1;
+				s = b1_progline;
+				b1_progline = b1_tmp_buf1;
 				err = b1_int_input_read_get_value(0, &values_offset, &options);
-				b1_int_progline = s;
+				b1_progline = s;
 
 				if(err != B1_RES_OK)
 				{
@@ -903,67 +808,19 @@ static B1_T_ERROR b1_int_st_input(B1_T_INDEX offset)
 	return err;
 }
 
-static B1_T_ERROR b1_int_stmt_init(uint8_t *stmt)
-{
-	B1_T_ERROR err;
-	B1_T_INDEX offset, len;
-	B1_TOKENDATA td;
-	B1_T_IDHASH hash;
-
-	*stmt = B1_ID_STMT_ABSENT;
-
-	// get line number
-	err = b1_int_get_line_num(&b1_int_curr_prog_line_offset);
-	if(err != B1_RES_OK)
-	{
-		return err;
-	}
-
-	// get statement
-	err = b1_tok_get(b1_int_curr_prog_line_offset, 0, &td);
-	if(err != B1_RES_OK)
-	{
-		return err;
-	}
-
-	// no statement
-	len = td.length;
-	if(!len)
-	{
-		return B1_RES_OK;
-	}
-
-	// check statement
-	if(!(td.type & B1_TOKEN_TYPE_IDNAME))
-	{
-		return B1_RES_EINVSTAT;
-	}
-
-	offset = td.offset;
-
-	hash = b1_id_calc_hash(b1_int_progline + offset, len * B1_T_CHAR_SIZE);
-	*stmt = b1_id_get_stmt_by_hash(hash);
-	if(*stmt != B1_ID_STMT_UNKNOWN)
-	{
-		b1_int_curr_prog_line_offset = offset + len;
-	}
-
-	return B1_RES_OK;
-}
-
 #ifdef B1_FEATURE_STMT_DATA_READ
 static B1_T_ERROR b1_int_read_next_field(uint8_t *options)
 {
 	B1_T_ERROR err, err1;
 	B1_T_PROG_LINE_CNT read_line_cnt;
 
-	read_line_cnt = b1_int_curr_prog_line_cnt;
+	read_line_cnt = b1_curr_prog_line_cnt;
 
-	// b1_int_data_curr_line_cnt == 0 stands for the initial state, b1_int_data_curr_line_offset == 0 means the need to
+	// b1_data_curr_line_cnt == 0 stands for the initial state, b1_data_curr_line_offset == 0 means the need to
 	// go to the next DATA statement line
-	if(b1_int_data_curr_line_cnt == 0 || b1_int_data_curr_line_offset == 0)
+	if(b1_data_curr_line_cnt == 0 || b1_data_curr_line_offset == 0)
 	{
-		err = b1_ex_prg_data_go_next(b1_int_data_curr_line_cnt == 0 ? B1_T_LINE_NUM_FIRST : B1_T_LINE_NUM_NEXT);
+		err = b1_ex_prg_data_go_next(b1_data_curr_line_cnt == 0 ? B1_T_LINE_NUM_FIRST : B1_T_LINE_NUM_NEXT);
 		if(err != B1_RES_OK)
 		{
 			return err;
@@ -971,22 +828,22 @@ static B1_T_ERROR b1_int_read_next_field(uint8_t *options)
 	}
 
 	// switch to DATA line
-	b1_int_curr_prog_line_cnt = b1_int_data_curr_line_cnt - 1;
+	b1_curr_prog_line_cnt = b1_data_curr_line_cnt - 1;
 	err = b1_ex_prg_get_prog_line(B1_T_LINE_NUM_NEXT);
 	if(err != B1_RES_OK)
 	{
 		return err;
 	}
 
-	err1 = b1_int_input_read_get_value(1, &b1_int_data_curr_line_offset, options);
+	err1 = b1_int_input_read_get_value(1, &b1_data_curr_line_offset, options);
 	if(err1 == B1_RES_OK && ((*options) & B1_INT_READ_VALUE_LAST))
 	{
 		// go to the next DATA statement line when reading the next value
-		b1_int_data_curr_line_offset = 0;
+		b1_data_curr_line_offset = 0;
 	}
 
 	// restore READ line
-	b1_int_curr_prog_line_cnt = read_line_cnt - 1;
+	b1_curr_prog_line_cnt = read_line_cnt - 1;
 	err = b1_ex_prg_get_prog_line(B1_T_LINE_NUM_NEXT);
 	if(err != B1_RES_OK)
 	{
@@ -1045,14 +902,14 @@ static B1_T_ERROR b1_int_st_read(B1_T_INDEX offset)
 }
 
 // RESTORE statement: sets next DATA stamtement line counter on requested
-// line number, returns the line number in b1_int_next_line_num variable
+// line number, returns the line number in b1_next_line_num variable
 static B1_T_ERROR b1_int_st_restore(B1_T_INDEX offset)
 {
 	B1_T_ERROR err;
 	B1_TOKENDATA td;
 
 	// get restore line number
-	err = b1_int_get_line_num(&offset);
+	err = b1_tok_get_line_num(&offset);
 	if(err != B1_RES_OK)
 	{
 		return err;
@@ -1069,7 +926,7 @@ static B1_T_ERROR b1_int_st_restore(B1_T_INDEX offset)
 		return B1_RES_ESYNTAX;
 	}
 
-	return b1_ex_prg_data_go_next(b1_int_next_line_num == B1_T_LINE_NUM_ABSENT ? B1_T_LINE_NUM_FIRST : b1_int_next_line_num);
+	return b1_ex_prg_data_go_next(b1_next_line_num == B1_T_LINE_NUM_ABSENT ? B1_T_LINE_NUM_FIRST : b1_next_line_num);
 }
 #endif
 
@@ -1107,89 +964,6 @@ static B1_T_ERROR b1_int_st_dim_get_size(B1_T_INDEX *offset, uint8_t allow_TO_st
 	return B1_RES_OK;
 }
 
-static B1_T_ERROR b1_int_get_type_by_name(const B1_T_CHAR *str, B1_T_INDEX len, uint8_t *type)
-{
-	B1_T_INDEX i;
-
-	for(i = 0; ; i++)
-	{
-		if(i == B1_VAR_TYPE_COUNT)
-		{
-			return B1_RES_ESYNTAX;
-		}
-
-		if(!b1_t_strcmpi(b1_var_type_names[i], str, len))
-		{
-			*type = b1_var_types[i];
-			break;
-		}
-	}
-
-	return B1_RES_OK;
-}
-
-B1_T_ERROR b1_int_get_type_by_type_spec(B1_T_CHAR type_spec_char, uint8_t expl_type, uint8_t *res_type)
-{
-	uint8_t type;
-
-	type = B1_TYPE_NULL;
-
-	switch(type_spec_char)
-	{
-		case B1_T_C_DOLLAR:
-			type = B1_TYPE_STRING;
-			break;
-#ifdef B1_FEATURE_TYPE_SINGLE
-		case B1_T_C_EXCLAMATION:
-			type = B1_TYPE_SINGLE;
-			break;
-#endif
-#ifdef B1_FEATURE_TYPE_DOUBLE
-		case B1_T_C_NUMBER:
-			type = B1_TYPE_DOUBLE;
-			break;
-#endif
-		case B1_T_C_PERCENT:
-			type = B1_TYPE_INT32;
-	}
-
-	if(expl_type == B1_TYPE_NULL)
-	{
-		if(type == B1_TYPE_NULL)
-		{
-			// default type for variabe without type specificator
-#ifdef B1_FEATURE_TYPE_SINGLE
-			type = B1_TYPE_SINGLE;
-#elif defined(B1_FEATURE_TYPE_DOUBLE)
-			type = B1_TYPE_DOUBLE;
-#else
-			type = B1_TYPE_INT32;
-#endif
-		}
-	}
-	else
-	{
-		if(type == B1_TYPE_NULL)
-		{
-			if(expl_type == B1_TYPE_STRING)
-			{
-				return B1_RES_ETYPMISM;
-			}
-
-			type = expl_type;
-		}
-
-		if(type != expl_type)
-		{
-			return B1_RES_ETYPMISM;
-		}
-	}
-
-	*res_type = type;
-
-	return B1_RES_OK;
-}
-
 static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 {
 	B1_T_ERROR err;
@@ -1222,14 +996,14 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 		len = td.length;
 
 		// get hash and check for existence
-		name_hash = b1_id_calc_hash(b1_int_progline + offset, len * B1_T_CHAR_SIZE);
+		name_hash = b1_id_calc_hash(b1_progline + offset, len * B1_T_CHAR_SIZE);
 #ifdef B1_FEATURE_DEBUG
 		id_off = offset;
 		id_len = len;
 #endif
 		offset += len;
 		type = B1_TYPE_NULL;
-		ts_char = b1_int_progline[offset - 1];
+		ts_char = b1_progline[offset - 1];
 
 		dimsnum = 0;
 		subs_bnds_ptr = subs_bounds;
@@ -1244,7 +1018,7 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 		offset = td.offset;
 		len = td.length;
 
-		if(len == 1 && b1_int_progline[offset] == B1_T_C_OPBRACK)
+		if(len == 1 && b1_progline[offset] == B1_T_C_OPBRACK)
 		{
 			offset++;
 			// get array dimensions
@@ -1263,11 +1037,11 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 				}
 
 				// TO, comma or close bracket
-				c = b1_int_progline[offset];
+				c = b1_progline[offset];
 
 				if(c == B1_T_C_CLBRACK || B1_T_ISCOMMA(c))
 				{
-					*subs_bnds_ptr++ = b1_int_opt_base_val;
+					*subs_bnds_ptr++ = b1_opt_base_val;
 					*subs_bnds_ptr++ = bound1;
 					dimsnum++;
 
@@ -1294,7 +1068,7 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 					}
 					dimsnum++;
 
-					c = b1_int_progline[offset];
+					c = b1_progline[offset];
 					offset++;
 
 					if(B1_T_ISCOMMA(c))
@@ -1324,7 +1098,7 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 			stop = 1;
 		}
 		else
-		if(len == 1 && B1_T_ISCOMMA(b1_int_progline[offset]))
+		if(len == 1 && B1_T_ISCOMMA(b1_progline[offset]))
 		{
 			// continue parsing string
 			stop = 0;
@@ -1332,7 +1106,7 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 		else
 		{
 			// try to get optional variable type
-			if(!b1_t_strcmpi(_AS, b1_int_progline + offset, len))
+			if(!b1_t_strcmpi(_AS, b1_progline + offset, len))
 			{
 				err = b1_tok_get(offset + len, 0, &td);
 				if(err != B1_RES_OK)
@@ -1343,7 +1117,7 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 				len = td.length;
 
 				// get variable type
-				err = b1_int_get_type_by_name(b1_int_progline + offset, len, &type);
+				err = b1_t_get_type_by_name(b1_progline + offset, len, &type);
 				if(err != B1_RES_OK)
 				{
 					return err;
@@ -1363,7 +1137,7 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 					stop = 1;
 				}
 				else
-				if(len == 1 && B1_T_ISCOMMA(b1_int_progline[offset]))
+				if(len == 1 && B1_T_ISCOMMA(b1_progline[offset]))
 				{
 					// continue parsing string
 					stop = 0;
@@ -1379,7 +1153,7 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 			}
 		}
 
-		err = b1_int_get_type_by_type_spec(ts_char, type, &type);
+		err = b1_t_get_type_by_type_spec(ts_char, type, &type);
 		if(err != B1_RES_OK)
 		{
 			return err;
@@ -1393,7 +1167,7 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 			return err;
 		}
 
-		memcpy((*var).id.name + 1, b1_int_progline + id_off, id_len * B1_T_CHAR_SIZE);
+		memcpy((*var).id.name + 1, b1_progline + id_off, id_len * B1_T_CHAR_SIZE);
 		(*var).id.name[0] = (B1_T_CHAR)id_len;
 #else
 		err = b1_var_create(name_hash, type, dimsnum, subs_bounds, NULL);
@@ -1537,7 +1311,7 @@ static B1_T_ERROR b1_int_st_erase(B1_T_INDEX offset)
 		}
 
 		// get hash and check for existence
-		name_hash = b1_id_calc_hash(b1_int_progline + offset, len * B1_T_CHAR_SIZE);
+		name_hash = b1_id_calc_hash(b1_progline + offset, len * B1_T_CHAR_SIZE);
 		offset += len;
 
 		err = b1_tok_get(offset, 0, &td);
@@ -1548,7 +1322,7 @@ static B1_T_ERROR b1_int_st_erase(B1_T_INDEX offset)
 
 		offset = td.offset;
 		len = td.length;
-		next = (len == 1) && B1_T_ISCOMMA(*(b1_int_progline + offset));
+		next = (len == 1) && B1_T_ISCOMMA(*(b1_progline + offset));
 		if(!next && len != 0)
 		{
 			return B1_RES_ESYNTAX;
@@ -1578,7 +1352,7 @@ static B1_T_ERROR b1_int_st_erase(B1_T_INDEX offset)
 #endif
 
 // linen_index = 0 for simple GOTO statement, linen_index != 0 for ON ... GOTO statement
-// sets b1_int_next_line_num to line number to move control to
+// sets b1_next_line_num to line number to move control to
 static B1_T_ERROR b1_int_st_go(B1_T_INDEX offset, uint8_t linen_index)
 {
 	B1_T_ERROR err;
@@ -1591,23 +1365,21 @@ static B1_T_ERROR b1_int_st_go(B1_T_INDEX offset, uint8_t linen_index)
 
 	while(1)
 	{
-		err = b1_int_get_line_num(&offset);
+		err = b1_tok_get_line_num(&offset);
 		if(err != B1_RES_OK)
 		{
 			return err;
 		}
 
-		if(b1_int_next_line_num == B1_T_LINE_NUM_ABSENT)
+		if(b1_next_line_num == B1_T_LINE_NUM_ABSENT)
 		{
 			return B1_RES_ESYNTAX;
 		}
 
-		if(!linen_index || i == linen_index)
+		if(i == linen_index)
 		{
 			break;
 		}
-
-		i++;
 
 		err = b1_tok_get(offset, 0, &td);
 		if(err != B1_RES_OK)
@@ -1617,26 +1389,24 @@ static B1_T_ERROR b1_int_st_go(B1_T_INDEX offset, uint8_t linen_index)
 
 		offset = td.offset;
 		len = td.length;
-		if(!(td.type & B1_TOKEN_TYPE_OPERATION) && len != 1 && !B1_T_ISCOMMA(b1_int_progline[offset]))
+
+		if(!linen_index)
+		{
+			if(len)
+			{
+				return B1_RES_ESYNTAX;
+			}
+
+			break;
+		}
+
+		if(!(td.type & B1_TOKEN_TYPE_OPERATION) && len != 1 && !B1_T_ISCOMMA(b1_progline[offset]))
 		{
 			return B1_RES_ESYNTAX;
 		}
 
 		offset += len;
-	}
-
-	if(!linen_index)
-	{
-		err = b1_tok_get(offset, 0, &td);
-		if(err != B1_RES_OK)
-		{
-			return err;
-		}
-
-		if(td.length)
-		{
-			return B1_RES_ESYNTAX;
-		}
+		i++;
 	}
 
 	return B1_RES_OK;
@@ -1675,7 +1445,7 @@ static B1_T_ERROR b1_int_st_if(B1_T_INDEX offset)
 	if(b1_rpn_eval[0].value.bval)
 	{
 		// add "THEN" keyword length
-		b1_int_curr_prog_line_offset = offset + (B1_T_INDEX)4;
+		b1_curr_prog_line_offset = offset + (B1_T_INDEX)4;
 	}
 
 	return B1_RES_OK;
@@ -1685,14 +1455,14 @@ static B1_T_ERROR b1_int_st_on(B1_T_INDEX offset, uint8_t *result)
 {
 	B1_T_ERROR err;
 
-	err = b1_rpn_build(offset, ON_STOP_TOKENS, &b1_int_curr_prog_line_offset);
+	err = b1_rpn_build(offset, ON_STOP_TOKENS, &b1_curr_prog_line_offset);
 	if(err != B1_RES_OK)
 	{
 		return err;
 	}
 
 	// no GOTO (GOSUB) clause found
-	if(b1_int_curr_prog_line_offset == 0)
+	if(b1_curr_prog_line_offset == 0)
 	{
 		return B1_RES_ESYNTAX;
 	}
@@ -1731,7 +1501,7 @@ static B1_T_ERROR b1_int_save_stmt_state(uint8_t new_state)
 	b1_int_stmt_stack_ptr++;
 
 	(*stk_rec).state = b1_int_curr_stmt_state;
-	(*stk_rec).ret_line_cnt = b1_int_curr_prog_line_cnt;
+	(*stk_rec).ret_line_cnt = b1_curr_prog_line_cnt;
 
 	b1_int_curr_stmt_state = new_state;
 
@@ -1750,7 +1520,7 @@ static B1_T_ERROR b1_int_restore_stmt_state()
 	// do no restore program line for IF statement
 	if(!(b1_int_curr_stmt_state & B1_INT_STATE_IF))
 	{
-		b1_int_curr_prog_line_cnt = (*(b1_int_stmt_stack + b1_int_stmt_stack_ptr)).ret_line_cnt;
+		b1_curr_prog_line_cnt = (*(b1_int_stmt_stack + b1_int_stmt_stack_ptr)).ret_line_cnt;
 	}
 
 	b1_int_curr_stmt_state = (*(b1_int_stmt_stack + b1_int_stmt_stack_ptr)).state;
@@ -1774,7 +1544,7 @@ static B1_T_ERROR b1_int_st_option_set(B1_T_INDEX *offset, const B1_T_CHAR *s, u
 
 	len = td.length;
 
-	if(!b1_t_strcmpi(s, b1_int_progline + td.offset, len))
+	if(!b1_t_strcmpi(s, b1_progline + td.offset, len))
 	{
 		err = b1_tok_get(td.offset + len, B1_TOK_COPY_VALUE, &td);
 		if(err != B1_RES_OK)
@@ -1862,12 +1632,12 @@ static B1_T_ERROR b1_int_st_option(B1_T_INDEX offset)
 	{
 		if(value == 0)
 		{
-			b1_int_opt_base_val = 0;
+			b1_opt_base_val = 0;
 		}
 		else
 		if(value == 1)
 		{
-			b1_int_opt_base_val = 1;
+			b1_opt_base_val = 1;
 		}
 		else
 		{
@@ -1888,12 +1658,12 @@ static B1_T_ERROR b1_int_st_option(B1_T_INDEX offset)
 		// omitted value corresponds to ON
 		if(value == 0)
 		{
-			b1_int_opt_explicit_val = 0;
+			b1_opt_explicit_val = 0;
 		}
 		else
 		if(value <= 2)
 		{
-			b1_int_opt_explicit_val = 1;
+			b1_opt_explicit_val = 1;
 		}
 		else
 		{
@@ -2178,7 +1948,7 @@ static B1_T_ERROR b1_int_st_for_test()
 	else
 	{
 		// set program line counter to the first line of the loop body
-		b1_int_curr_prog_line_cnt = (*stk_rec).ret_line_cnt;
+		b1_curr_prog_line_cnt = (*stk_rec).ret_line_cnt;
 	}
 
 	return B1_RES_OK;
@@ -2214,7 +1984,7 @@ static B1_T_ERROR b1_int_st_for_next(B1_T_INDEX offset)
 				return B1_RES_EINVTOK;
 			}
 
-			if(b1_id_calc_hash(b1_int_progline + td.offset, td.length * B1_T_CHAR_SIZE) != (*var).id.name_hash)
+			if(b1_id_calc_hash(b1_progline + td.offset, td.length * B1_T_CHAR_SIZE) != (*var).id.name_hash)
 			{
 				return B1_RES_ENXTWOFOR;
 			}
@@ -2285,7 +2055,7 @@ static B1_T_ERROR b1_int_st_def(B1_T_INDEX offset, B1_T_PROG_LINE_CNT def_line_c
 	len = td.length;
 
 	// get hash
-	hash = b1_id_calc_hash(b1_int_progline + offset, len * B1_T_CHAR_SIZE);
+	hash = b1_id_calc_hash(b1_progline + offset, len * B1_T_CHAR_SIZE);
 	offset += len;
 
 	// check for existence
@@ -2302,7 +2072,7 @@ static B1_T_ERROR b1_int_st_def(B1_T_INDEX offset, B1_T_PROG_LINE_CNT def_line_c
 
 	// create new user function
 	(*fn).fn.id.name_hash = hash;
-	b1_int_get_type_by_type_spec(b1_int_progline[offset - 1], B1_TYPE_NULL, &(*fn).fn.ret_type);
+	b1_t_get_type_by_type_spec(b1_progline[offset - 1], B1_TYPE_NULL, &(*fn).fn.ret_type);
 
 	err = b1_tok_get(offset, 0, &td);
 	if(err != B1_RES_OK)
@@ -2318,7 +2088,7 @@ static B1_T_ERROR b1_int_st_def(B1_T_INDEX offset, B1_T_PROG_LINE_CNT def_line_c
 		return B1_RES_ESYNTAX;
 	}
 
-	c = b1_int_progline[offset];
+	c = b1_progline[offset];
 	offset += len;
 
 	argnum = 0;
@@ -2348,7 +2118,7 @@ static B1_T_ERROR b1_int_st_def(B1_T_INDEX offset, B1_T_PROG_LINE_CNT def_line_c
 			}
 
 			// process function argument
-			hash = b1_id_calc_hash(b1_int_progline + offset, len * B1_T_CHAR_SIZE);
+			hash = b1_id_calc_hash(b1_progline + offset, len * B1_T_CHAR_SIZE);
 			i = b1_int_find_hash(arg_hashes, argnum, hash);
 			if(i != argnum)
 			{
@@ -2356,7 +2126,7 @@ static B1_T_ERROR b1_int_st_def(B1_T_INDEX offset, B1_T_PROG_LINE_CNT def_line_c
 			}
 
 			offset += len;
-			b1_int_get_type_by_type_spec(b1_int_progline[offset - 1], B1_TYPE_NULL, &(*fn).fn.argtypes[argnum]);
+			b1_t_get_type_by_type_spec(b1_progline[offset - 1], B1_TYPE_NULL, &(*fn).fn.argtypes[argnum]);
 
 			arg_hashes[argnum] = hash;
 			argnum++;
@@ -2375,7 +2145,7 @@ static B1_T_ERROR b1_int_st_def(B1_T_INDEX offset, B1_T_PROG_LINE_CNT def_line_c
 				return B1_RES_ESYNTAX;
 			}
 
-			c = b1_int_progline[offset];
+			c = b1_progline[offset];
 			offset += len;
 
 			if(c == B1_T_C_CLBRACK)
@@ -2403,7 +2173,7 @@ static B1_T_ERROR b1_int_st_def(B1_T_INDEX offset, B1_T_PROG_LINE_CNT def_line_c
 			return B1_RES_ESYNTAX;
 		}
 
-		c = b1_int_progline[offset];
+		c = b1_progline[offset];
 		offset += len;
 	}
 
@@ -2579,10 +2349,10 @@ static B1_T_ERROR b1_int_interpret_stmt(uint8_t stmt)
 	uint8_t onpos;
 	B1_VAR_REF var_ref;
 
-	offset = b1_int_curr_prog_line_offset;
-	b1_int_curr_prog_line_offset = 0;
+	offset = b1_curr_prog_line_offset;
+	b1_curr_prog_line_offset = 0;
 
-	if(b1_int_next_line_num != B1_T_LINE_NUM_ABSENT)
+	if(b1_next_line_num != B1_T_LINE_NUM_ABSENT)
 	{
 		// line number is present
 		// process statements like "IF ... THEN 10", "ELSEIF ... THEN 20", "ELSE 30"
@@ -2592,7 +2362,7 @@ static B1_T_ERROR b1_int_interpret_stmt(uint8_t stmt)
 		}
 	}
 
-	b1_int_next_line_num = B1_T_LINE_NUM_NEXT;
+	b1_next_line_num = B1_T_LINE_NUM_NEXT;
 
 	if(stmt == B1_ID_STMT_ABSENT)
 	{
@@ -2614,7 +2384,7 @@ static B1_T_ERROR b1_int_interpret_stmt(uint8_t stmt)
 
 	if(stmt == B1_ID_STMT_OPTION)
 	{
-		if(b1_int_options_allowed)
+		if(b1_options_allowed)
 		{
 			return b1_int_st_option(offset);
 		}
@@ -2622,7 +2392,7 @@ static B1_T_ERROR b1_int_interpret_stmt(uint8_t stmt)
 		return B1_RES_EINVSTAT;
 	}
 
-	b1_int_options_allowed = 0;
+	b1_options_allowed = 0;
 
 	if(stmt == B1_ID_STMT_ELSEIF)
 	{
@@ -2642,7 +2412,7 @@ static B1_T_ERROR b1_int_interpret_stmt(uint8_t stmt)
 			return err;
 		}
 
-		b1_int_curr_stmt_state = b1_int_curr_prog_line_offset ? (B1_INT_STATE_IF | B1_INT_STATE_IF_EXEC) : (B1_INT_STATE_IF | B1_INT_STATE_IF_NEXT);
+		b1_int_curr_stmt_state = b1_curr_prog_line_offset ? (B1_INT_STATE_IF | B1_INT_STATE_IF_EXEC) : (B1_INT_STATE_IF | B1_INT_STATE_IF_NEXT);
 
 		return B1_RES_OK;
 	}
@@ -2660,7 +2430,7 @@ static B1_T_ERROR b1_int_interpret_stmt(uint8_t stmt)
 		}
 
 		b1_int_curr_stmt_state = B1_INT_STATE_IF | B1_INT_STATE_IF_EXEC;
-		b1_int_curr_prog_line_offset = offset;
+		b1_curr_prog_line_offset = offset;
 
 		return B1_RES_OK;
 	}
@@ -2690,7 +2460,7 @@ static B1_T_ERROR b1_int_interpret_stmt(uint8_t stmt)
 		}
 
 		// save current statement state
-		return b1_int_save_stmt_state(b1_int_curr_prog_line_offset ? (B1_INT_STATE_IF | B1_INT_STATE_IF_EXEC) : (B1_INT_STATE_IF | B1_INT_STATE_IF_NEXT));
+		return b1_int_save_stmt_state(b1_curr_prog_line_offset ? (B1_INT_STATE_IF | B1_INT_STATE_IF_EXEC) : (B1_INT_STATE_IF | B1_INT_STATE_IF_NEXT));
 	}
 
 	// any statement executing in IF should change state to SKIP
@@ -2858,7 +2628,7 @@ static B1_T_ERROR b1_int_interpret_stmt(uint8_t stmt)
 			return err;
 		}
 
-		b1_int_curr_prog_line_cnt--;
+		b1_curr_prog_line_cnt--;
 
 		return B1_RES_OK;
 	}
@@ -2886,7 +2656,7 @@ static B1_T_ERROR b1_int_interpret_stmt(uint8_t stmt)
 		}
 
 		// go to FOR or WHILE satement
-		b1_int_curr_prog_line_cnt = (*(b1_int_stmt_stack + b1_int_stmt_stack_ptr - 1)).ret_line_cnt;
+		b1_curr_prog_line_cnt = (*(b1_int_stmt_stack + b1_int_stmt_stack_ptr - 1)).ret_line_cnt;
 
 #ifdef B1_FEATURE_STMT_WHILE_WEND
 		err = B1_RES_OK;
@@ -2911,7 +2681,7 @@ static B1_T_ERROR b1_int_interpret_stmt(uint8_t stmt)
 
 		if(stmt == B1_ID_STMT_CONTINUE)
 		{
-			b1_int_curr_prog_line_cnt--;
+			b1_curr_prog_line_cnt--;
 		}
 
 		return B1_RES_OK;
@@ -2937,8 +2707,8 @@ static B1_T_ERROR b1_int_interpret_stmt(uint8_t stmt)
 	if(stmt == B1_ID_STMT_RESTORE)
 	{
 		err = b1_int_st_restore(offset);
-		// b1_int_st_restore function changes b1_int_next_line_num variable
-		b1_int_next_line_num = B1_T_LINE_NUM_NEXT;
+		// b1_int_st_restore function changes b1_next_line_num variable
+		b1_next_line_num = B1_T_LINE_NUM_NEXT;
 		return err;
 	}
 #endif
@@ -3035,30 +2805,30 @@ B1_T_ERROR b1_int_prerun()
 			return err;
 		}
 
-		err = b1_int_stmt_init(&stmt);
+		err = b1_tok_stmt_init(&stmt);
 		if(err != B1_RES_OK)
 		{
 			return err;
 		}
 
-		err = b1_ex_prg_cache_curr_line_num(b1_int_next_line_num, stmt);
+		err = b1_ex_prg_cache_curr_line_num(b1_next_line_num, stmt);
 		if(err != B1_RES_OK)
 		{
 			return err;
 		}
 
 		// check line number
-		if(b1_int_next_line_num != B1_T_LINE_NUM_ABSENT)
+		if(b1_next_line_num != B1_T_LINE_NUM_ABSENT)
 		{
-			if(prev_line_n != B1_T_LINE_NUM_ABSENT && prev_line_n >= b1_int_next_line_num)
+			if(prev_line_n != B1_T_LINE_NUM_ABSENT && prev_line_n >= b1_next_line_num)
 			{
 				return B1_RES_EINVLINEN;
 			}
 
-			prev_line_n = b1_int_next_line_num;
+			prev_line_n = b1_next_line_num;
 		}
 
-		line_cnt = b1_int_curr_prog_line_cnt;
+		line_cnt = b1_curr_prog_line_cnt;
 
 		if(stmt == B1_ID_STMT_FOR)
 		{
@@ -3085,7 +2855,7 @@ B1_T_ERROR b1_int_prerun()
 #ifdef B1_FEATURE_FUNCTIONS_USER
 		if(stmt == B1_ID_STMT_DEF)
 		{
-			err = b1_int_st_def(b1_int_curr_prog_line_offset, line_cnt);
+			err = b1_int_st_def(b1_curr_prog_line_offset, line_cnt);
 			if(err != B1_RES_OK)
 			{
 				return err;
@@ -3093,18 +2863,18 @@ B1_T_ERROR b1_int_prerun()
 		}
 #endif
 
-		b1_int_curr_prog_line_offset = 0;
+		b1_curr_prog_line_offset = 0;
 	}
 
 	if(for_nest != 0)
 	{
-		b1_int_curr_prog_line_cnt = b1_int_stmt_stack[for_nest].ret_line_cnt - 1;
+		b1_curr_prog_line_cnt = b1_int_stmt_stack[for_nest].ret_line_cnt - 1;
 
 		return B1_RES_EFORWONXT;
 	}
 
-	b1_int_curr_prog_line_cnt = 0;
-	b1_int_next_line_num = B1_T_LINE_NUM_NEXT;
+	b1_curr_prog_line_cnt = 0;
+	b1_next_line_num = B1_T_LINE_NUM_NEXT;
 
 	return B1_RES_OK;
 }
@@ -3116,9 +2886,9 @@ B1_T_ERROR b1_int_run()
 
 	while(1)
 	{
-		if(b1_int_curr_prog_line_offset == 0)
+		if(b1_curr_prog_line_offset == 0)
 		{
-			err = b1_ex_prg_get_prog_line(b1_int_next_line_num);
+			err = b1_ex_prg_get_prog_line(b1_next_line_num);
 			if(err != B1_RES_OK)
 			{
 				return err;
@@ -3126,9 +2896,9 @@ B1_T_ERROR b1_int_run()
 
 #ifdef B1_FEATURE_DEBUG
 			if(!b1_int_continue_after_break &&
-				b1_dbg_check_breakpoint(b1_int_curr_prog_line_cnt) != B1_MAX_BREAKPOINT_NUM)
+				b1_dbg_check_breakpoint(b1_curr_prog_line_cnt) != B1_MAX_BREAKPOINT_NUM)
 			{
-				b1_int_curr_prog_line_cnt--;
+				b1_curr_prog_line_cnt--;
 				b1_int_continue_after_break++;
 				return B1_RES_STOP;
 			}
@@ -3137,7 +2907,7 @@ B1_T_ERROR b1_int_run()
 #endif
 		}
 
-		err = b1_int_stmt_init(&stmt);
+		err = b1_tok_stmt_init(&stmt);
 		if(err != B1_RES_OK)
 		{
 			return err;

@@ -190,22 +190,22 @@ static B1_T_ERROR b1_ex_prg_get_next_prog_line()
 {
 	B1_T_PROG_LINE_CNT line_cnt;
 
-	line_cnt = b1_int_curr_prog_line_cnt;
+	line_cnt = b1_curr_prog_line_cnt;
 
 	if(line_cnt >= b1_ex_prg_lines.size())
 	{
 		return B1_RES_EPROGUNEND;
 	}
 
-	b1_int_progline = b1_ex_prg_lines[line_cnt].data();
-	b1_int_curr_prog_line_cnt = line_cnt + 1;
+	b1_progline = b1_ex_prg_lines[line_cnt].data();
+	b1_curr_prog_line_cnt = line_cnt + 1;
 	
 	return B1_RES_OK;
 }
 
 static B1_T_ERROR b1_ex_prg_get_first_prog_line()
 {
-	b1_int_curr_prog_line_cnt = 0;
+	b1_curr_prog_line_cnt = 0;
 	return b1_ex_prg_get_next_prog_line();
 }
 
@@ -216,24 +216,24 @@ extern "C" B1_T_ERROR b1_ex_prg_cache_curr_line_num(B1_T_LINE_NUM curr_line_num,
 #ifdef B1_FEATURE_STMT_DATA_READ
 	if(stmt == B1_ID_STMT_DATA)
 	{
-		b1_ex_prg_data_line_cnt_cache.push_back(std::pair<B1_T_PROG_LINE_CNT, B1_T_INDEX>(b1_int_curr_prog_line_cnt, b1_int_curr_prog_line_offset));
+		b1_ex_prg_data_line_cnt_cache.push_back(std::pair<B1_T_PROG_LINE_CNT, B1_T_INDEX>(b1_curr_prog_line_cnt, b1_curr_prog_line_offset));
 	}
 #endif
 
 	if(curr_line_num != B1_T_LINE_NUM_ABSENT)
 	{
-		b1_ex_prg_line_num_cache[curr_line_num] = b1_int_curr_prog_line_cnt - 1;
+		b1_ex_prg_line_num_cache[curr_line_num] = b1_curr_prog_line_cnt - 1;
 	}
 
 	// move FOR statement line counter to tmp. stack
 	if(stmt == B1_ID_STMT_FOR)
 	{
-		b1_ex_prg_for_line_cnt_stack.push(b1_int_curr_prog_line_cnt);
+		b1_ex_prg_for_line_cnt_stack.push(b1_curr_prog_line_cnt);
 	}
 
 	if(stmt == B1_ID_STMT_NEXT && !b1_ex_prg_for_line_cnt_stack.empty())
 	{
-		b1_ex_prg_for_line_cnt_cache[b1_ex_prg_for_line_cnt_stack.top()] = b1_int_curr_prog_line_cnt;
+		b1_ex_prg_for_line_cnt_cache[b1_ex_prg_for_line_cnt_stack.top()] = b1_curr_prog_line_cnt;
 		b1_ex_prg_for_line_cnt_stack.pop();
 	}
 
@@ -241,12 +241,12 @@ extern "C" B1_T_ERROR b1_ex_prg_cache_curr_line_num(B1_T_LINE_NUM curr_line_num,
 	// move WHILE statement line counter to tmp. stack
 	if(stmt == B1_ID_STMT_WHILE)
 	{
-		b1_ex_prg_while_line_cnt_stack.push(b1_int_curr_prog_line_cnt);
+		b1_ex_prg_while_line_cnt_stack.push(b1_curr_prog_line_cnt);
 	}
 
 	if(stmt == B1_ID_STMT_WEND && !b1_ex_prg_while_line_cnt_stack.empty())
 	{
-		b1_ex_prg_while_line_cnt_cache[b1_ex_prg_while_line_cnt_stack.top()] = b1_int_curr_prog_line_cnt;
+		b1_ex_prg_while_line_cnt_cache[b1_ex_prg_while_line_cnt_stack.top()] = b1_curr_prog_line_cnt;
 		b1_ex_prg_while_line_cnt_stack.pop();
 	}
 #endif
@@ -254,7 +254,7 @@ extern "C" B1_T_ERROR b1_ex_prg_cache_curr_line_num(B1_T_LINE_NUM curr_line_num,
 	return B1_RES_OK;
 }
 
-// the function should set b1_int_progline and b1_int_curr_prog_line_cnt global variables according to the program line
+// the function should set b1_progline and b1_curr_prog_line_cnt global variables according to the program line
 // number requested via next_line_num argument. the argument can be either BASIC line number or one of the next constants:
 // B1_T_LINE_NUM_FIRST, B1_T_LINE_NUM_NEXT. can return the next values (error codes): B1_RES_OK, B1_RES_ELINENNOTFND,
 // B1_RES_EPROGUNEND, B1_RES_EENVFAT
@@ -276,8 +276,8 @@ extern "C" B1_T_ERROR b1_ex_prg_get_prog_line(B1_T_LINE_NUM next_line_num)
 		return B1_RES_ELINENNOTFND;
 	}
 
-	b1_int_progline = b1_ex_prg_lines[line_it->second].data();
-	b1_int_curr_prog_line_cnt = line_it->second + 1;
+	b1_progline = b1_ex_prg_lines[line_it->second].data();
+	b1_curr_prog_line_cnt = line_it->second + 1;
 
 	return B1_RES_OK;
 }
@@ -285,14 +285,14 @@ extern "C" B1_T_ERROR b1_ex_prg_get_prog_line(B1_T_LINE_NUM next_line_num)
 // sets the NEXT statement line counter for the current FOR statement
 extern "C" B1_T_ERROR b1_ex_prg_for_go_next()
 {
-	auto line_cnt_it = b1_ex_prg_for_line_cnt_cache.find(b1_int_curr_prog_line_cnt);
+	auto line_cnt_it = b1_ex_prg_for_line_cnt_cache.find(b1_curr_prog_line_cnt);
 
 	if(line_cnt_it == b1_ex_prg_for_line_cnt_cache.end())
 	{
 		return B1_RES_EFORWONXT;
 	}
 	
-	b1_int_curr_prog_line_cnt = line_cnt_it->second;
+	b1_curr_prog_line_cnt = line_cnt_it->second;
 
 	return B1_RES_OK;
 }
@@ -301,21 +301,21 @@ extern "C" B1_T_ERROR b1_ex_prg_for_go_next()
 // sets the WEND statement line counter for the current WHILE statement
 extern "C" B1_T_ERROR b1_ex_prg_while_go_wend()
 {
-	auto line_cnt_it = b1_ex_prg_while_line_cnt_cache.find(b1_int_curr_prog_line_cnt);
+	auto line_cnt_it = b1_ex_prg_while_line_cnt_cache.find(b1_curr_prog_line_cnt);
 
 	if(line_cnt_it == b1_ex_prg_while_line_cnt_cache.end())
 	{
 		return B1_RES_EWHILEWOWND;
 	}
 	
-	b1_int_curr_prog_line_cnt = line_cnt_it->second;
+	b1_curr_prog_line_cnt = line_cnt_it->second;
 
 	return B1_RES_OK;
 }
 #endif
 
 #ifdef B1_FEATURE_STMT_DATA_READ
-// sets the next DATA stamtement line counter (b1_int_data_curr_line_cnt and b1_int_data_curr_line_offset),
+// sets the next DATA stamtement line counter (b1_data_curr_line_cnt and b1_data_curr_line_offset),
 // next_line_num can be either valid line number or B1_T_LINE_NUM_FIRST, B1_T_LINE_NUM_NEXT constants.
 // possible return codes: B1_RES_OK, B1_RES_EDATAEND, B1_RES_ELINENNOTFND, B1_RES_EENVFAT, etc.
 extern "C" B1_T_ERROR b1_ex_prg_data_go_next(B1_T_LINE_NUM next_line_num)
@@ -327,7 +327,7 @@ extern "C" B1_T_ERROR b1_ex_prg_data_go_next(B1_T_LINE_NUM next_line_num)
 
 	if(next_line_num == B1_T_LINE_NUM_FIRST)
 	{
-		b1_int_data_curr_line_cnt = b1_ex_prg_data_line_cnt_cache[0].first;
+		b1_data_curr_line_cnt = b1_ex_prg_data_line_cnt_cache[0].first;
 	}
 	else
 	if(next_line_num != B1_T_LINE_NUM_NEXT)
@@ -338,17 +338,17 @@ extern "C" B1_T_ERROR b1_ex_prg_data_go_next(B1_T_LINE_NUM next_line_num)
 			return B1_RES_ELINENNOTFND;
 		}
 
-		b1_int_data_curr_line_cnt = line_it->second + 1;
+		b1_data_curr_line_cnt = line_it->second + 1;
 	}
 
 	for(auto i = b1_ex_prg_data_line_cnt_cache.begin(); ; i++)
 	{
-		if(i == b1_ex_prg_data_line_cnt_cache.end() || i->first > b1_int_data_curr_line_cnt)
+		if(i == b1_ex_prg_data_line_cnt_cache.end() || i->first > b1_data_curr_line_cnt)
 		{
 			return B1_RES_EDATAEND;
 		}
 
-		if(i->first == b1_int_data_curr_line_cnt)
+		if(i->first == b1_data_curr_line_cnt)
 		{
 			if(next_line_num == B1_T_LINE_NUM_NEXT)
 			{
@@ -359,8 +359,8 @@ extern "C" B1_T_ERROR b1_ex_prg_data_go_next(B1_T_LINE_NUM next_line_num)
 				}
 			}
 
-			b1_int_data_curr_line_cnt = i->first;
-			b1_int_data_curr_line_offset = i->second;
+			b1_data_curr_line_cnt = i->first;
+			b1_data_curr_line_offset = i->second;
 
 			return B1_RES_OK;
 		}
@@ -390,14 +390,14 @@ extern "C" B1_T_ERROR b1_ex_prg_rpn_cache(B1_T_INDEX offset, B1_T_INDEX continue
 		}
 	}
 
-	b1_ex_prg_rpn_expr_cache[(((uint32_t)b1_int_curr_prog_line_cnt) << 16) + offset] = std::pair<B1_T_INDEX, std::vector<B1_RPNREC>>(continue_offset, rpn);
+	b1_ex_prg_rpn_expr_cache[(((uint32_t)b1_curr_prog_line_cnt) << 16) + offset] = std::pair<B1_T_INDEX, std::vector<B1_RPNREC>>(continue_offset, rpn);
 	
 	return B1_RES_OK;
 }
 
 extern "C" B1_T_ERROR b1_ex_prg_rpn_get_cached(B1_T_INDEX offset, B1_T_INDEX *continue_offset)
 {
-	auto expr_rpn_it = b1_ex_prg_rpn_expr_cache.find((((uint32_t)b1_int_curr_prog_line_cnt) << 16) + offset);
+	auto expr_rpn_it = b1_ex_prg_rpn_expr_cache.find((((uint32_t)b1_curr_prog_line_cnt) << 16) + offset);
 
 	if(expr_rpn_it != b1_ex_prg_rpn_expr_cache.end())
 	{
