@@ -167,7 +167,7 @@ B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_IN
 				return B1_RES_OK;
 			}
 
-			tmpvar.type = B1_TYPE_SET(B1_TYPE_INT32, 0);
+			tmpvar.type = B1_TYPE_SET(B1_TYPE_INT, 0);
 			tmpvar.value.i32val = (int32_t)ai;
 
 			err = b1_dbg_var_to_str(&tmpvar);
@@ -222,12 +222,33 @@ B1_T_ERROR b1_dbg_get_var_dump(const B1_NAMED_VAR *var, B1_T_CHAR *sbuf, B1_T_IN
 				else
 #endif
 
-				if(type == B1_TYPE_INT32)
+				if(type == B1_TYPE_INT)
 				{
-					tmpvar.type = B1_TYPE_SET(B1_TYPE_INT32, 0);
+					tmpvar.type = B1_TYPE_SET(B1_TYPE_INT, 0);
 					tmpvar.value.i32val = *((int32_t *)data);
 				}
 				else
+#ifdef B1_FEATURE_TYPE_SMALL
+				if(type == B1_TYPE_INT16)
+				{
+					tmpvar.type = B1_TYPE_SET(B1_TYPE_INT16, 0);
+					tmpvar.value.i16val = *((int16_t *)data);
+				}
+				else
+				if(type == B1_TYPE_WORD)
+				{
+					tmpvar.type = B1_TYPE_SET(B1_TYPE_WORD, 0);
+					tmpvar.value.ui16val = *((uint16_t *)data);
+				}
+				else
+				if(type == B1_TYPE_BYTE)
+				{
+					tmpvar.type = B1_TYPE_SET(B1_TYPE_BYTE, 0);
+					tmpvar.value.ui8val = *((uint8_t *)data);
+				}
+				else
+#endif
+
 				{
 					tmpvar.type = B1_TYPE_SET(B1_TYPE_STRING, B1_TYPE_REF_FLAG);
 					tmpvar.value.mem_desc = *((B1_T_MEM_BLOCK_DESC *)data);

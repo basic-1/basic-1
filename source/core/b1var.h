@@ -37,6 +37,11 @@ typedef union
 	// double precision floating point value
 	double dval;
 #endif
+#ifdef B1_FEATURE_TYPE_SMALL
+	int16_t i16val;
+	uint16_t ui16val;
+	uint8_t ui8val;
+#endif
 } B1_VAL;
 
 typedef struct

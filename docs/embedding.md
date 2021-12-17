@@ -59,6 +59,8 @@ Some interpreter's features can be turned on or off by editing application's `fe
   
 `B1_FEATURE_STMT_STOP`: enables possibility to stop program execution with `STOP` statement, makes `b1_int_exec_stop` variable available. See `b1_int_run` function description for details.  
   
+`B1_FEATURE_TYPE_SMALL`: enables three small integer data types (`INT16`, `WORD` and `BYTE`)  
+  
 ## Interpreter's global variables and functions  
   
 Hosting application can control the interpreter core by reading/writing special global variables and calling some functions. The most of them are described below.  

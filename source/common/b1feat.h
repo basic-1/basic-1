@@ -84,6 +84,11 @@
 // STOP statement
 #define B1_FEATURE_STMT_STOP
 
+// enables three small integer types: INT16 (16-bit signed integer), WORD (16-bit unsigned
+// integer) and BYTE (8-bit unsigned integer)
+#define B1_FEATURE_TYPE_SMALL
+
+
 // constraints and memory usage
 #define B1_MAX_PROGLINE_LEN 255
 #define B1_MAX_STRING_LEN (B1_MAX_PROGLINE_LEN / 2)

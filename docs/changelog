@@ -1,3 +1,9 @@
+b1i (1.0.0-54) unstable; urgency=low
+
+  * small integer data types support added
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Wed, 15 Dec 2021 18:10:35 +0300
+
 b1i (1.0.0-53) unstable; urgency=low
 
   * some code revision

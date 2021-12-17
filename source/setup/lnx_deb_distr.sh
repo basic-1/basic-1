@@ -167,7 +167,7 @@ ${7}strip --strip-all $tmp_dir$proj_dir_name/usr/bin/b1i
 ${7}strip --strip-all $tmp_dir$proj_dir_name/usr/bin/b1iu
 if [ "$project_name" = "b1ig" ]
 then
-  ${6}strip --strip-all $tmp_dir$proj_dir_name/usr/bin/b1ig
+  ${7}strip --strip-all $tmp_dir$proj_dir_name/usr/bin/b1ig
   if [ "$wx_libs_dir" != "" ]
   then
     ${7}strip --strip-all $tmp_dir$proj_dir_name/usr/lib/$proj_dir_name/libwx_baseu*.so.4.0.0

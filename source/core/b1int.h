@@ -33,6 +33,7 @@
 
 #define B1_INT_STATE_FOR_NEXT_CHECKED ((uint8_t)0x1)
 #define B1_INT_STATE_FOR_NEG_STEP ((uint8_t)0x2)
+#define B1_INT_STATE_FOR_STOP ((uint8_t)0x4)
 
 #define B1_INT_STATE_ON_POS_MASK ((uint8_t)0x7)
 

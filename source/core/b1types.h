@@ -22,16 +22,25 @@
 
 // user data types
 #ifdef B1_FEATURE_TYPE_SINGLE
-// 4-byte floating-point value
+// 4-byte floating-point type
 #define B1_TYPE_SINGLE ((uint8_t)0x0)
 #endif
-// 4-byte integer value
-#define B1_TYPE_INT32 ((uint8_t)0x1)
-// string value
+// 4-byte signed integer type
+#define B1_TYPE_INT ((uint8_t)0x1)
+// string type
 #define B1_TYPE_STRING ((uint8_t)0x2)
 #ifdef B1_FEATURE_TYPE_DOUBLE
-// 8-byte floating-point value
+// 8-byte floating-point type
 #define B1_TYPE_DOUBLE ((uint8_t)0x3)
+#endif
+// small integer types
+#ifdef B1_FEATURE_TYPE_SMALL
+// 2-byte signed integer type
+#define B1_TYPE_INT16 ((uint8_t)0x4)
+// 2-byte unsigned integer type
+#define B1_TYPE_WORD ((uint8_t)0x5)
+// 1-byte unsigned integer type
+#define B1_TYPE_BYTE ((uint8_t)0x6)
 #endif
 
 // internally used boolean value
@@ -58,12 +67,21 @@
 #define B1_TYPE_REF_FLAG ((uint8_t)0x80)
 
 #if defined(B1_FEATURE_TYPE_SINGLE) && defined(B1_FEATURE_TYPE_DOUBLE)
-#define B1_TYPE_COUNT ((uint8_t)4)
+#define B1_TYPE_COUNT_FLOAT_POINT ((uint8_t)2)
 #elif defined(B1_FEATURE_TYPE_SINGLE) || defined(B1_FEATURE_TYPE_DOUBLE)
-#define B1_TYPE_COUNT ((uint8_t)3)
+#define B1_TYPE_COUNT_FLOAT_POINT ((uint8_t)1)
 #else
-#define B1_TYPE_COUNT ((uint8_t)2)
+#define B1_TYPE_COUNT_FLOAT_POINT ((uint8_t)0)
 #endif
+
+#if defined(B1_FEATURE_TYPE_SMALL)
+#define B1_TYPE_COUNT_INTEGER ((uint8_t)4)
+#else
+#define B1_TYPE_COUNT_INTEGER ((uint8_t)1)
+#endif
+
+#define B1_TYPE_COUNT ((uint8_t)(B1_TYPE_COUNT_FLOAT_POINT + B1_TYPE_COUNT_INTEGER + (uint8_t)1))
+
 
 #define B1_T_C_STRTERM ((B1_T_CHAR)0)
 #define B1_T_C_0 ((B1_T_CHAR)'0')
@@ -134,28 +152,33 @@
 #define B1_T_TOUPPER(C) (B1_T_ISLOWER(C) ? ((B1_T_CHAR)(((B1_T_CHAR)(C)) - B1_T_C_LCA + B1_T_C_UCA)) : (B1_T_CHAR)(C))
 #define B1_T_TOLOWER(C) (B1_T_ISUPPER(C) ? ((B1_T_CHAR)(((B1_T_CHAR)(C)) + B1_T_C_LCA - B1_T_C_UCA)) : (B1_T_CHAR)(C))
 
+
 #define B1_TYPE_GET(TYPE) (((((uint8_t)(TYPE))) & B1_TYPE_MASK) >> B1_TYPE_SHIFT)
 #define B1_TYPE_TEST_ANY(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_ANY)
 #define B1_TYPE_TEST_RPNREC_PTR(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_RPNREC_PTR)
 #define B1_TYPE_TEST_TAB_FN(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_TAB_FN)
 #define B1_TYPE_TEST_SPC_FN(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_SPC_FN)
 #define B1_TYPE_TEST_STRING(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_STRING)
-#define B1_TYPE_TEST_INT32(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_INT32)
-#ifdef B1_FEATURE_TYPE_SINGLE
-#define B1_TYPE_TEST_SINGLE(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_SINGLE)
-#endif
-#ifdef B1_FEATURE_TYPE_DOUBLE
-#define B1_TYPE_TEST_DOUBLE(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_DOUBLE)
-#endif
-#if defined(B1_FEATURE_TYPE_SINGLE) && defined(B1_FEATURE_TYPE_DOUBLE)
-#define B1_TYPE_TEST_NUMERIC(TYPE) (B1_TYPE_TEST_SINGLE(TYPE) || B1_TYPE_TEST_DOUBLE(TYPE) || B1_TYPE_TEST_INT32(TYPE))
-#elif defined(B1_FEATURE_TYPE_DOUBLE)
-#define B1_TYPE_TEST_NUMERIC(TYPE) (B1_TYPE_TEST_DOUBLE(TYPE) || B1_TYPE_TEST_INT32(TYPE))
-#elif defined(B1_FEATURE_TYPE_SINGLE)
-#define B1_TYPE_TEST_NUMERIC(TYPE) (B1_TYPE_TEST_SINGLE(TYPE) || B1_TYPE_TEST_INT32(TYPE))
+#define B1_TYPE_TEST_INT(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_INT)
+
+#if defined(B1_FEATURE_TYPE_SMALL)
+#define B1_TYPE_TEST_INTEGER(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_INT || B1_TYPE_GET(TYPE) == B1_TYPE_INT16 || B1_TYPE_GET(TYPE) == B1_TYPE_WORD || B1_TYPE_GET(TYPE) == B1_TYPE_BYTE)
 #else
-#define B1_TYPE_TEST_NUMERIC(TYPE) (B1_TYPE_TEST_INT32(TYPE))
+#define B1_TYPE_TEST_INTEGER(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_INT)
 #endif
+
+#if defined(B1_FEATURE_TYPE_SINGLE) && defined(B1_FEATURE_TYPE_DOUBLE)
+#define B1_TYPE_TEST_FLOAT_POINT(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_SINGLE || B1_TYPE_GET(TYPE) == B1_TYPE_DOUBLE)
+#elif defined(B1_FEATURE_TYPE_SINGLE)
+#define B1_TYPE_TEST_FLOAT_POINT(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_SINGLE)
+#elif defined(B1_FEATURE_TYPE_DOUBLE)
+#define B1_TYPE_TEST_FLOAT_POINT(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_DOUBLE)
+#else
+#define B1_TYPE_TEST_FLOAT_POINT(TYPE) (0)
+#endif
+
+#define B1_TYPE_TEST_NUMERIC(TYPE) (B1_TYPE_TEST_INTEGER(TYPE) || B1_TYPE_TEST_FLOAT_POINT(TYPE))
+
 #define B1_TYPE_TEST_BOOL(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_BOOL)
 #define B1_TYPE_TEST_NULL(TYPE) (B1_TYPE_GET(TYPE) == B1_TYPE_NULL)
 
@@ -164,6 +187,7 @@
 #define B1_TYPE_TEST_REF(TYPE) (((uint8_t)(TYPE)) & B1_TYPE_REF_FLAG)
 
 #define B1_TYPE_SET(TYPE, FLAGS) ((((uint8_t)(B1_TYPE_GET(TYPE))) << B1_TYPE_SHIFT) | ((uint8_t)(FLAGS)))
+
 
 // max. immediate string length
 #define B1_TYPE_STRING_IMM_MAX_LEN ((uint8_t)((4 / sizeof(B1_T_CHAR)) - 1))
@@ -221,6 +245,11 @@ extern const B1_T_CHAR _DOUBLE[];
 #endif
 extern const B1_T_CHAR _STRING[];
 extern const B1_T_CHAR _INT[];
+#ifdef B1_FEATURE_TYPE_SMALL
+extern const B1_T_CHAR _INT16[];
+extern const B1_T_CHAR _WORD[];
+extern const B1_T_CHAR _BYTE[];
+#endif
 
 #ifdef B1_FEATURE_DEBUG
 extern const B1_T_CHAR _DBG_FORVAR[];

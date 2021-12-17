@@ -144,10 +144,10 @@ then
   ${6}strip --strip-all $tmp_dir$proj_dir_name/local/bin/b1ig
   if [ "$wx_libs_dir" != "" ]
   then
-    ${7}strip --strip-all $tmp_dir$proj_dir_name/local/lib/$proj_dir_name/libwx_baseu*.so.4.0.0
-    ${7}strip --strip-all $tmp_dir$proj_dir_name/local/lib/$proj_dir_name/libwx_gtk3u*core*.so.4.0.0
-    ${7}strip --strip-all $tmp_dir$proj_dir_name/local/lib/$proj_dir_name/libwx_gtk3u*aui*.so.4.0.0
-    ${7}strip --strip-all $tmp_dir$proj_dir_name/local/lib/$proj_dir_name/libwx_gtk3u*stc*.so.4.0.0
+    ${6}strip --strip-all $tmp_dir$proj_dir_name/local/lib/$proj_dir_name/libwx_baseu*.so.4.0.0
+    ${6}strip --strip-all $tmp_dir$proj_dir_name/local/lib/$proj_dir_name/libwx_gtk3u*core*.so.4.0.0
+    ${6}strip --strip-all $tmp_dir$proj_dir_name/local/lib/$proj_dir_name/libwx_gtk3u*aui*.so.4.0.0
+    ${6}strip --strip-all $tmp_dir$proj_dir_name/local/lib/$proj_dir_name/libwx_gtk3u*stc*.so.4.0.0
   fi
 fi
 

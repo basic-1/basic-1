@@ -22,6 +22,9 @@
 - SINGLE (32-bit floating-point)  
 - DOUBLE (64-bit floating-point)  
 - INT (32-bit integer)  
+- INT16 (16-bit integer)  
+- WORD (16-bit unsigned integer)  
+- BYTE (8-bit unsigned integer)  
   
 # Statements  
   

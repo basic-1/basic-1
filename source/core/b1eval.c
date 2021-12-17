@@ -55,7 +55,7 @@ B1_T_ERROR b1_eval_get_numeric_value(B1_VAR *var)
 #endif
 	if(c == B1_T_C_PERCENT)
 	{
-		type = B1_TYPE_INT32;
+		type = B1_TYPE_INT;
 	}
 	else
 	{
@@ -66,15 +66,15 @@ B1_T_ERROR b1_eval_get_numeric_value(B1_VAR *var)
 #elif defined(B1_FEATURE_TYPE_DOUBLE)
 		type = B1_TYPE_DOUBLE;
 #else
-		type = B1_TYPE_INT32;
+		type = B1_TYPE_INT;
 #endif
 	}
 
 	*(b1_tmp_buf + len) = B1_T_C_STRTERM;
 
-	if(type == B1_TYPE_INT32)
+	if(type == B1_TYPE_INT)
 	{
-		(*var).type = B1_TYPE_SET(B1_TYPE_INT32, 0);
+		(*var).type = B1_TYPE_SET(B1_TYPE_INT, 0);
 		return b1_t_strtoi32(b1_tmp_buf + 1, &(*var).value.i32val);
 	}
 #ifdef B1_FEATURE_TYPE_SINGLE
@@ -154,7 +154,7 @@ B1_T_ERROR b1_eval_neg(B1_VAR *pvar, uint8_t optype, uint8_t abs)
 	}
 	else
 #endif
-	if(optype == B1_TYPE_INT32)
+	if(optype == B1_TYPE_INT)
 	{
 		if(!abs || (*pvar).value.i32val < 0)
 		{
@@ -162,6 +162,32 @@ B1_T_ERROR b1_eval_neg(B1_VAR *pvar, uint8_t optype, uint8_t abs)
 		}
 	}
 	else
+#ifdef B1_FEATURE_TYPE_SMALL
+	if(optype == B1_TYPE_INT16)
+	{
+		if(!abs || (*pvar).value.i16val < 0)
+		{
+			(*pvar).value.i16val = -((*pvar).value.i16val);
+		}
+	}
+	else
+	if(optype == B1_TYPE_WORD)
+	{
+		if(!abs)
+		{
+			(*pvar).value.ui16val = -((*pvar).value.ui16val);
+		}
+	}
+	else
+	if(optype == B1_TYPE_BYTE)
+	{
+		if(!abs)
+		{
+			(*pvar).value.ui8val = -((*pvar).value.ui8val);
+		}
+	}
+	else
+#endif
 	{
 		return B1_RES_EWARGTYPE;
 	}
@@ -185,11 +211,28 @@ B1_T_ERROR b1_eval_add(B1_VAR *pvar1, uint8_t optype)
 	}
 	else
 #endif
-	if(optype == B1_TYPE_INT32)
+	if(optype == B1_TYPE_INT)
 	{
 		(*pvar1).value.i32val += (*(pvar1 + 1)).value.i32val;
 	}
 	else
+#ifdef B1_FEATURE_TYPE_SMALL
+	if(optype == B1_TYPE_INT16)
+	{
+		(*pvar1).value.i16val += (*(pvar1 + 1)).value.i16val;
+	}
+	else
+	if(optype == B1_TYPE_WORD)
+	{
+		(*pvar1).value.ui16val += (*(pvar1 + 1)).value.ui16val;
+	}
+	else
+	if(optype == B1_TYPE_BYTE)
+	{
+		(*pvar1).value.ui8val += (*(pvar1 + 1)).value.ui8val;
+	}
+	else
+#endif
 	{
 		return B1_RES_EWARGTYPE;
 	}
@@ -258,11 +301,28 @@ B1_T_ERROR b1_eval_sub(B1_VAR *pvar1, uint8_t optype)
 	}
 	else
 #endif
-	if(optype == B1_TYPE_INT32)
+	if(optype == B1_TYPE_INT)
 	{
 		(*pvar1).value.i32val -= (*(pvar1 + 1)).value.i32val;
 	}
 	else
+#ifdef B1_FEATURE_TYPE_SMALL
+	if(optype == B1_TYPE_INT16)
+	{
+		(*pvar1).value.i16val -= (*(pvar1 + 1)).value.i16val;
+	}
+	else
+	if(optype == B1_TYPE_WORD)
+	{
+		(*pvar1).value.ui16val -= (*(pvar1 + 1)).value.ui16val;
+	}
+	else
+	if(optype == B1_TYPE_BYTE)
+	{
+		(*pvar1).value.ui8val -= (*(pvar1 + 1)).value.ui8val;
+	}
+	else
+#endif
 	{
 		return B1_RES_EWARGTYPE;
 	}
@@ -286,11 +346,28 @@ static B1_T_ERROR b1_eval_mul(B1_VAR *pvar1, uint8_t optype)
 	}
 	else
 #endif
-	if(optype == B1_TYPE_INT32)
+	if(optype == B1_TYPE_INT)
 	{
 		(*pvar1).value.i32val *= (*(pvar1 + 1)).value.i32val;
 	}
 	else
+#ifdef B1_FEATURE_TYPE_SMALL
+	if(optype == B1_TYPE_INT16)
+	{
+		(*pvar1).value.i16val *= (*(pvar1 + 1)).value.i16val;
+	}
+	else
+	if(optype == B1_TYPE_WORD)
+	{
+		(*pvar1).value.ui16val *= (*(pvar1 + 1)).value.ui16val;
+	}
+	else
+	if(optype == B1_TYPE_BYTE)
+	{
+		(*pvar1).value.ui8val *= (*(pvar1 + 1)).value.ui8val;
+	}
+	else
+#endif
 	{
 		return B1_RES_EWARGTYPE;
 	}
@@ -314,7 +391,7 @@ static B1_T_ERROR b1_eval_div(B1_VAR *pvar1, uint8_t optype)
 	}
 	else
 #endif
-	if(optype == B1_TYPE_INT32)
+	if(optype == B1_TYPE_INT)
 	{
 		if((*(pvar1 + 1)).value.i32val == 0 || ((*(pvar1 + 1)).value.i32val == -1 && (*pvar1).value.i32val == INT32_MIN))
 		{
@@ -324,6 +401,38 @@ static B1_T_ERROR b1_eval_div(B1_VAR *pvar1, uint8_t optype)
 		(*pvar1).value.i32val /= (*(pvar1 + 1)).value.i32val;
 	}
 	else
+#ifdef B1_FEATURE_TYPE_SMALL
+	if(optype == B1_TYPE_INT16)
+	{
+		if((*(pvar1 + 1)).value.i16val == 0 || ((*(pvar1 + 1)).value.i16val == ((int16_t)-1) && (*pvar1).value.i16val == INT16_MIN))
+		{
+			return B1_RES_EIDIVZERO;
+		}
+
+		(*pvar1).value.i16val /= (*(pvar1 + 1)).value.i16val;
+	}
+	else
+	if(optype == B1_TYPE_WORD)
+	{
+		if((*(pvar1 + 1)).value.ui16val == 0)
+		{
+			return B1_RES_EIDIVZERO;
+		}
+
+		(*pvar1).value.ui16val /= (*(pvar1 + 1)).value.ui16val;
+	}
+	else
+	if(optype == B1_TYPE_BYTE)
+	{
+		if((*(pvar1 + 1)).value.ui8val == 0)
+		{
+			return B1_RES_EIDIVZERO;
+		}
+
+		(*pvar1).value.ui8val /= (*(pvar1 + 1)).value.ui8val;
+	}
+	else
+#endif
 	{
 		return B1_RES_EWARGTYPE;
 	}
@@ -375,12 +484,31 @@ static B1_T_ERROR b1_eval_pow(B1_VAR *pvar1, uint8_t optype)
 		}
 		else
 #endif
-		if(optype == B1_TYPE_INT32)
+		if(optype == B1_TYPE_INT)
 		{
 			(*pvar1).value.dval = (double)(*pvar1).value.i32val;
 			(*(pvar1 + 1)).value.dval = (double)(*(pvar1 + 1)).value.i32val;
 		}
-
+#ifdef B1_FEATURE_TYPE_SMALL
+		else
+		if(optype == B1_TYPE_INT16)
+		{
+			(*pvar1).value.dval = (double)(*pvar1).value.i16val;
+			(*(pvar1 + 1)).value.dval = (double)(*(pvar1 + 1)).value.i16val;
+		}
+		else
+		if(optype == B1_TYPE_WORD)
+		{
+			(*pvar1).value.dval = (double)(*pvar1).value.ui16val;
+			(*(pvar1 + 1)).value.dval = (double)(*(pvar1 + 1)).value.ui16val;
+		}
+		else
+		if(optype == B1_TYPE_BYTE)
+		{
+			(*pvar1).value.dval = (double)(*pvar1).value.ui8val;
+			(*(pvar1 + 1)).value.dval = (double)(*(pvar1 + 1)).value.ui8val;
+		}
+#endif
 		(*pvar1).value.dval = pow((*pvar1).value.dval, (*(pvar1 + 1)).value.dval);
 
 #ifdef B1_FEATURE_TYPE_SINGLE
@@ -390,31 +518,119 @@ static B1_T_ERROR b1_eval_pow(B1_VAR *pvar1, uint8_t optype)
 		}
 		else
 #endif
-		if(optype == B1_TYPE_INT32)
+		if(optype == B1_TYPE_INT)
 		{
 			(*pvar1).value.i32val = (int32_t)(*pvar1).value.dval;
 		}
+#ifdef B1_FEATURE_TYPE_SMALL
+		else
+		if(optype == B1_TYPE_INT16)
+		{
+			(*pvar1).value.i16val = (int16_t)(*pvar1).value.dval;
+		}
+		else
+		if(optype == B1_TYPE_WORD)
+		{
+			(*pvar1).value.ui16val = (uint16_t)(*pvar1).value.dval;
+		}
+		else
+		if(optype == B1_TYPE_BYTE)
+		{
+			(*pvar1).value.ui8val = (uint8_t)(*pvar1).value.dval;
+		}
+#endif
 	}
 #elif defined(B1_FEATURE_TYPE_SINGLE)
 	if(B1_TYPE_TEST_NUMERIC(optype))
 	{
-		if(optype == B1_TYPE_INT32)
+		if(optype == B1_TYPE_INT)
 		{
 			(*pvar1).value.sval = (float)(*pvar1).value.i32val;
 			(*(pvar1 + 1)).value.sval = (float)(*(pvar1 + 1)).value.i32val;
 		}
-		
+#ifdef B1_FEATURE_TYPE_SMALL
+		else
+		if(optype == B1_TYPE_INT16)
+		{
+			(*pvar1).value.sval = (float)(*pvar1).value.i16val;
+			(*(pvar1 + 1)).value.sval = (float)(*(pvar1 + 1)).value.i16val;
+		}
+		else
+		if(optype == B1_TYPE_WORD)
+		{
+			(*pvar1).value.sval = (float)(*pvar1).value.ui16val;
+			(*(pvar1 + 1)).value.sval = (float)(*(pvar1 + 1)).value.ui16val;
+		}
+		else
+		if(optype == B1_TYPE_BYTE)
+		{
+			(*pvar1).value.sval = (float)(*pvar1).value.ui8val;
+			(*(pvar1 + 1)).value.sval = (float)(*(pvar1 + 1)).value.ui8val;
+		}
+#endif
 		(*pvar1).value.sval = powf((*pvar1).value.sval, (*(pvar1 + 1)).value.sval);
 		
-		if(optype == B1_TYPE_INT32)
+		if(optype == B1_TYPE_INT)
 		{
 			(*pvar1).value.i32val = (int32_t)(*pvar1).value.sval;
 		}
+#ifdef B1_FEATURE_TYPE_SMALL
+		else
+		if(optype == B1_TYPE_INT16)
+		{
+			(*pvar1).value.i16val = (int16_t)(*pvar1).value.sval;
+		}
+		else
+		if(optype == B1_TYPE_WORD)
+		{
+			(*pvar1).value.ui16val = (uint16_t)(*pvar1).value.sval;
+		}
+		else
+		if(optype == B1_TYPE_BYTE)
+		{
+			(*pvar1).value.ui8val = (uint8_t)(*pvar1).value.sval;
+		}
+#endif
 	}
 #else
-	if(optype == B1_TYPE_INT32)
+	if(B1_TYPE_TEST_NUMERIC(optype))
 	{
+#ifdef B1_FEATURE_TYPE_SMALL
+		if(optype == B1_TYPE_INT16)
+		{
+			(*pvar1).value.i32val = (int32_t)(*pvar1).value.i16val;
+			(*(pvar1 + 1)).value.i32val = (int32_t)(*(pvar1 + 1)).value.i16val;
+		}
+		else
+		if(optype == B1_TYPE_WORD)
+		{
+			(*pvar1).value.i32val = (int32_t)(*pvar1).value.ui16val;
+			(*(pvar1 + 1)).value.i32val = (int32_t)(*(pvar1 + 1)).value.ui16val;
+		}
+		else
+		if(optype == B1_TYPE_BYTE)
+		{
+			(*pvar1).value.i32val = (int32_t)(*pvar1).value.ui8val;
+			(*(pvar1 + 1)).value.i32val = (int32_t)(*(pvar1 + 1)).value.ui8val;
+		}
+#endif
 		(*pvar1).value.i32val = b1_eval_pow_int32((*pvar1).value.i32val, (*(pvar1 + 1)).value.i32val);
+#ifdef B1_FEATURE_TYPE_SMALL
+		if(optype == B1_TYPE_INT16)
+		{
+			(*pvar1).value.i16val = (int16_t)(*pvar1).value.i32val;
+		}
+		else
+		if(optype == B1_TYPE_WORD)
+		{
+			(*pvar1).value.ui16val = (uint16_t)(*pvar1).value.i32val;
+		}
+		else
+		if(optype == B1_TYPE_BYTE)
+		{
+			(*pvar1).value.ui8val = (uint8_t)(*pvar1).value.i32val;
+		}
+#endif
 	}
 #endif
 	else
@@ -475,12 +691,32 @@ B1_T_ERROR b1_eval_cmp(B1_VAR *pvar1, B1_T_CHAR c, B1_T_CHAR c1, uint8_t optype)
 	}
 	else
 #endif
-	if(optype == B1_TYPE_INT32)
+	if(optype == B1_TYPE_INT)
 	{
 		if((cmp & 1) && ((*pvar1).value.i32val == (*(pvar1 + 1)).value.i32val)) scmp = 0;
 		if((cmp & 2) && ((*pvar1).value.i32val < (*(pvar1 + 1)).value.i32val)) scmp = -1;
 	}
 	else
+#ifdef B1_FEATURE_TYPE_SMALL
+	if(optype == B1_TYPE_INT16)
+	{
+		if((cmp & 1) && ((*pvar1).value.i16val == (*(pvar1 + 1)).value.i16val)) scmp = 0;
+		if((cmp & 2) && ((*pvar1).value.i16val < (*(pvar1 + 1)).value.i16val)) scmp = -1;
+	}
+	else
+	if(optype == B1_TYPE_WORD)
+	{
+		if((cmp & 1) && ((*pvar1).value.ui16val == (*(pvar1 + 1)).value.ui16val)) scmp = 0;
+		if((cmp & 2) && ((*pvar1).value.ui16val < (*(pvar1 + 1)).value.ui16val)) scmp = -1;
+	}
+	else
+	if(optype == B1_TYPE_BYTE)
+	{
+		if((cmp & 1) && ((*pvar1).value.ui8val == (*(pvar1 + 1)).value.ui8val)) scmp = 0;
+		if((cmp & 2) && ((*pvar1).value.ui8val < (*(pvar1 + 1)).value.ui8val)) scmp = -1;
+	}
+	else
+#endif
 	if(optype == B1_TYPE_STRING)
 	{
 		err = b1_var_var2str(pvar1, b1_tmp_buf);
@@ -658,7 +894,7 @@ B1_T_ERROR b1_eval(uint8_t options, B1_VAR_REF *var_ref)
 				(tflags == B1_RPNREC_TYPE_SPEC_ARG_2)
 				)
 			{
-				var1->type = B1_TYPE_SET(B1_TYPE_INT32, 0);
+				var1->type = B1_TYPE_SET(B1_TYPE_INT, 0);
 				var1->value.i32val = 0;
 				tmptop++;
 
@@ -722,7 +958,7 @@ B1_T_ERROR b1_eval(uint8_t options, B1_VAR_REF *var_ref)
 		}
 		else
 		{
-			type = B1_TYPE_SET(B1_TYPE_INT32, 0);
+			type = B1_TYPE_SET(B1_TYPE_INT, 0);
 
 			// B1_RPNREC_TYPE_OPER, B1_RPNREC_TYPE_FNVAR or B1_RPNREC_TYPE_FN_ARG
 			if(B1_RPNREC_TEST_TYPES(tflags, B1_RPNREC_TYPE_OPER))
@@ -794,7 +1030,7 @@ B1_T_ERROR b1_eval(uint8_t options, B1_VAR_REF *var_ref)
 #endif
 					if(err == B1_RES_EUNKIDENT)
 					{
-						// not a function: variable subscripts are numerics (B1_TYPE_INT32)
+						// not a function: variable subscripts are numerics (B1_TYPE_INT)
 						// get/create variable (var_type here stands for variable type)
 						err = b1_var_create(name_hash, var_type, argnum, NULL, &var);
 						if(err == B1_RES_OK)

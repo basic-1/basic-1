@@ -948,7 +948,7 @@ static B1_T_ERROR b1_int_st_dim_get_size(B1_T_INDEX *offset, uint8_t allow_TO_st
 		return err;
 	}
 
-	err = b1_var_convert(b1_rpn_eval, B1_TYPE_INT32);
+	err = b1_var_convert(b1_rpn_eval, B1_TYPE_INT);
 	if(err != B1_RES_OK)
 	{
 		return err;
@@ -1474,7 +1474,7 @@ static B1_T_ERROR b1_int_st_on(B1_T_INDEX offset, uint8_t *result)
 		return err;
 	}
 
-	err = b1_var_convert(b1_rpn_eval, B1_TYPE_INT32);
+	err = b1_var_convert(b1_rpn_eval, B1_TYPE_INT);
 	if(err != B1_RES_OK)
 	{
 		return err;
@@ -1855,8 +1855,19 @@ static B1_T_ERROR b1_int_st_for_start(B1_T_INDEX offset)
 			b1_rpn_eval[0].value.dval = 1.0;
 		else
 #endif
-		if(type == B1_TYPE_INT32)
+		if(type == B1_TYPE_INT)
 			b1_rpn_eval[0].value.i32val = 1;
+#ifdef B1_FEATURE_TYPE_SMALL
+		else
+		if(type == B1_TYPE_INT16)
+			b1_rpn_eval[0].value.i16val = 1;
+		else
+		if(type == B1_TYPE_WORD)
+			b1_rpn_eval[0].value.ui16val = 1;
+		else
+		if(type == B1_TYPE_BYTE)
+			b1_rpn_eval[0].value.ui8val = 1;
+#endif
 	}
 
 	return b1_int_st_for_get_intvar(0x80, B1_INT_ST_FOR_INTVAR_CREATE, type, &var_ref);
@@ -1864,7 +1875,7 @@ static B1_T_ERROR b1_int_st_for_start(B1_T_INDEX offset)
 
 static B1_T_ERROR b1_int_st_for_end()
 {
-	// dispose own1 and own2 variables
+	// dispose own1 (limit) and own2 (step) variables
 
 	B1_T_ERROR err;
 
@@ -1880,52 +1891,44 @@ static B1_T_ERROR b1_int_st_for_end()
 
 static B1_T_ERROR b1_int_st_for_test()
 {
-	//IF (v-own1) * SGN (own2) > 0 THEN line2
+	//IF (v-limit) * SGN (step) > 0 THEN line2
 
 	B1_T_ERROR err;
-	uint8_t type, negstep;
+	uint8_t negstep, stop;
 	B1_INT_STMT_STK_REC *stk_rec;
 
-	negstep = b1_int_curr_stmt_state & B1_INT_STATE_FOR_NEG_STEP;
+#ifdef B1_FEATURE_TYPE_SMALL
+	// extra loop exit condition for unsigned data types
+	stop = (b1_int_curr_stmt_state & B1_INT_STATE_FOR_STOP);
 
-	stk_rec = b1_int_stmt_stack + b1_int_stmt_stack_ptr - 1;
-	b1_rpn_eval[0] = (*(*stk_rec).var).var;
-	type = b1_rpn_eval[0].type;
-
-	err = b1_int_st_for_get_intvar(0, B1_INT_ST_FOR_INTVAR_ACCESS, 0, NULL);
-	if(err != B1_RES_OK)
+	if(!stop)
 	{
-		return err;
-	}
+#endif
+		negstep = b1_int_curr_stmt_state & B1_INT_STATE_FOR_NEG_STEP;
 
-	err = b1_eval_sub(b1_rpn_eval, type);
-	if(err != B1_RES_OK)
-	{
-		return err;
-	}
+		stk_rec = b1_int_stmt_stack + b1_int_stmt_stack_ptr - 1;
+		b1_rpn_eval[0] = (*(*stk_rec).var).var;
 
-	if(negstep)
-	{
-		err = b1_eval_neg(b1_rpn_eval, type, 0);
-		if(err != B1_RES_OK)
+		// get limit
+		err = b1_int_st_for_get_intvar(0, B1_INT_ST_FOR_INTVAR_ACCESS, 0, NULL);
+		if (err != B1_RES_OK)
 		{
 			return err;
 		}
-	}
 
-	err = b1_var_init_empty(type, 0, NULL, b1_rpn_eval + 1);
-	if(err != B1_RES_OK)
-	{
-		return err;
-	}
+		err = b1_eval_cmp(b1_rpn_eval, negstep ? B1_T_C_LT : B1_T_C_GT, 0, b1_rpn_eval[0].type);
+		if (err != B1_RES_OK)
+		{
+			return err;
+		}
 
-	err = b1_eval_cmp(b1_rpn_eval, B1_T_C_GT, 0, type);
-	if(err != B1_RES_OK)
-	{
-		return err;
-	}
+		stop = b1_rpn_eval[0].value.bval;
 
-	if(b1_rpn_eval[0].value.bval)
+#ifdef B1_FEATURE_TYPE_SMALL
+	}
+#endif
+
+	if(stop)
 	{
 		err = b1_int_st_for_end();
 		if(err != B1_RES_OK)
@@ -1947,6 +1950,21 @@ static B1_T_ERROR b1_int_st_for_test()
 	}
 	else
 	{
+#ifdef B1_FEATURE_TYPE_SMALL
+		// check if the loop control variable has reached its limit value (is necessary for unsigned types)
+		b1_rpn_eval[0] = (*(*stk_rec).var).var;
+
+		err = b1_eval_cmp(b1_rpn_eval, B1_T_C_EQ, 0, b1_rpn_eval[0].type);
+		if(err != B1_RES_OK)
+		{
+			return err;
+		}
+
+		if(b1_rpn_eval[0].value.bval)
+		{
+			b1_int_curr_stmt_state |= B1_INT_STATE_FOR_STOP;
+		}
+#endif
 		// set program line counter to the first line of the loop body
 		b1_curr_prog_line_cnt = (*stk_rec).ret_line_cnt;
 	}

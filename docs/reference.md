@@ -66,6 +66,9 @@ Data types supported by the interpreter:
 - `SINGLE` - single precision floating-point (32-bit)  
 - `DOUBLE` - double precision floating-point (64-bit)  
 - `INT` - 32-bit integer type  
+- `INT16` - 16-bit integer  
+- `WORD` - 16-bit unsigned integer  
+- `BYTE` - 8-bit unsigned integer  
   
 Every constant, variable, function or function argument is processed according to its data type. Default numeric data type is `SINGLE`. String constants are enclosed in double-quotes and string variables names, names of functions returning string values or names of function string arguments must end with `$` character. BASIC1 interpreter automatically converts operands to the common data type when evaluating every operator. The common data type is selected according to data types priority: `STRING` (the highest priority), `DOUBLE`, `SINGLE`, `INT` (the lowest priority). When assigning values to variables they are converted to variable data type if possibly.  
   

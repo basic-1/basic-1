@@ -11,25 +11,46 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <float.h>
 
 #include "b1types.h"
 #include "b1err.h"
 
 
 // types should be defined according to their converting priorities (from highest to lowest)
-#if defined(B1_FEATURE_TYPE_DOUBLE) && defined(B1_FEATURE_TYPE_SINGLE)
-const uint8_t b1_t_types[B1_TYPE_COUNT] = { B1_TYPE_STRING, B1_TYPE_DOUBLE, B1_TYPE_SINGLE, B1_TYPE_INT32 };
-const B1_T_CHAR *b1_t_type_names[B1_TYPE_COUNT] = { _STRING, _DOUBLE, _SINGLE, _INT };
-#elif defined(B1_FEATURE_TYPE_SINGLE)
-const uint8_t b1_t_types[B1_TYPE_COUNT] = { B1_TYPE_STRING, B1_TYPE_SINGLE, B1_TYPE_INT32 };
-const B1_T_CHAR *b1_t_type_names[B1_TYPE_COUNT] = { _STRING, _SINGLE, _INT };
-#elif defined(B1_FEATURE_TYPE_DOUBLE)
-const uint8_t b1_t_types[B1_TYPE_COUNT] = { B1_TYPE_STRING, B1_TYPE_DOUBLE, B1_TYPE_INT32 };
-const B1_T_CHAR *b1_t_type_names[B1_TYPE_COUNT] = { _STRING, _DOUBLE, _INT };
-#else
-const uint8_t b1_t_types[B1_TYPE_COUNT] = { B1_TYPE_STRING, B1_TYPE_INT32 };
-const B1_T_CHAR *b1_t_type_names[B1_TYPE_COUNT] = { _STRING, _INT };
+const uint8_t b1_t_types[B1_TYPE_COUNT] =
+{
+	B1_TYPE_STRING,
+#if defined(B1_FEATURE_TYPE_DOUBLE)
+	B1_TYPE_DOUBLE,
 #endif
+#if defined(B1_FEATURE_TYPE_SINGLE)
+	B1_TYPE_SINGLE,
+#endif
+	B1_TYPE_INT,
+#if defined(B1_FEATURE_TYPE_SMALL)
+	B1_TYPE_INT16,
+	B1_TYPE_WORD,
+	B1_TYPE_BYTE,
+#endif
+};
+
+const B1_T_CHAR *b1_t_type_names[B1_TYPE_COUNT] =
+{
+	_STRING,
+#if defined(B1_FEATURE_TYPE_DOUBLE)
+	_DOUBLE,
+#endif
+#if defined(B1_FEATURE_TYPE_SINGLE)
+	_SINGLE,
+#endif
+	_INT,
+#if defined(B1_FEATURE_TYPE_SMALL)
+	_INT16,
+	_WORD,
+	_BYTE,
+#endif
+};
 
 // global string constants
 const B1_T_CHAR _EQ[] = { 1, B1_T_C_EQ };
@@ -58,6 +79,11 @@ const B1_T_CHAR _DOUBLE[] = { 6, 'D', 'O', 'U', 'B', 'L', 'E' };
 #endif
 const B1_T_CHAR _STRING[] = { 6, 'S', 'T', 'R', 'I', 'N', 'G' };
 const B1_T_CHAR _INT[] = { 3, 'I', 'N', 'T' };
+#ifdef B1_FEATURE_TYPE_SMALL
+const B1_T_CHAR _INT16[] = { 5, 'I', 'N', 'T', '1', '6' };
+const B1_T_CHAR _WORD[] = { 4, 'W', 'O', 'R', 'D' };
+const B1_T_CHAR _BYTE[] = { 4, 'B', 'Y', 'T', 'E' };
+#endif
 
 #ifdef B1_FEATURE_DEBUG
 // string constant to designate FOR loop special variables (non-accessible directly from program)
@@ -695,7 +721,7 @@ B1_T_ERROR b1_t_strtosingle(const B1_T_CHAR *cs, float *value)
 B1_T_ERROR b1_t_singletostr(float value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, uint8_t max_len)
 {
 	B1_T_INDEX start, end, n;
-	uint8_t neg, use_exp, lt1;
+	uint8_t neg, use_exp, lt1, nan;
 	int8_t e;
 #ifdef B1_FEATURE_UNICODE_UCS2
 	char tmpbuf[51];
@@ -707,6 +733,8 @@ B1_T_ERROR b1_t_singletostr(float value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, uin
 	use_exp = 0;
 	// less than 1 value
 	lt1 = 0;
+	// NaN or Inf
+	nan = 0;
 
 	// <string length><unary minus>0.<up to 47 characters long significand><C string terminator>
 	// 0              1            234                                   5051
@@ -715,30 +743,39 @@ B1_T_ERROR b1_t_singletostr(float value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, uin
 		return B1_RES_EBUFSMALL;
 	}
 
-	// check for negative value
+	// check for NaN and Inf
+	if(!(value == value) || value < -FLT_MAX || value > FLT_MAX)
+	{
+		nan++;
+	}
+
+	if(!nan)
+	{
+		// check for negative value
 #ifdef signbit
-	if(signbit(value))
+		if(signbit(value))
 #else
-	// IEEE 754 single precision fp value
-	if(*((int32_t *)&value) < 0)
+		// IEEE 754 single precision fp value
+		if(*((int32_t*)&value) < 0)
 #endif
-	{
-		neg++;
-		value = -value;
-	}
+		{
+			neg++;
+			value = -value;
+		}
 
-	// process zero values separately
-	if(value == 0.0f)
-	{
-		*sbuf = neg + 1;
-		*(sbuf + 1) = neg ? B1_T_C_MINUS : B1_T_C_0;
-		*(sbuf + 2) = B1_T_C_0;
-		return B1_RES_OK;
-	}
+		// process zero values separately
+		if(value == 0.0f)
+		{
+			*sbuf = neg + 1;
+			*(sbuf + 1) = neg ? B1_T_C_MINUS : B1_T_C_0;
+			*(sbuf + 2) = B1_T_C_0;
+			return B1_RES_OK;
+		}
 
-	if(value < 1.0f)
-	{
-		lt1++;
+		if(value < 1.0f)
+		{
+			lt1++;
+		}
 	}
 
 #ifdef B1_FEATURE_UNICODE_UCS2
@@ -750,6 +787,12 @@ B1_T_ERROR b1_t_singletostr(float value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, uin
 #else
 	n = (B1_T_INDEX)sprintf((char *)(sbuf + neg + 1), lt1 ? "%.47f" : "%.9f", value);
 #endif
+
+	if(nan)
+	{
+		*(sbuf) = n;
+		return B1_RES_OK;
+	}
 
 	if(neg)
 	{
@@ -893,7 +936,7 @@ B1_T_ERROR b1_t_strtodouble(const B1_T_CHAR *cs, double *value)
 B1_T_ERROR b1_t_doubletostr(double value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, uint8_t max_len)
 {
 	B1_T_INDEX start, end, n;
-	uint8_t neg, use_exp, lt1;
+	uint8_t neg, use_exp, lt1, nan;
 	int8_t e;
 #ifdef B1_FEATURE_UNICODE_UCS2
 	char tmpbuf[51];
@@ -905,6 +948,8 @@ B1_T_ERROR b1_t_doubletostr(double value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, ui
 	use_exp = 0;
 	// less than 1 value
 	lt1 = 0;
+	// NaN or Inf
+	nan = 0;
 
 	// <string length><unary minus>0.<up to 47 characters long significand><C string terminator>
 	// 0              1            234                                   5051
@@ -913,36 +958,44 @@ B1_T_ERROR b1_t_doubletostr(double value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, ui
 		return B1_RES_EBUFSMALL;
 	}
 
-	// check for negative value
+	// check for NaN and Inf
+	if(!(value == value) || value < -DBL_MAX || value > DBL_MAX)
+	{
+		nan++;
+	}
+
+	if(!nan)
+	{
+		// check for negative value
 #ifdef signbit
-	if(signbit(value))
+		if(signbit(value))
 #else
-	if(
-		// IEEE 754 single precision fp value
-		(sizeof(value) == 4 && *((int32_t *)&value) < 0) ||
-		// IEEE 754 double precision fp value
-		(sizeof(value) == 8 && *((int64_t *)&value) < 0)
-		)
+		if(
+			// IEEE 754 single precision fp value
+			(sizeof(value) == 4 && *((int32_t*)&value) < 0) ||
+			// IEEE 754 double precision fp value
+			(sizeof(value) == 8 && *((int64_t*)&value) < 0)
+			)
 #endif
-	{
-		neg++;
-		value = -value;
-	}
+		{
+			neg++;
+			value = -value;
+		}
 
-	// process zero values separately
-	if(value == 0.0)
-	{
-		*sbuf = neg + 1;
-		*(sbuf + 1) = neg ? B1_T_C_MINUS : B1_T_C_0;
-		*(sbuf + 2) = B1_T_C_0;
-		return B1_RES_OK;
-	}
+		// process zero values separately
+		if(value == 0.0)
+		{
+			*sbuf = neg + 1;
+			*(sbuf + 1) = neg ? B1_T_C_MINUS : B1_T_C_0;
+			*(sbuf + 2) = B1_T_C_0;
+			return B1_RES_OK;
+		}
 
-	if(value < 1.0)
-	{
-		lt1++;
+		if(value < 1.0)
+		{
+			lt1++;
+		}
 	}
-
 #ifdef B1_FEATURE_UNICODE_UCS2
 	n = (B1_T_INDEX)sprintf(tmpbuf, lt1 ? "%.47f" : "%.18f", value);
 	for(start = 0; start <= n; start++)
@@ -952,6 +1005,12 @@ B1_T_ERROR b1_t_doubletostr(double value, B1_T_CHAR *sbuf, B1_T_INDEX buflen, ui
 #else
 	n = (B1_T_INDEX)sprintf((char *)(sbuf + neg + 1), lt1 ? "%.47f" : "%.18f", value);
 #endif
+
+	if(nan)
+	{
+		*(sbuf) = n;
+		return B1_RES_OK;
+	}
 
 	if(neg)
 	{
@@ -1131,7 +1190,7 @@ B1_T_ERROR b1_t_get_type_by_type_spec(B1_T_CHAR type_spec_char, uint8_t expl_typ
 			break;
 #endif
 		case B1_T_C_PERCENT:
-			type = B1_TYPE_INT32;
+			type = B1_TYPE_INT;
 	}
 
 	if(expl_type == B1_TYPE_NULL)
@@ -1144,7 +1203,7 @@ B1_T_ERROR b1_t_get_type_by_type_spec(B1_T_CHAR type_spec_char, uint8_t expl_typ
 #elif defined(B1_FEATURE_TYPE_DOUBLE)
 			type = B1_TYPE_DOUBLE;
 #else
-			type = B1_TYPE_INT32;
+			type = B1_TYPE_INT;
 #endif
 		}
 	}
