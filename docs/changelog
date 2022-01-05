@@ -1,3 +1,9 @@
+b1i (1.0.0-55) unstable; urgency=low
+
+  * hexadecimal format for integer constants
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Sat, 25 Dec 2021 21:52:18 +0300
+
 b1i (1.0.0-54) unstable; urgency=low
 
   * small integer data types support added

@@ -1,6 +1,6 @@
 /*
  BASIC1 interpreter
- Copyright (c) 2020 Nikolay Pletnev
+ Copyright (c) 2020-2021 Nikolay Pletnev
  MIT license
 
  b1tok.c: tokenizer
@@ -63,11 +63,13 @@ B1_T_ERROR b1_tok_get(B1_T_INDEX offset, uint8_t options, B1_TOKENDATA *tokendat
 	// the variable is used to mark some special cases (open/closed quote, dollar sign at the end of variable name, etc.)
 	extra = 0;
 	out_index = 1;
+	c = 0;
 
 	while(1)
 	{
 		offset++;
 
+		c1 = c;
 		c = *(b1_progline + offset);
 
 		if(offset == B1_T_INDEX_MAX_VALUE && !B1_T_ISCSTRTERM(c))
@@ -225,18 +227,14 @@ B1_T_ERROR b1_tok_get(B1_T_INDEX offset, uint8_t options, B1_TOKENDATA *tokendat
 		// process opreation token
 		if(toktype & B1_TOKEN_TYPE_OPERATION)
 		{
-			if(len == 0)
-			{
-				c1 = c;
-			}
-			else
-			if(!(len == 1 && ((c == B1_T_C_EQ && (c1 == B1_T_C_GT || c1 == B1_T_C_LT)) || (c == B1_T_C_GT && c1 == B1_T_C_LT))))
+			if(!(len == 0 ||
+				(len == 1 && ((c == B1_T_C_EQ && (c1 == B1_T_C_GT || c1 == B1_T_C_LT)) || (c == B1_T_C_GT && c1 == B1_T_C_LT)))
+				))
 			{
 				break;
 			}
 
 			out_index++;
-
 			continue;
 		}
 		else
@@ -295,10 +293,17 @@ B1_T_ERROR b1_tok_get(B1_T_INDEX offset, uint8_t options, B1_TOKENDATA *tokendat
 #endif
 					)
 				{
+#ifdef B1_FEATURE_HEX_NUM
+					if(c == B1_T_C_PERCENT || !(toktype & B1_TOKEN_TYPE_HEX))
+					{
+#endif
 					extra = B1_NUMERIC_PART_TYPE_SPEC;
-					toktype = B1_TOKEN_TYPE_NUMERIC;
+					toktype &= ~(B1_TOKEN_TYPE_DIGITS);
 					out_index++;
 					continue;
+#ifdef B1_FEATURE_HEX_NUM
+					}
+#endif
 				}
 				else
 				if(ctype & (B1_CTYPE_SPACE | B1_CTYPE_OPER | B1_CTYPE_NULL | B1_CTYPE_COMMENT))
@@ -313,6 +318,17 @@ B1_T_ERROR b1_tok_get(B1_T_INDEX offset, uint8_t options, B1_TOKENDATA *tokendat
 				else
 				if(extra & (B1_NUMERIC_PART_INT | B1_NUMERIC_PART_FRAC))
 				{
+#ifdef B1_FEATURE_HEX_NUM
+					if(len == 1 && (extra & B1_NUMERIC_PART_INT) && (c == (B1_T_CHAR)'X' || c == (B1_T_CHAR)'x') && c1 == B1_T_C_0)
+					{
+						toktype = B1_TOKEN_TYPE_NUMERIC | B1_TOKEN_TYPE_HEX;
+						out_index++;
+						continue;
+					}
+
+					if(!(toktype & B1_TOKEN_TYPE_HEX))
+					{
+#endif
 					if((extra & B1_NUMERIC_PART_INT) && ctype == B1_CTYPE_POINT)
 					{
 						extra = B1_NUMERIC_PART_FRAC;
@@ -329,6 +345,9 @@ B1_T_ERROR b1_tok_get(B1_T_INDEX offset, uint8_t options, B1_TOKENDATA *tokendat
 							continue;
 						}
 					}
+#ifdef B1_FEATURE_HEX_NUM
+					}
+#endif
 				}
 			}
 			else
@@ -349,7 +368,7 @@ B1_T_ERROR b1_tok_get(B1_T_INDEX offset, uint8_t options, B1_TOKENDATA *tokendat
 			if(!extra && c == B1_T_C_PERCENT)
 			{
 				extra = B1_NUMERIC_PART_TYPE_SPEC;
-				toktype = B1_TOKEN_TYPE_NUMERIC;
+				toktype &= ~(B1_TOKEN_TYPE_DIGITS);
 				out_index++;
 				continue;
 			}
@@ -359,8 +378,22 @@ B1_T_ERROR b1_tok_get(B1_T_INDEX offset, uint8_t options, B1_TOKENDATA *tokendat
 				break;
 			}
 #endif
-			if(ctype == B1_CTYPE_DIGIT && extra != B1_NUMERIC_PART_TYPE_SPEC)
+			if((ctype == B1_CTYPE_DIGIT
+#ifdef B1_FEATURE_HEX_NUM
+				|| ((toktype & B1_TOKEN_TYPE_HEX) && ((c >= (B1_T_CHAR)'A' && c <= (B1_T_CHAR)'F') || (c >= (B1_T_CHAR)'a' && c <= (B1_T_CHAR)'f')))
+#ifndef B1_FRACTIONAL_TYPE_EXISTS
+				|| (len == 1 && (c == (B1_T_CHAR)'X' || c == (B1_T_CHAR)'x') && c1 == B1_T_C_0)
+#endif
+#endif
+				)
+				&& extra != B1_NUMERIC_PART_TYPE_SPEC)
 			{
+#if defined(B1_FEATURE_HEX_NUM) && !defined(B1_FRACTIONAL_TYPE_EXISTS)
+				if(ctype != B1_CTYPE_DIGIT)
+				{
+					toktype = B1_TOKEN_TYPE_NUMERIC | B1_TOKEN_TYPE_HEX;
+				}
+#endif
 				out_index++;
 				continue;
 			}
@@ -406,7 +439,7 @@ B1_T_ERROR b1_tok_get_line_num(B1_T_INDEX *offset)
 
 	if(len != 0)
 	{
-		if((td.type & B1_TOKEN_TYPE_DIGITS))
+		if((td.type == (B1_TOKEN_TYPE_NUMERIC | B1_TOKEN_TYPE_DIGITS)))
 		{
 			if(len <= B1_MAX_LINE_NUM_LEN)
 			{

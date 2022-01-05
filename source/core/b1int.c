@@ -1554,12 +1554,13 @@ static B1_T_ERROR b1_int_st_option_set(B1_T_INDEX *offset, const B1_T_CHAR *s, u
 
 		len = td.length;
 		*offset = td.offset;
-		if(!(len == 0 && (value_type & B1_TOKEN_TYPE_LETTERS) && (options & 0x1)) && !(td.type & value_type))
+
+		if(len != 0 && !(td.type & value_type))
 		{
 			return B1_RES_EINVARG;
 		}
 
-		if(value_type == B1_TOKEN_TYPE_DIGITS)
+		if(value_type == B1_TOKEN_TYPE_NUMERIC)
 		{
 			if(len == 0 || len > 3)
 			{
@@ -1581,7 +1582,7 @@ static B1_T_ERROR b1_int_st_option_set(B1_T_INDEX *offset, const B1_T_CHAR *s, u
 			*value = (uint8_t)val;
 		}
 		else
-		if(value_type & (B1_TOKEN_TYPE_LETTERS | B1_TOKEN_TYPE_IDNAME))
+		if(value_type == B1_TOKEN_TYPE_IDNAME)
 		{
 			if(options & 0x1)
 			{
@@ -1627,7 +1628,7 @@ static B1_T_ERROR b1_int_st_option(B1_T_INDEX offset)
 	B1_T_ERROR err;
 	uint8_t value;
 
-	err = b1_int_st_option_set(&offset, _BASE, B1_TOKEN_TYPE_DIGITS, 0, &value);
+	err = b1_int_st_option_set(&offset, _BASE, B1_TOKEN_TYPE_NUMERIC, 0, &value);
 	if(err == B1_RES_OK)
 	{
 		if(value == 0)
@@ -1652,7 +1653,7 @@ static B1_T_ERROR b1_int_st_option(B1_T_INDEX offset)
 		return err;
 	}
 
-	err = b1_int_st_option_set(&offset, _EXPLICIT, B1_TOKEN_TYPE_LETTERS, 1, &value);
+	err = b1_int_st_option_set(&offset, _EXPLICIT, B1_TOKEN_TYPE_IDNAME, 1, &value);
 	if(err == B1_RES_OK)
 	{
 		// omitted value corresponds to ON
@@ -2261,7 +2262,7 @@ static B1_T_ERROR b1_int_st_set(B1_T_INDEX offset)
 	B1_T_ERROR err;
 	uint8_t value;
 
-	err = b1_int_st_option_set(&offset, _MARGIN, B1_TOKEN_TYPE_DIGITS, 0, &value);
+	err = b1_int_st_option_set(&offset, _MARGIN, B1_TOKEN_TYPE_NUMERIC, 0, &value);
 	if(err == B1_RES_OK)
 	{
 		if(value < b1_int_print_zone_width)
@@ -2280,7 +2281,7 @@ static B1_T_ERROR b1_int_st_set(B1_T_INDEX offset)
 		return err;
 	}
 
-	err = b1_int_st_option_set(&offset, _ZONEWIDTH, B1_TOKEN_TYPE_DIGITS, 0, &value);
+	err = b1_int_st_option_set(&offset, _ZONEWIDTH, B1_TOKEN_TYPE_NUMERIC, 0, &value);
 	if(err == B1_RES_OK)
 	{
 		if(value == 0 || value > b1_int_print_margin)
@@ -2299,7 +2300,7 @@ static B1_T_ERROR b1_int_st_set(B1_T_INDEX offset)
 		return err;
 	}
 
-	err = b1_int_st_option_set(&offset, _INPUTECHO, B1_TOKEN_TYPE_LETTERS, 1, &value);
+	err = b1_int_st_option_set(&offset, _INPUTECHO, B1_TOKEN_TYPE_IDNAME, 1, &value);
 	if(err == B1_RES_OK)
 	{
 		if(value == 0)

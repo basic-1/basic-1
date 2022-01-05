@@ -88,6 +88,9 @@
 // integer) and BYTE (8-bit unsigned integer)
 #define B1_FEATURE_TYPE_SMALL
 
+// enables hexadecimal form of numerics (value has to be preceded by 0x prefix, e.g. 0x10)
+#define B1_FEATURE_HEX_NUM
+
 
 // constraints and memory usage
 #define B1_MAX_PROGLINE_LEN 255

@@ -30,6 +30,10 @@ B1_T_ERROR b1_eval_get_numeric_value(B1_VAR *var)
 	B1_T_INDEX len;
 	B1_T_CHAR c;
 	uint8_t type;
+#ifdef B1_FEATURE_HEX_NUM
+	B1_T_INDEX i;
+	int32_t hv;
+#endif
 
 	len = *b1_tmp_buf;
 	if(len == 0 || len == (B1_TMP_BUF_LEN - 1))
@@ -37,8 +41,59 @@ B1_T_ERROR b1_eval_get_numeric_value(B1_VAR *var)
 		return B1_RES_EINVNUM;
 	}
 
-	// get type specificator
 	c = *(b1_tmp_buf + len);
+
+#ifdef B1_FEATURE_HEX_NUM
+	if(len >= 2 && *(b1_tmp_buf + 1) == B1_T_C_0 && (*(b1_tmp_buf + 2) == (B1_T_CHAR)'X' || *(b1_tmp_buf + 2) == (B1_T_CHAR)'x'))
+	{
+		type = B1_TYPE_INT;
+		if(c == B1_T_C_PERCENT)
+		{
+			len--;
+		}
+
+		if(len < 3 || len > 10)
+		{
+			return B1_RES_EINVNUM;
+		}
+
+		hv = 0;
+
+		for(i = 3; i <= len; i++)
+		{
+			hv <<= (uint8_t)4;
+
+			c = *(b1_tmp_buf + i);
+
+			if(B1_T_ISDIGIT(c))
+			{
+				hv |= (uint8_t)(c - B1_T_C_0);
+			}
+			else
+			if(c >= (B1_T_CHAR)'A' && c <= (B1_T_CHAR)'F')
+			{
+				hv |= (uint8_t)(c - ((B1_T_CHAR)'A' - (B1_T_CHAR)10));
+			}
+			else
+			if(c >= (B1_T_CHAR)'a' && c <= (B1_T_CHAR)'f')
+			{
+				hv |= (uint8_t)(c - ((B1_T_CHAR)'a' - (B1_T_CHAR)10));
+			}
+			else
+			{
+				return B1_RES_EINVNUM;
+			}
+		}
+
+		(*var).type = B1_TYPE_SET(B1_TYPE_INT, 0);
+		(*var).value.i32val = hv;
+
+		return B1_RES_OK;
+	}
+
+#endif
+
+	// get type specificator
 #ifdef B1_FEATURE_TYPE_SINGLE
 	if(c == B1_T_C_EXCLAMATION)
 	{

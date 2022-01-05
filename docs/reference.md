@@ -32,7 +32,7 @@ There are two types of comments supported by the interpreter: full-line comments
   
 ## Constants  
   
-Constant is an element of every BASIC program representing a number or text string. String constants are embraced in double-quote characters. All double-quote characters withing string constants have to be doubled for the interpreter to distinguish them from the embracing characters. Numeric constants can be written in normal or exponential form. Numeric constants allow type specifying character addition at the end. See **Data type specifiers** chapter for details.  
+Constant is an element of every BASIC program representing a number or text string. String constants are embraced in double-quote characters. All double-quote characters withing string constants have to be doubled for the interpreter to distinguish them from the embracing characters. Numeric constants can be written in normal or exponential form. Numeric constants allow type specifying character addition at the end. See **Data type specifiers** chapter for details. Optional `B1_FEATURE_HEX_NUM` feature allows writing integer constants in hexadecimal form (with `0x` prefix).  
   
 **Examples of constants:**  
 `"this is a string constant"`  
@@ -40,6 +40,7 @@ Constant is an element of every BASIC program representing a number or text stri
 `0`  
 `-1`  
 `+10.1`  
+`0xFF`  
   
 ## Identifiers  
   

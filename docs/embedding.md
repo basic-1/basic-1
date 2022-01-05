@@ -61,6 +61,8 @@ Some interpreter's features can be turned on or off by editing application's `fe
   
 `B1_FEATURE_TYPE_SMALL`: enables three small integer data types (`INT16`, `WORD` and `BYTE`)  
   
+`B1_FEATURE_HEX_NUM`: enables hexadecimal format support for integer constants (with `0x` prefix, e.g.: `0xFFFF`)  
+  
 ## Interpreter's global variables and functions  
   
 Hosting application can control the interpreter core by reading/writing special global variables and calling some functions. The most of them are described below.  

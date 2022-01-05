@@ -1,6 +1,6 @@
 /*
  BASIC1 interpreter
- Copyright (c) 2020 Nikolay Pletnev
+ Copyright (c) 2020-2021 Nikolay Pletnev
  MIT license
 
  b1tok.h: tokenizer
@@ -24,15 +24,20 @@
 #define B1_TOKEN_TYPE_UNKNOWN ((uint8_t)0x0)
 #define B1_TOKEN_TYPE_QUOTEDSTR ((uint8_t)0x1)
 #define B1_TOKEN_TYPE_OPERATION ((uint8_t)0x2)
-// can be identifier name
+// identifier name
 #define B1_TOKEN_TYPE_IDNAME ((uint8_t)0x4)
+// numeric value
 #define B1_TOKEN_TYPE_NUMERIC ((uint8_t)0x8)
-// can be combined with B1_TOKEN_TYPE_NUMERIC
-#define B1_TOKEN_TYPE_DIGITS ((uint8_t)0x10)
 // can be combined with B1_TOKEN_TYPE_IDNAME
 #define B1_TOKEN_TYPE_LETTERS ((uint8_t)0x20)
+// can be combined with B1_TOKEN_TYPE_NUMERIC
+#define B1_TOKEN_TYPE_DIGITS ((uint8_t)0x20)
+#ifdef B1_FEATURE_HEX_NUM
+// can be combined with B1_TOKEN_TYPE_NUMERIC
+#define B1_TOKEN_TYPE_HEX ((uint8_t)0x40)
+#endif
 // special type, used internally
-#define B1_TOKEN_TYPE_SKIP_SPACES ((uint8_t)0x40)
+#define B1_TOKEN_TYPE_SKIP_SPACES ((uint8_t)0x80)
 
 
 typedef struct
