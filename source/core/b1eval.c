@@ -1,6 +1,6 @@
 /*
  BASIC1 interpreter
- Copyright (c) 2021 Nikolay Pletnev
+ Copyright (c) 2021-2022 Nikolay Pletnev
  MIT license
 
  b1eval.c: expressions evaluation
@@ -33,6 +33,7 @@ B1_T_ERROR b1_eval_get_numeric_value(B1_VAR *var)
 #ifdef B1_FEATURE_HEX_NUM
 	B1_T_INDEX i;
 	int32_t hv;
+	uint8_t neg;
 #endif
 
 	len = *b1_tmp_buf;
@@ -41,10 +42,25 @@ B1_T_ERROR b1_eval_get_numeric_value(B1_VAR *var)
 		return B1_RES_EINVNUM;
 	}
 
+#ifdef B1_FEATURE_HEX_NUM
+	i = 2;
+	neg = 0;
+	c = *(b1_tmp_buf + 1);
+	if(c == B1_T_C_MINUS || c == B1_T_C_PLUS)
+	{
+		if(c == B1_T_C_MINUS)
+		{
+			neg++;
+		}
+		i++;
+	}
+#endif
+
+	// get type specifier
 	c = *(b1_tmp_buf + len);
 
 #ifdef B1_FEATURE_HEX_NUM
-	if(len >= 2 && *(b1_tmp_buf + 1) == B1_T_C_0 && (*(b1_tmp_buf + 2) == (B1_T_CHAR)'X' || *(b1_tmp_buf + 2) == (B1_T_CHAR)'x'))
+	if(len >= i && *(b1_tmp_buf + i - 1) == B1_T_C_0 && (*(b1_tmp_buf + i) == (B1_T_CHAR)'X' || *(b1_tmp_buf + i) == (B1_T_CHAR)'x'))
 	{
 		type = B1_TYPE_INT;
 		if(c == B1_T_C_PERCENT)
@@ -52,14 +68,14 @@ B1_T_ERROR b1_eval_get_numeric_value(B1_VAR *var)
 			len--;
 		}
 
-		if(len < 3 || len > 10)
+		if(len <= i || len > 10)
 		{
 			return B1_RES_EINVNUM;
 		}
 
 		hv = 0;
 
-		for(i = 3; i <= len; i++)
+		for(; ++i <= len;)
 		{
 			hv <<= (uint8_t)4;
 
@@ -85,12 +101,16 @@ B1_T_ERROR b1_eval_get_numeric_value(B1_VAR *var)
 			}
 		}
 
+		if(neg)
+		{
+			hv = -hv;
+		}
+
 		(*var).type = B1_TYPE_SET(B1_TYPE_INT, 0);
 		(*var).value.i32val = hv;
 
 		return B1_RES_OK;
 	}
-
 #endif
 
 	// get type specificator
@@ -240,6 +260,51 @@ B1_T_ERROR b1_eval_neg(B1_VAR *pvar, uint8_t optype, uint8_t abs)
 		{
 			(*pvar).value.ui8val = -((*pvar).value.ui8val);
 		}
+	}
+	else
+#endif
+	{
+		return B1_RES_EWARGTYPE;
+	}
+
+	return B1_RES_OK;
+}
+
+static B1_T_ERROR b1_eval_not(B1_VAR *pvar, uint8_t optype)
+{
+#ifdef B1_FEATURE_TYPE_SINGLE
+	if(optype == B1_TYPE_SINGLE)
+	{
+		return B1_RES_ETYPMISM;
+	}
+	else
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(optype == B1_TYPE_DOUBLE)
+	{
+		return B1_RES_ETYPMISM;
+	}
+	else
+#endif
+	if(optype == B1_TYPE_INT)
+	{
+		(*pvar).value.i32val = ~((*pvar).value.i32val);
+	}
+	else
+#ifdef B1_FEATURE_TYPE_SMALL
+	if(optype == B1_TYPE_INT16)
+	{
+		(*pvar).value.i16val = ~((*pvar).value.i16val);
+	}
+	else
+	if(optype == B1_TYPE_WORD)
+	{
+		(*pvar).value.ui16val = ~((*pvar).value.ui16val);
+	}
+	else
+	if(optype == B1_TYPE_BYTE)
+	{
+		(*pvar).value.ui8val = ~((*pvar).value.ui8val);
 	}
 	else
 #endif
@@ -485,6 +550,296 @@ static B1_T_ERROR b1_eval_div(B1_VAR *pvar1, uint8_t optype)
 		}
 
 		(*pvar1).value.ui8val /= (*(pvar1 + 1)).value.ui8val;
+	}
+	else
+#endif
+	{
+		return B1_RES_EWARGTYPE;
+	}
+
+	return B1_RES_OK;
+}
+
+static B1_T_ERROR b1_eval_mod(B1_VAR *pvar1, uint8_t optype)
+{
+#ifdef B1_FEATURE_TYPE_SINGLE
+	if(optype == B1_TYPE_SINGLE)
+	{
+		(*pvar1).value.sval = fmodf((*pvar1).value.sval, (*(pvar1 + 1)).value.sval);
+	}
+	else
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(optype == B1_TYPE_DOUBLE)
+	{
+		(*pvar1).value.dval = fmod((*pvar1).value.dval, (*(pvar1 + 1)).value.dval);
+	}
+	else
+#endif
+	if(optype == B1_TYPE_INT)
+	{
+		if((*(pvar1 + 1)).value.i32val == 0 || ((*(pvar1 + 1)).value.i32val == -1 && (*pvar1).value.i32val == INT32_MIN))
+		{
+			return B1_RES_EIDIVZERO;
+		}
+
+		(*pvar1).value.i32val %= (*(pvar1 + 1)).value.i32val;
+	}
+	else
+#ifdef B1_FEATURE_TYPE_SMALL
+	if(optype == B1_TYPE_INT16)
+	{
+		if((*(pvar1 + 1)).value.i16val == 0 || ((*(pvar1 + 1)).value.i16val == ((int16_t)-1) && (*pvar1).value.i16val == INT16_MIN))
+		{
+			return B1_RES_EIDIVZERO;
+		}
+
+		(*pvar1).value.i16val %= (*(pvar1 + 1)).value.i16val;
+	}
+	else
+	if(optype == B1_TYPE_WORD)
+	{
+		if((*(pvar1 + 1)).value.ui16val == 0)
+		{
+			return B1_RES_EIDIVZERO;
+		}
+
+		(*pvar1).value.ui16val %= (*(pvar1 + 1)).value.ui16val;
+	}
+	else
+	if(optype == B1_TYPE_BYTE)
+	{
+		if((*(pvar1 + 1)).value.ui8val == 0)
+		{
+			return B1_RES_EIDIVZERO;
+		}
+		
+		(*pvar1).value.ui8val %= (*(pvar1 + 1)).value.ui8val;
+	}
+	else
+#endif
+	{
+		return B1_RES_EWARGTYPE;
+	}
+
+	return B1_RES_OK;
+}
+
+static B1_T_ERROR b1_eval_and(B1_VAR *pvar1, uint8_t optype)
+{
+#ifdef B1_FEATURE_TYPE_SINGLE
+	if(optype == B1_TYPE_SINGLE)
+	{
+		return B1_RES_ETYPMISM;
+	}
+	else
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(optype == B1_TYPE_DOUBLE)
+	{
+		return B1_RES_ETYPMISM;
+	}
+	else
+#endif
+	if(optype == B1_TYPE_INT)
+	{
+		(*pvar1).value.i32val &= (*(pvar1 + 1)).value.i32val;
+	}
+	else
+#ifdef B1_FEATURE_TYPE_SMALL
+	if(optype == B1_TYPE_INT16)
+	{
+		(*pvar1).value.i16val &= (*(pvar1 + 1)).value.i16val;
+	}
+	else
+	if(optype == B1_TYPE_WORD)
+	{
+		(*pvar1).value.ui16val &= (*(pvar1 + 1)).value.ui16val;
+	}
+	else
+	if(optype == B1_TYPE_BYTE)
+	{
+		(*pvar1).value.ui8val &= (*(pvar1 + 1)).value.ui8val;
+	}
+	else
+#endif
+	{
+		return B1_RES_EWARGTYPE;
+	}
+
+	return B1_RES_OK;
+}
+
+static B1_T_ERROR b1_eval_or(B1_VAR *pvar1, uint8_t optype)
+{
+#ifdef B1_FEATURE_TYPE_SINGLE
+	if(optype == B1_TYPE_SINGLE)
+	{
+		return B1_RES_ETYPMISM;
+	}
+	else
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(optype == B1_TYPE_DOUBLE)
+	{
+		return B1_RES_ETYPMISM;
+	}
+	else
+#endif
+	if(optype == B1_TYPE_INT)
+	{
+		(*pvar1).value.i32val |= (*(pvar1 + 1)).value.i32val;
+	}
+	else
+#ifdef B1_FEATURE_TYPE_SMALL
+	if(optype == B1_TYPE_INT16)
+	{
+		(*pvar1).value.i16val |= (*(pvar1 + 1)).value.i16val;
+	}
+	else
+	if(optype == B1_TYPE_WORD)
+	{
+		(*pvar1).value.ui16val |= (*(pvar1 + 1)).value.ui16val;
+	}
+	else
+	if(optype == B1_TYPE_BYTE)
+	{
+		(*pvar1).value.ui8val |= (*(pvar1 + 1)).value.ui8val;
+	}
+	else
+#endif
+	{
+		return B1_RES_EWARGTYPE;
+	}
+
+	return B1_RES_OK;
+}
+
+static B1_T_ERROR b1_eval_xor(B1_VAR *pvar1, uint8_t optype)
+{
+#ifdef B1_FEATURE_TYPE_SINGLE
+	if(optype == B1_TYPE_SINGLE)
+	{
+		return B1_RES_ETYPMISM;
+	}
+	else
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(optype == B1_TYPE_DOUBLE)
+	{
+		return B1_RES_ETYPMISM;
+	}
+	else
+#endif
+	if(optype == B1_TYPE_INT)
+	{
+		(*pvar1).value.i32val ^= (*(pvar1 + 1)).value.i32val;
+	}
+	else
+#ifdef B1_FEATURE_TYPE_SMALL
+	if(optype == B1_TYPE_INT16)
+	{
+		(*pvar1).value.i16val ^= (*(pvar1 + 1)).value.i16val;
+	}
+	else
+	if(optype == B1_TYPE_WORD)
+	{
+		(*pvar1).value.ui16val ^= (*(pvar1 + 1)).value.ui16val;
+	}
+	else
+	if(optype == B1_TYPE_BYTE)
+	{
+		(*pvar1).value.ui8val ^= (*(pvar1 + 1)).value.ui8val;
+	}
+	else
+#endif
+	{
+		return B1_RES_EWARGTYPE;
+	}
+
+	return B1_RES_OK;
+}
+
+static B1_T_ERROR b1_eval_shr(B1_VAR *pvar1, uint8_t optype)
+{
+#ifdef B1_FEATURE_TYPE_SINGLE
+	if(optype == B1_TYPE_SINGLE)
+	{
+		return B1_RES_ETYPMISM;
+	}
+	else
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(optype == B1_TYPE_DOUBLE)
+	{
+		return B1_RES_ETYPMISM;
+	}
+	else
+#endif
+	if(optype == B1_TYPE_INT)
+	{
+		(*pvar1).value.i32val >>= (*(pvar1 + 1)).value.i32val;
+	}
+	else
+#ifdef B1_FEATURE_TYPE_SMALL
+	if(optype == B1_TYPE_INT16)
+	{
+		(*pvar1).value.i16val >>= (*(pvar1 + 1)).value.i16val;
+	}
+	else
+	if(optype == B1_TYPE_WORD)
+	{
+		(*pvar1).value.ui16val >>= (*(pvar1 + 1)).value.ui16val;
+	}
+	else
+	if(optype == B1_TYPE_BYTE)
+	{
+		(*pvar1).value.ui8val >>= (*(pvar1 + 1)).value.ui8val;
+	}
+	else
+#endif
+	{
+		return B1_RES_EWARGTYPE;
+	}
+
+	return B1_RES_OK;
+}
+
+static B1_T_ERROR b1_eval_shl(B1_VAR *pvar1, uint8_t optype)
+{
+#ifdef B1_FEATURE_TYPE_SINGLE
+	if(optype == B1_TYPE_SINGLE)
+	{
+		return B1_RES_ETYPMISM;
+	}
+	else
+#endif
+#ifdef B1_FEATURE_TYPE_DOUBLE
+	if(optype == B1_TYPE_DOUBLE)
+	{
+		return B1_RES_ETYPMISM;
+	}
+	else
+#endif
+	if(optype == B1_TYPE_INT)
+	{
+		(*pvar1).value.i32val <<= (*(pvar1 + 1)).value.i32val;
+	}
+	else
+#ifdef B1_FEATURE_TYPE_SMALL
+	if(optype == B1_TYPE_INT16)
+	{
+		(*pvar1).value.i16val <<= (*(pvar1 + 1)).value.i16val;
+	}
+	else
+	if(optype == B1_TYPE_WORD)
+	{
+		(*pvar1).value.ui16val <<= (*(pvar1 + 1)).value.ui16val;
+	}
+	else
+	if(optype == B1_TYPE_BYTE)
+	{
+		(*pvar1).value.ui8val <<= (*(pvar1 + 1)).value.ui8val;
 	}
 	else
 #endif
@@ -827,6 +1182,11 @@ static B1_T_ERROR b1_eval_un_op(B1_T_CHAR c, B1_VAR *arg, uint8_t optype)
 		{
 			return b1_eval_neg(arg, optype, 0);
 		}
+
+		if(c == B1_T_C_EXCLAMATION)
+		{
+			return b1_eval_not(arg, optype);
+		}
 	}
 	else
 	{
@@ -867,6 +1227,42 @@ static B1_T_ERROR b1_eval_bin_op(B1_T_CHAR c, B1_T_CHAR c1, B1_VAR *args, uint8_
 		err = b1_eval_pow(args, optype);
 	}
 	else
+	// MOD operator
+	if(c == B1_T_C_PERCENT)
+	{
+		err = b1_eval_mod(args, optype);
+	}
+	else
+	// AND operator
+	if(c == B1_T_C_AMPERSAND)
+	{
+		err = b1_eval_and(args, optype);
+	}
+	else
+	// OR operator
+	if(c == B1_T_C_PIPE)
+	{
+		err = b1_eval_or(args, optype);
+	}
+	else
+	// XOR operator
+	if(c == B1_T_C_TILDE)
+	{
+		err = b1_eval_xor(args, optype);
+	}
+	else
+	// << operator
+	if(c == B1_T_C_LT && c1 == B1_T_C_LT)
+	{
+		err = b1_eval_shl(args, optype);
+	}
+	else
+	// >> operator
+	if(c == B1_T_C_GT && c1 == B1_T_C_GT)
+	{
+		err = b1_eval_shr(args, optype);
+	}
+	else
 	{
 		err = b1_eval_cmp(args, c, c1, optype);
 	}
@@ -877,18 +1273,15 @@ static B1_T_ERROR b1_eval_bin_op(B1_T_CHAR c, B1_T_CHAR c1, B1_VAR *args, uint8_
 static uint8_t b1_eval_get_common_type(uint8_t type1, uint8_t type2)
 {
 	B1_T_INDEX i;
+	uint8_t type;
 
 	// start finding common type from the highest priority type
 	for(i = 0; i < B1_TYPE_COUNT; i++)
 	{
-		if(b1_t_types[i] == type1)
+		type = b1_t_types[i];
+		if(type == type1 || type == type2)
 		{
-			return type1;
-		}
-
-		if(b1_t_types[i] == type2)
-		{
-			return type2;
+			return type;
 		}
 	}
 
@@ -979,12 +1372,16 @@ B1_T_ERROR b1_eval(uint8_t options, B1_VAR_REF *var_ref)
 #endif
 		}
 		else
+		if(B1_RPNREC_TEST_TYPES(tflags, B1_RPNREC_TYPE_OPER))
+		{
+			// the first and the second characters of the token
+			c = (*(b1_rpn + i)).data.oper.c;
+			c1 = (*(b1_rpn + i)).data.oper.c1;
+		}
+		else
 		{
 			// pointer to the current expression token structure
 			ptoken = &(*(b1_rpn + i)).data.token;
-			// the first and the second characters of the token
-			c = *(b1_progline + (*ptoken).offset);
-			c1 = ((*ptoken).length == 1 ? B1_T_C_STRTERM : *(b1_progline + (*ptoken).offset + 1));
 		}
 
 		if(B1_RPNREC_TEST_TYPES(tflags, B1_RPNREC_TYPE_IMM_VALUE))
@@ -1018,11 +1415,11 @@ B1_T_ERROR b1_eval(uint8_t options, B1_VAR_REF *var_ref)
 			// B1_RPNREC_TYPE_OPER, B1_RPNREC_TYPE_FNVAR or B1_RPNREC_TYPE_FN_ARG
 			if(B1_RPNREC_TEST_TYPES(tflags, B1_RPNREC_TYPE_OPER))
 			{
-				// test for unary operator (1 - priority of unary -/+ operators)
+				// test for unary operator (0 - priority of unary -/+ and NOT operators)
 				argnum = 1;
 				type = B1_TYPE_GET((*(var1 - 1)).type);
 
-				if(!B1_RPNREC_TEST_OPER_PRI(tflags, 1))
+				if(!B1_RPNREC_TEST_OPER_PRI(tflags, 0))
 				{
 					argnum++;
 					type = b1_eval_get_common_type(type, B1_TYPE_GET((*(var1 - 2)).type));

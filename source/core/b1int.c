@@ -971,8 +971,8 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 	uint8_t stop, type, dimsnum;
 	B1_TOKENDATA td;
 	B1_T_INDEX len;
-	B1_T_IDHASH name_hash;
 	B1_T_SUBSCRIPT bound1, subs_bounds[B1_MAX_VAR_DIM_NUM * 2], *subs_bnds_ptr;
+	B1_T_IDHASH hash;
 #ifdef B1_FEATURE_DEBUG
 	B1_T_INDEX id_off, id_len;
 	B1_NAMED_VAR *var;
@@ -981,7 +981,7 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 	while(1)
 	{
 		// get variable name
-		err = b1_tok_get(offset, 0, &td);
+		err = b1_tok_get(offset, B1_TOK_CALC_HASH, &td);
 		if(err != B1_RES_OK)
 		{
 			return err;
@@ -995,8 +995,6 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 		offset = td.offset;
 		len = td.length;
 
-		// get hash and check for existence
-		name_hash = b1_id_calc_hash(b1_progline + offset, len * B1_T_CHAR_SIZE);
 #ifdef B1_FEATURE_DEBUG
 		id_off = offset;
 		id_len = len;
@@ -1007,6 +1005,8 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 
 		dimsnum = 0;
 		subs_bnds_ptr = subs_bounds;
+
+		hash = b1_tok_id_hash;
 
 		// DIM <var_name>[(subscript[,...])] [AS <type_name>][,...]
 		err = b1_tok_get(offset, 0, &td);
@@ -1161,7 +1161,7 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 
 		// create variable
 #ifdef B1_FEATURE_DEBUG
-		err = b1_var_create(name_hash, type, dimsnum, subs_bounds, &var);
+		err = b1_var_create(hash, type, dimsnum, subs_bounds, &var);
 		if(err != B1_RES_OK)
 		{
 			return err;
@@ -1170,7 +1170,7 @@ static B1_T_ERROR b1_int_st_dim(B1_T_INDEX offset)
 		memcpy((*var).id.name + 1, b1_progline + id_off, id_len * B1_T_CHAR_SIZE);
 		(*var).id.name[0] = (B1_T_CHAR)id_len;
 #else
-		err = b1_var_create(name_hash, type, dimsnum, subs_bounds, NULL);
+		err = b1_var_create(hash, type, dimsnum, subs_bounds, NULL);
 		if(err != B1_RES_OK)
 		{
 			return err;
@@ -1285,13 +1285,12 @@ static B1_T_ERROR b1_int_st_erase(B1_T_INDEX offset)
 	uint8_t next, type;
 	B1_TOKENDATA td;
 	B1_T_INDEX len;
-	B1_T_IDHASH name_hash;
 	B1_NAMED_VAR *var;
 
 	while(1)
 	{
 		// get variable name
-		err = b1_tok_get(offset, 0, &td);
+		err = b1_tok_get(offset, B1_TOK_CALC_HASH, &td);
 		if(err != B1_RES_OK)
 		{
 			return err;
@@ -1310,8 +1309,6 @@ static B1_T_ERROR b1_int_st_erase(B1_T_INDEX offset)
 			return B1_RES_EINVTOK;
 		}
 
-		// get hash and check for existence
-		name_hash = b1_id_calc_hash(b1_progline + offset, len * B1_T_CHAR_SIZE);
 		offset += len;
 
 		err = b1_tok_get(offset, 0, &td);
@@ -1329,7 +1326,7 @@ static B1_T_ERROR b1_int_st_erase(B1_T_INDEX offset)
 		}
 		offset++;
 
-		err = b1_ex_var_alloc(name_hash, &var);
+		err = b1_ex_var_alloc(b1_tok_id_hash, &var);
 		if(err != B1_RES_OK && err != B1_RES_EIDINUSE)
 		{
 			return err;
@@ -1342,7 +1339,7 @@ static B1_T_ERROR b1_int_st_erase(B1_T_INDEX offset)
 		}
 
 		// release variable memory
-		b1_ex_var_free(name_hash);
+		b1_ex_var_free(b1_tok_id_hash);
 
 		if(!next) break;
 	}
@@ -1990,7 +1987,7 @@ static B1_T_ERROR b1_int_st_for_next(B1_T_INDEX offset)
 	{
 		b1_int_curr_stmt_state |= B1_INT_STATE_FOR_NEXT_CHECKED;
 		
-		err = b1_tok_get(offset, 0, &td);
+		err = b1_tok_get(offset, B1_TOK_CALC_HASH, &td);
 		if(err != B1_RES_OK)
 		{
 			return err;
@@ -2003,7 +2000,7 @@ static B1_T_ERROR b1_int_st_for_next(B1_T_INDEX offset)
 				return B1_RES_EINVTOK;
 			}
 
-			if(b1_id_calc_hash(b1_progline + td.offset, td.length * B1_T_CHAR_SIZE) != (*var).id.name_hash)
+			if(b1_tok_id_hash != (*var).id.name_hash)
 			{
 				return B1_RES_ENXTWOFOR;
 			}
@@ -2053,13 +2050,13 @@ static B1_T_ERROR b1_int_st_def(B1_T_INDEX offset, B1_T_PROG_LINE_CNT def_line_c
 	B1_TOKENDATA td;
 	B1_T_INDEX i, len;
 	B1_T_CHAR c;
-	B1_T_IDHASH hash, arg_hashes[B1_MAX_FN_ARGS_NUM];
+	B1_T_IDHASH arg_hashes[B1_MAX_FN_ARGS_NUM];
 	uint8_t argnum, tflags;
 	B1_UDEF_FN *fn;
 	B1_RPNREC *rpnrec;
 
 	// get function name
-	err = b1_tok_get(offset, 0, &td);
+	err = b1_tok_get(offset, B1_TOK_CALC_HASH, &td);
 	if(err != B1_RES_OK)
 	{
 		return err;
@@ -2073,12 +2070,10 @@ static B1_T_ERROR b1_int_st_def(B1_T_INDEX offset, B1_T_PROG_LINE_CNT def_line_c
 	offset = td.offset;
 	len = td.length;
 
-	// get hash
-	hash = b1_id_calc_hash(b1_progline + offset, len * B1_T_CHAR_SIZE);
 	offset += len;
 
 	// check for existence
-	err = b1_fn_get_params(hash, 1, (B1_FN **)&fn);
+	err = b1_fn_get_params(b1_tok_id_hash, 1, (B1_FN **)&fn);
 	if(err == B1_RES_OK)
 	{
 		return B1_RES_EIDINUSE;
@@ -2090,7 +2085,7 @@ static B1_T_ERROR b1_int_st_def(B1_T_INDEX offset, B1_T_PROG_LINE_CNT def_line_c
 	}
 
 	// create new user function
-	(*fn).fn.id.name_hash = hash;
+	(*fn).fn.id.name_hash = b1_tok_id_hash;
 	b1_t_get_type_by_type_spec(b1_progline[offset - 1], B1_TYPE_NULL, &(*fn).fn.ret_type);
 
 	err = b1_tok_get(offset, 0, &td);
@@ -2117,7 +2112,7 @@ static B1_T_ERROR b1_int_st_def(B1_T_INDEX offset, B1_T_PROG_LINE_CNT def_line_c
 		// read function arguments
 		while(1)
 		{
-			err = b1_tok_get(offset, 0, &td);
+			err = b1_tok_get(offset, B1_TOK_CALC_HASH, &td);
 			if(err != B1_RES_OK)
 			{
 				return err;
@@ -2137,8 +2132,7 @@ static B1_T_ERROR b1_int_st_def(B1_T_INDEX offset, B1_T_PROG_LINE_CNT def_line_c
 			}
 
 			// process function argument
-			hash = b1_id_calc_hash(b1_progline + offset, len * B1_T_CHAR_SIZE);
-			i = b1_int_find_hash(arg_hashes, argnum, hash);
+			i = b1_int_find_hash(arg_hashes, argnum, b1_tok_id_hash);
 			if(i != argnum)
 			{
 				return B1_RES_EIDINUSE;
@@ -2147,7 +2141,7 @@ static B1_T_ERROR b1_int_st_def(B1_T_INDEX offset, B1_T_PROG_LINE_CNT def_line_c
 			offset += len;
 			b1_t_get_type_by_type_spec(b1_progline[offset - 1], B1_TYPE_NULL, &(*fn).fn.argtypes[argnum]);
 
-			arg_hashes[argnum] = hash;
+			arg_hashes[argnum] = b1_tok_id_hash;
 			argnum++;
 
 			err = b1_tok_get(offset, 0, &td);

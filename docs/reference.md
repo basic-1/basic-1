@@ -108,6 +108,7 @@ Operators are characters indicating arithmetic and other operations performed on
   
 - `+` - unary plus operator, does nothing, can be used with numeric operands only  
 - `-` - unary minus operator, performs arithmetic negation, can be used with numeric operands only  
+- `NOT` - bitwise operator performing ones' complement of an integer value (inverting all the bits in binary representation of the given integer value)  
   
 ### Binary operators  
   
@@ -115,7 +116,13 @@ Operators are characters indicating arithmetic and other operations performed on
 - `-` - arithmetic subtraction, numeric operands only  
 - `*` - arithmetic multiplication  
 - `/` - arithmetic division  
+- `MOD` -  
 - `^` - calculates power of a number (exponentiation)  
+- `AND` -  
+- `OR` -  
+- `XOR` -  
+- `<<` -  
+- `>>` -  
 - `=` - assignment operator, can be used with numerics and strings  
 - `>` - "greater than" comparison operator, can be used with numerics and strings  
 - `<` - "less than" comparison operator, can be used with numerics and strings  
@@ -138,10 +145,13 @@ Operator precedence determines the order of operators evaluation in one expressi
   
 ### Operator precedence order  
   
-- unary `+` and unary `-` (the highest order of precedence)  
+- unary `+`, `-` and `NOT` operators (the highest order of precedence)  
 - `^`  
-- `*` and `/`  
+- `*`, `/` and `MOD`  
 - `+` and `-`  
+- `<<` and `>>`  
+- `AND`  
+- `OR` and `XOR`  
 - `>`, `<`, `>=`, `<=`, `=` and `<>` comparison operators  
 - `=` (assignment operator, the lowest order of precedence)  
   
@@ -149,7 +159,7 @@ Operator precedence determines the order of operators evaluation in one expressi
 `A = A + -A` 'operators evaluation order: negation (unary `-`), addition (`+`), assignment (`=`)  
 `A = A + B * C` 'order: multiplication (`*`), addition (`+`), assignment (`=`)  
 `A = (A + B) * C` 'order: addition (`+`), multiplication (`*`), assignment (`=`)  
-`IF A + 1 > B * 2 THEN GOTO 100` 'order: multiplication (`*`), addition (`+`), greater than comparison (`>`)  
+`IF A + 1 > B * 2 THEN GOTO 100` 'order: multiplication (`*`), addition (`+`), comparison (`>`)  
   
 ## Functions  
   

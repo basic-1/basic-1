@@ -72,10 +72,17 @@ typedef struct
 #endif
 } B1_T_RPN_ID;
 
+typedef struct
+{
+	B1_T_CHAR c;
+	B1_T_CHAR c1;
+} B1_T_RPN_OPER;
+
 typedef union
 {
 	B1_TOKENDATA token;
 	B1_T_RPN_ID id;
+	B1_T_RPN_OPER oper;
 #ifdef B1_FEATURE_MINIMAL_EVALUATION
 	uint8_t nestlevel;
 #endif

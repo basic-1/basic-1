@@ -18,6 +18,9 @@
 #include "b1err.h"
 
 
+B1_T_IDHASH b1_tok_id_hash;
+
+
 // token character types
 #define B1_CTYPE_UNKNOWN ((uint8_t)0x0)
 #define B1_CTYPE_LETTER ((uint8_t)0x1)
@@ -227,8 +230,10 @@ B1_T_ERROR b1_tok_get(B1_T_INDEX offset, uint8_t options, B1_TOKENDATA *tokendat
 		// process opreation token
 		if(toktype & B1_TOKEN_TYPE_OPERATION)
 		{
-			if(!(len == 0 ||
-				(len == 1 && ((c == B1_T_C_EQ && (c1 == B1_T_C_GT || c1 == B1_T_C_LT)) || (c == B1_T_C_GT && c1 == B1_T_C_LT)))
+			if(!(len == 0
+				|| (c == B1_T_C_EQ && (c1 == B1_T_C_GT || c1 == B1_T_C_LT))
+				|| (c == B1_T_C_GT && c1 == B1_T_C_LT)
+				|| (c == c1 && (c1 == B1_T_C_GT || c1 == B1_T_C_LT))
 				))
 			{
 				break;
@@ -319,7 +324,7 @@ B1_T_ERROR b1_tok_get(B1_T_INDEX offset, uint8_t options, B1_TOKENDATA *tokendat
 				if(extra & (B1_NUMERIC_PART_INT | B1_NUMERIC_PART_FRAC))
 				{
 #ifdef B1_FEATURE_HEX_NUM
-					if(len == 1 && (extra & B1_NUMERIC_PART_INT) && (c == (B1_T_CHAR)'X' || c == (B1_T_CHAR)'x') && c1 == B1_T_C_0)
+					if((extra & B1_NUMERIC_PART_INT) && (c == (B1_T_CHAR)'X' || c == (B1_T_CHAR)'x') && c1 == B1_T_C_0)
 					{
 						toktype = B1_TOKEN_TYPE_NUMERIC | B1_TOKEN_TYPE_HEX;
 						out_index++;
@@ -382,7 +387,7 @@ B1_T_ERROR b1_tok_get(B1_T_INDEX offset, uint8_t options, B1_TOKENDATA *tokendat
 #ifdef B1_FEATURE_HEX_NUM
 				|| ((toktype & B1_TOKEN_TYPE_HEX) && ((c >= (B1_T_CHAR)'A' && c <= (B1_T_CHAR)'F') || (c >= (B1_T_CHAR)'a' && c <= (B1_T_CHAR)'f')))
 #ifndef B1_FRACTIONAL_TYPE_EXISTS
-				|| (len == 1 && (c == (B1_T_CHAR)'X' || c == (B1_T_CHAR)'x') && c1 == B1_T_C_0)
+				|| ((c == (B1_T_CHAR)'X' || c == (B1_T_CHAR)'x') && c1 == B1_T_C_0)
 #endif
 #endif
 				)
@@ -413,6 +418,11 @@ B1_T_ERROR b1_tok_get(B1_T_INDEX offset, uint8_t options, B1_TOKENDATA *tokendat
 	{
 		out_index--;
 		*(b1_tmp_buf) = (B1_T_CHAR)out_index;
+	}
+
+	if(options & B1_TOK_CALC_HASH)
+	{
+		b1_tok_id_hash = b1_id_calc_hash(b1_progline + b, len * B1_T_CHAR_SIZE);
 	}
 
 	return B1_RES_OK;
@@ -468,9 +478,8 @@ B1_T_ERROR b1_tok_get_line_num(B1_T_INDEX *offset)
 B1_T_ERROR b1_tok_stmt_init(uint8_t *stmt)
 {
 	B1_T_ERROR err;
-	B1_T_INDEX offset, len;
+	B1_T_INDEX len;
 	B1_TOKENDATA td;
-	B1_T_IDHASH hash;
 
 	*stmt = B1_ID_STMT_ABSENT;
 
@@ -482,7 +491,7 @@ B1_T_ERROR b1_tok_stmt_init(uint8_t *stmt)
 	}
 
 	// get statement
-	err = b1_tok_get(b1_curr_prog_line_offset, 0, &td);
+	err = b1_tok_get(b1_curr_prog_line_offset, B1_TOK_CALC_HASH, &td);
 	if(err != B1_RES_OK)
 	{
 		return err;
@@ -501,13 +510,10 @@ B1_T_ERROR b1_tok_stmt_init(uint8_t *stmt)
 		return B1_RES_EINVSTAT;
 	}
 
-	offset = td.offset;
-
-	hash = b1_id_calc_hash(b1_progline + offset, len * B1_T_CHAR_SIZE);
-	*stmt = b1_id_get_stmt_by_hash(hash);
+	*stmt = b1_id_get_stmt_by_hash(b1_tok_id_hash);
 	if(*stmt != B1_ID_STMT_UNKNOWN)
 	{
-		b1_curr_prog_line_offset = offset + len;
+		b1_curr_prog_line_offset = td.offset + len;
 	}
 
 	return B1_RES_OK;

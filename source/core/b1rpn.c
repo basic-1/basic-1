@@ -1,6 +1,6 @@
 /*
  BASIC1 interpreter
- Copyright (c) 2021 Nikolay Pletnev
+ Copyright (c) 2021-2022 Nikolay Pletnev
  MIT license
 
  b1rpn.c: converting expressions to RPN form
@@ -24,6 +24,25 @@ B1_RPNREC b1_rpn_buf[B1_MAX_RPN_LEN];
 const B1_RPNREC *b1_rpn;
 // needed for expression evaluation
 B1_VAR b1_rpn_eval[B1_MAX_RPN_EVAL_BUFFER_LEN];
+
+
+static const B1_T_CHAR *b1_rpn_op_names[] =
+{
+	_MOD,
+	_AND,
+	_OR,
+	_XOR,
+	_NOT
+};
+
+static const B1_T_CHAR b1_rpn_op_chars[] =
+{
+	B1_T_C_PERCENT,
+	B1_T_C_AMPERSAND,
+	B1_T_C_PIPE,
+	B1_T_C_TILDE,
+	B1_T_C_EXCLAMATION
+};
 
 
 #define QUEUE_PUT(QUEUE_INDEX, VALUE) do \
@@ -66,7 +85,7 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 	B1_RPNREC rr;
 	B1_T_ERROR err;
 	uint8_t ttype, tmp, tmp1, lassoc, unop, argnum, argtop, argstk[B1_MAX_RPN_BRACK_NEST_DEPTH];
-	B1_T_CHAR c, cprev;
+	B1_T_CHAR c, c1, cprev;
 #ifdef B1_FEATURE_RPN_CACHING
 	B1_T_INDEX init_offset;
 #endif
@@ -136,7 +155,7 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 		cprev = c;
 
 		// get next token
-		err = b1_tok_get(offset + len, 0, &rr.data.token);
+		err = b1_tok_get(offset + len, B1_TOK_CALC_HASH, &rr.data.token);
 		if(err != B1_RES_OK)
 		{
 			return err;
@@ -152,8 +171,20 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 		}
 		else
 		{
-			// get the first token character
+			// get the first token character(-s)
 			c = *(b1_progline + offset);
+			c1 = (len == 1) ? (B1_T_CHAR)0 : *(b1_progline + offset + 1);
+
+			for(tmp1 = 0; tmp1 < sizeof(b1_rpn_op_names) / sizeof(b1_rpn_op_names[0]); tmp1++)
+			{
+				if(!b1_t_strcmpi(b1_rpn_op_names[tmp1], b1_progline + offset, len))
+				{
+					c = b1_rpn_op_chars[tmp1];
+					c1 = (B1_T_CHAR)0;
+					ttype = B1_TOKEN_TYPE_OPERATION;
+					break;
+				}
+			}
 		}
 
 		// process variables with subscripts and functions (tmp here is type of the previous token)
@@ -194,7 +225,7 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 
 		if(!c) break;
 
-		// unop variable should be not equal to 0 only in case of unary minus
+		// unop variable should be true only in case of unary minus or bitwise NOT
 		if(unop)
 		{
 			switch(c)
@@ -202,9 +233,10 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 				case B1_T_C_PLUS:
 					continue;
 				case B1_T_C_MINUS:
+				case B1_T_C_EXCLAMATION:
 					break;
 				default:
-					unop = 0;
+					unop = (uint8_t)0;
 			}
 		}
 
@@ -304,7 +336,7 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 			continue;
 		}
 
-		if((ttype & (B1_TOKEN_TYPE_IDNAME)) || c == B1_T_C_OPBRACK)
+		if(((ttype & (B1_TOKEN_TYPE_IDNAME)) || c == B1_T_C_OPBRACK))
 		{
 			if(c == B1_T_C_OPBRACK)
 			{
@@ -332,10 +364,10 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 				rr.data.id.offset = offset;
 				rr.data.id.length = len;
 #endif
-				rr.data.id.hash = b1_id_calc_hash(b1_progline + offset, len * B1_T_CHAR_SIZE);
+				rr.data.id.hash = b1_tok_id_hash;
 #ifdef B1_FEATURE_MINIMAL_EVALUATION
 				// set iif flag if hash corresponds to IIF or IIF$ name
-				if(rr.data.id.hash == B1_FN_IIF_FN_HASH || rr.data.id.hash == B1_FN_STRIIF_FN_HASH)
+				if(b1_tok_id_hash == B1_FN_IIF_FN_HASH || b1_tok_id_hash == B1_FN_STRIIF_FN_HASH)
 				{
 					iif++;
 				}
@@ -356,12 +388,18 @@ B1_T_ERROR b1_rpn_build(B1_T_INDEX offset, const B1_T_CHAR **stop_tokens, B1_T_I
 				return B1_RES_ESYNTAX;
 			}
 
-			tmp = (unop)									?	(uint8_t)(1 << (B1_RPNREC_OPER_PRI_SHIFT)) | (B1_RPNREC_TYPE_OPER) :
-				(c == B1_T_C_CARET)							?	(uint8_t)(3 << (B1_RPNREC_OPER_PRI_SHIFT)) | (B1_RPNREC_TYPE_OPER) :
-				(c == B1_T_C_ASTERISK || c == B1_T_C_SLASH)	?	(uint8_t)(4 << (B1_RPNREC_OPER_PRI_SHIFT)) | (B1_RPNREC_TYPE_OPER) | (B1_RPNREC_OPER_LEFT_ASSOC) :
-				(B1_T_ISPLUS(c) || B1_T_ISMINUS(c))			?	(uint8_t)(5 << (B1_RPNREC_OPER_PRI_SHIFT)) | (B1_RPNREC_TYPE_OPER) | (B1_RPNREC_OPER_LEFT_ASSOC) :
-																(uint8_t)(6 << (B1_RPNREC_OPER_PRI_SHIFT)) | (B1_RPNREC_TYPE_OPER) | (B1_RPNREC_OPER_LEFT_ASSOC);
+			tmp = unop																?	(uint8_t)(0 << (B1_RPNREC_OPER_PRI_SHIFT)) | (B1_RPNREC_TYPE_OPER) :
+				(c == B1_T_C_CARET)													?	(uint8_t)(1 << (B1_RPNREC_OPER_PRI_SHIFT)) | (B1_RPNREC_TYPE_OPER) :
+				(c == B1_T_C_ASTERISK || c == B1_T_C_SLASH || c == B1_T_C_PERCENT)	?	(uint8_t)(2 << (B1_RPNREC_OPER_PRI_SHIFT)) | (B1_RPNREC_TYPE_OPER) | (B1_RPNREC_OPER_LEFT_ASSOC) :
+				(B1_T_ISPLUS(c) || B1_T_ISMINUS(c))									?	(uint8_t)(3 << (B1_RPNREC_OPER_PRI_SHIFT)) | (B1_RPNREC_TYPE_OPER) | (B1_RPNREC_OPER_LEFT_ASSOC) :
+				(c == c1 && (c == B1_T_C_LT || c == B1_T_C_GT))						?	(uint8_t)(4 << (B1_RPNREC_OPER_PRI_SHIFT)) | (B1_RPNREC_TYPE_OPER) | (B1_RPNREC_OPER_LEFT_ASSOC) :
+				(c == B1_T_C_AMPERSAND)												?	(uint8_t)(5 << (B1_RPNREC_OPER_PRI_SHIFT)) | (B1_RPNREC_TYPE_OPER) | (B1_RPNREC_OPER_LEFT_ASSOC) :
+				(c == B1_T_C_PIPE || c == B1_T_C_TILDE)								?	(uint8_t)(6 << (B1_RPNREC_OPER_PRI_SHIFT)) | (B1_RPNREC_TYPE_OPER) | (B1_RPNREC_OPER_LEFT_ASSOC) :
+																						(uint8_t)(7 << (B1_RPNREC_OPER_PRI_SHIFT)) | (B1_RPNREC_TYPE_OPER) | (B1_RPNREC_OPER_LEFT_ASSOC);
 			rr.flags = tmp;
+			rr.data.oper.c = c;
+			rr.data.oper.c1 = c1;
+
 			unop = 0;
 
 			lassoc = B1_RPNREC_TEST_OPER_LEFT_ASSOC(tmp);

@@ -1,6 +1,6 @@
 /*
  BASIC1 interpreter
- Copyright (c) 2020 Nikolay Pletnev
+ Copyright (c) 2020-2022 Nikolay Pletnev
  MIT license
 
  b1types.c: interpreter string constants, variable data types, conversion
@@ -84,6 +84,11 @@ const B1_T_CHAR _INT16[] = { 5, 'I', 'N', 'T', '1', '6' };
 const B1_T_CHAR _WORD[] = { 4, 'W', 'O', 'R', 'D' };
 const B1_T_CHAR _BYTE[] = { 4, 'B', 'Y', 'T', 'E' };
 #endif
+const B1_T_CHAR _MOD[] = { 3, 'M', 'O', 'D' };
+const B1_T_CHAR _AND[] = { 3, 'A', 'N', 'D' };
+const B1_T_CHAR _OR[] = { 2, 'O', 'R' };
+const B1_T_CHAR _XOR[] = { 3, 'X', 'O', 'R' };
+const B1_T_CHAR _NOT[] = { 3, 'N', 'O', 'T' };
 
 #ifdef B1_FEATURE_DEBUG
 // string constant to designate FOR loop special variables (non-accessible directly from program)

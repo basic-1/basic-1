@@ -1,6 +1,6 @@
 /*
  BASIC1 interpreter
- Copyright (c) 2020 Nikolay Pletnev
+ Copyright (c) 2020-2022 Nikolay Pletnev
  MIT license
 
  b1types.h: variable data type constants, string and character macros
@@ -125,6 +125,9 @@
 #define B1_T_C_POINT ((B1_T_CHAR)'.')
 #define B1_T_C_DOLLAR ((B1_T_CHAR)'$')
 #define B1_T_C_NUMBER ((B1_T_CHAR)'#')
+#define B1_T_C_AMPERSAND ((B1_T_CHAR)'&')
+#define B1_T_C_PIPE ((B1_T_CHAR)'|')
+#define B1_T_C_TILDE ((B1_T_CHAR)'~')
 
 #define B1_T_ISCSTRTERM(C) ((B1_T_CHAR)(C) == B1_T_C_STRTERM)
 #define B1_T_ISDIGIT(C) (((B1_T_CHAR)(C) >= B1_T_C_0) && ((B1_T_CHAR)(C) <= B1_T_C_9))
@@ -250,6 +253,11 @@ extern const B1_T_CHAR _INT16[];
 extern const B1_T_CHAR _WORD[];
 extern const B1_T_CHAR _BYTE[];
 #endif
+extern const B1_T_CHAR _MOD[];
+extern const B1_T_CHAR _AND[];
+extern const B1_T_CHAR _OR[];
+extern const B1_T_CHAR _XOR[];
+extern const B1_T_CHAR _NOT[];
 
 #ifdef B1_FEATURE_DEBUG
 extern const B1_T_CHAR _DBG_FORVAR[];

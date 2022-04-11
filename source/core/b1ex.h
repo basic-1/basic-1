@@ -1,6 +1,6 @@
 /*
  BASIC1 interpreter
- Copyright (c) 2020 Nikolay Pletnev
+ Copyright (c) 2020-2022 Nikolay Pletnev
  MIT license
 
  b1ex.h: declarations of functions that are external to the interpreter core
@@ -13,6 +13,7 @@
 
 #include "b1var.h"
 #include "b1fn.h"
+#include "b1extra.h"
 
 
 #define B1_EX_MEM_READ ((uint8_t)0x1)

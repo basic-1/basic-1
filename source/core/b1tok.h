@@ -1,6 +1,6 @@
 /*
  BASIC1 interpreter
- Copyright (c) 2020-2021 Nikolay Pletnev
+ Copyright (c) 2020-2022 Nikolay Pletnev
  MIT license
 
  b1tok.h: tokenizer
@@ -19,6 +19,8 @@
 #define B1_TOK_COPY_VALUE ((uint8_t)0x1)
 // treat unary operator as a part of numeric
 #define B1_TOK_ALLOW_UNARY_OPER ((uint8_t)0x2)
+// calculate token hash
+#define B1_TOK_CALC_HASH ((uint8_t)0x4)
 
 // token types
 #define B1_TOKEN_TYPE_UNKNOWN ((uint8_t)0x0)
@@ -47,6 +49,8 @@ typedef struct
 	B1_T_INDEX length;
 } B1_TOKENDATA;
 
+
+extern B1_T_IDHASH b1_tok_id_hash;
 
 extern B1_T_ERROR b1_tok_get(B1_T_INDEX offset, uint8_t options, B1_TOKENDATA *tokendata);
 extern B1_T_ERROR b1_tok_stmt_init(uint8_t *stmt);
