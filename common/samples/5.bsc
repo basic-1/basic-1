@@ -1,0 +1,94 @@
+REM Solving a system of linear equations
+REM Copyright (c) 2020 Nikolay Pletnev
+REM MIT license
+
+GOSUB 1000
+GOSUB 2000
+GOSUB 3000
+GOSUB 4000
+END
+
+
+1000 REM Print program description
+1010 PRINT "Solving a system of linear equations"
+1020 PRINT "a1_1*x1 + a1_2*x2 + ... + a1_n*xn = b1"
+1030 PRINT "a2_1*x1 + a2_2*x2 + ... + a2_n*xn = b2"
+1040 PRINT "  ..................................  "
+1050 PRINT "an_1*x1 + an_2*x2 + ... + an_n*xn = bn"
+1060 PRINT
+1070 RETURN
+
+
+2000 REM Input system of equations and allocate memory
+2010 INPUT "Enter number of equations (n): ", n
+2020 DIM eq(0 TO n-1, 0 TO n)
+2030 FOR e = 0 TO n-1
+2040   PRINT "Enter coefficients of equation N"; STR$(e+1)
+2050   FOR c = 0 TO n-1
+2060     PRINT "a" + (e+1) + "_" + (c+1) + " = ";
+2070     INPUT "", eq(e, c)
+2080   NEXT c
+2090   PRINT "Enter constant term of equation N"; STR$(e+1)
+2100   PRINT "b" + (e+1) + " = ";
+2110   INPUT "", eq(e, n)
+2120 NEXT e
+2130 PRINT
+2140 RETURN
+
+
+3000 REM Solve the system of equations represented with eq and n variables
+3010 REM by transforming the matrix to triangular form
+3020 FOR e = 0 TO n-1
+3030   FOR e1 = e TO n-1 'find an equation with non-zero coefficient
+3040     IF eq(e1, e) = 0 THEN GOTO 3110
+3050     FOR c = 0 TO n
+3060       tmp = eq(e, c)
+3070       eq(e, c) = eq(e1, c)
+3080       eq(e1, c) = tmp
+3090     NEXT c
+3100     e1 = n-1
+3110   NEXT e1
+3120   FOR e1 = e+1 TO n-1 'make the coefficient zero
+3130     m = eq(e1, e) / eq(e, e)
+3140     FOR c = e TO n
+3150       eq(e1, c) = eq(e1, c) - eq(e, c) * m
+3160     NEXT c
+3170   NEXT e1
+3180 NEXT e
+3190 RETURN
+
+
+4000 REM Print the system solution
+4010 PRINT "Solution:"
+4020 FOR e = n-1 TO 0 STEP -1
+4030   f = e 'f stands for failure state, f = n means all zero coefficients
+4040   d = eq(e, e)
+4050   FOR c = e TO n
+4060     f = f + IIF(c = n, 0, IIF(eq(e, c) = 0, 1, 0))
+4070     eq(e, c) = eq(e, c) / d
+4080   NEXT c
+4090   IF f < n THEN GOTO 4130
+4100   PRINT "The system is inconsistent or its equations are not independent"
+4110   e = 0 'break the outer loop
+4120   GOTO 4160
+4130   FOR c = e+1 TO n-1
+4140     eq(e, n) = eq(e, n) - eq(e, c) * eq(c, n)
+4150   NEXT c
+4160 NEXT e
+4170 IF f = n THEN GOTO 4220
+4180 FOR e = 0 TO n-1
+4190   PRINT "x" + (e+1) + " = " + eq(e, n)
+4200 NEXT e
+4210 PRINT
+4220 RETURN
+
+
+5000 REM Print the system
+5010 FOR en = 0 TO n-1
+5020   FOR cn = 0 TO n-1
+5030     PRINT eq(en, cn) + "*x" + (cn+1) + IIF$(cn < n-1, " + ", " = ");
+5040   NEXT cn
+5050   PRINT eq(en, n)
+5060 NEXT en
+5070 PRINT
+5080 RETURN 

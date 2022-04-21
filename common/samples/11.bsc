@@ -1,0 +1,39 @@
+' Case-insensitive sorting of letters of Greek alphabet, UTF-8 encoding
+'
+' The program will probably not work under Windows because of
+' poor UTF-8 support by Windows console.
+'
+' Under Linux (possible command, depends on installed locales):
+' b1iu -l el_GR.utf8 11.bsc
+
+10  DATA Α,Β,Γ,Δ,Ε,Ζ,Η,Θ,Ι,Κ,Λ,Μ,Ν,Ξ,Ο,Π,Ρ,Σ,Τ,Υ,Φ,Χ,Ψ,Ω
+20  DATA α,β,γ,δ,ε,ζ,η,θ,ι,κ,λ,μ,ν,ξ,ο,π,ρ,ς,σ,τ,υ,φ,χ,ψ,ω
+30
+40  N% = 49
+50  DIM alpha$(N% - 1%)
+60
+70  FOR i% = 0% TO N% - 1%
+80    READ alpha$(i%)
+90  NEXT
+100
+110 GOSUB 1000
+120
+130 FOR i% = 0% TO N% - 1%
+140   PRINT alpha$(i%);
+150 NEXT
+160 PRINT
+170 END
+
+1000 REM Sort array alpha$ of size 0 .. N% - 1
+1010 FOR i% = 0% TO N% - 2%
+1020   m$ = alpha$(i%)
+1030   mi% = i%
+1040   FOR j% = i% + 1% TO N% - 1%
+1050     IF m$ <= alpha$(j%) THEN 1080
+1060     m$ = alpha$(j%)
+1070     mi% = j%
+1080   NEXT
+1090   alpha$(mi%) = alpha$(i%)
+1100   alpha$(i%) = m$
+1110 NEXT
+1120 RETURN

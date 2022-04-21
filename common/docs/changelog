@@ -1,0 +1,250 @@
+b1i (1.0.0-57) unstable; urgency=low
+
+  * interpreter core (https://github.com/basic-1/b1core) separated from
+    b1i/b1iu CLI programs and b1ig graphical IDE
+  * project directories structure changed
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Wed, 20 Apr 2022 18:07:55 +0300
+
+b1i (1.0.0-56) unstable; urgency=low
+
+  * MOD (remainder) operator support added
+  * logical AND, OR, XOR and NOT operators support added
+  * >> and << arithmetic shift operators support added
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Wed, 06 Apr 2022 23:10:55 +0300
+
+b1i (1.0.0-55) unstable; urgency=low
+
+  * hexadecimal format for integer constants
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Sat, 25 Dec 2021 21:52:18 +0300
+
+b1i (1.0.0-54) unstable; urgency=low
+
+  * small integer data types support added
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Wed, 15 Dec 2021 18:10:35 +0300
+
+b1i (1.0.0-53) unstable; urgency=low
+
+  * some code revision
+  * small improvements in b1ig IDE (saving column sizes of Watch variables
+    grid, etc.)
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Sun, 21 Mar 2021 18:16:11 +0300
+
+b1i (1.0.0-52) unstable; urgency=low
+
+  * now program line caused an error is highlighted with red color
+  * better errors processing: b1_int_prerun function reports program
+    line number in case of error
+  * b1ig executable accepts program file name as command line argument
+    to show it in IDE editor
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Fri, 26 Feb 2021 19:32:03 +0300
+
+b1i (1.0.0-51) unstable; urgency=low
+
+  * some screenshots added
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Fri, 19 Feb 2021 21:16:11 +0300
+
+b1i (1.0.0-50) unstable; urgency=low
+
+  * b1ig interpreter and IDE with graphical interface first release
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Thu, 11 Feb 2021 21:15:32 +0300
+
+b1i (1.0.0-49) unstable; urgency=low
+
+  * more dubugging abilities: breakpoint functions added
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Mon, 25 Jan 2021 20:24:29 +0300
+
+b1i (1.0.0-48) unstable; urgency=low
+
+  * B1_FEATURE_STMT_STOP feature: support for STOP statement and program
+    resuming
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Mon, 19 Oct 2020 18:10:15 +0300
+
+b1i (1.0.0-47) unstable; urgency=low
+
+  * minor changes in Linux build scripts
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Fri, 10 Oct 2020 20:27:02 +0300
+
+b1i (1.0.0-46) unstable; urgency=low
+
+  * B1_FEATURE_STMT_BREAK_CONTINUE feature added: BREAK and CONTINUE statements
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Tue, 22 Sep 2020 18:12:32 +0300
+
+b1i (1.0.0-45) unstable; urgency=low
+
+  * B1_FEATURE_MINIMAL_EVALUATION feature added: minimal evaluation of
+    arguments of IIF and IIF$ functions
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Wed, 16 Sep 2020 18:05:17 +0300
+
+b1i (1.0.0-44) unstable; urgency=low
+
+  * updated reference.md document (DOUBLE data type support)
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Mon, 14 Sep 2020 18:05:02 +0300
+
+b1i (1.0.0-43) unstable; urgency=low
+
+  * DOUBLE type support added (B1_FEATURE_TYPE_DOUBLE)
+  * random generator functions revised
+  * fixed wrong floating-point values formatting when print zone width
+    exceeded some value (SET ZONEWIDTH 14 statement caused the issue for
+    SINGLE data type values)
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Fri, 04 Sep 2020 18:05:02 +0300
+
+b1i (1.0.0-42) unstable; urgency=low
+
+  * B1_FEATURE_3_DIM_ARRAYS feature added (three-dimensional arrays support)
+  * tar.gz archives with binary executable files for Linux
+  * distr directory description added (README.md file)
+  * a bug with wrong subscript number when accessing arrays fixed (the
+    interpreter allowed reading and writing arrays specifying wrong number
+    of subscripts)
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Sat, 29 Aug 2020 17:52:42 +0300
+
+b1i (1.0.0-41) unstable; urgency=low
+
+  * memory management functions revised
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Thu, 27 Aug 2020 18:15:11 +0300
+
+b1i (1.0.0-40) unstable; urgency=low
+
+  * user-defined functions data cache detached from interpreter's core
+  * now RETURN statement unwinds statements stack so it can be used in IF
+    statement and loops
+  * some improvements and bugfixes: b1_int_reset function didn't free memory
+    allocated with arrays, arrays memory releasing revised
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Fri, 17 Jul 2020 19:39:07 +0300
+
+b1i (1.0.0-39) unstable; urgency=low
+
+  * B1_FEATURE_STMT_WHILE_WEND feature added (WHILE - WEND statements)
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Wed, 08 Jul 2020 18:23:22 +0300
+
+b1i (1.0.0-38) unstable; urgency=low
+
+  * B1_FEATURE_CHECK_KEYWORDS feature added (forbids using reserved keywords
+    as identifier names)
+  * implemented binary search of hashes of statements and built-in functions
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Thu, 11 Jun 2020 18:42:40 +0300
+
+b1i (1.0.0-37) unstable; urgency=low
+
+  * B1_FEATURE_DEBUG feature code refined
+  * embedding.md document updated
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Tue, 09 Jun 2020 18:17:51 +0300
+
+b1i (1.0.0-36) unstable; urgency=low
+
+  * added possibility to enumerate all existing variables (for debugging or
+    to free the memory occupied by them)
+  * now b1i/b1iu interpreters free memory taken by variables when terminating
+  * new '-a' command-line option added: dump all variables in case of error
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Fri, 05 Jun 2020 18:07:31 +0300
+
+b1i (1.0.0-35) unstable; urgency=low
+
+  * Unicode support added (now the core supports UCS-2 encoding)
+  * b1iu executable module with Unicode support added
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Mon, 01 Jun 2020 18:45:18 +0300
+
+b1i (1.0.0-34) unstable; urgency=low
+
+  * locales support added
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Wed, 20 May 2020 19:43:15 +0300
+
+b1i (1.0.0-33) unstable; urgency=low
+
+  * added possibility to specify type and range of array subscripts
+  * b1i interpreter's array subscript range changed to [-8388608 ... 8388607]
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Thu, 14 May 2020 18:45:11 +0300
+
+b1i (1.0.0-32) unstable; urgency=low
+
+  * a bug in floating-point to string conversion function fixed
+    (long -> int32_t)
+  * string to integer conversion function improved
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Wed, 13 May 2020 18:25:00 +0300
+
+b1i (1.0.0-31) unstable; urgency=low
+
+  * Linux armv7l (armhf) binary module rebuild to avoid segmentation fault
+  * embedding.md document finished
+  * minor code and documentation improvements
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Fri, 08 May 2020 20:15:00 +0300
+
+b1i (1.0.0-30) unstable; urgency=low
+
+  * Linux armv7l (armhf) architecture support added
+  * minor changes in memory allocation and variables cache functions
+  * embedding.md document continued (not finished yet)
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Thu, 07 May 2020 18:12:00 +0300
+
+b1i (1.0.0-29) unstable; urgency=low
+
+  * changed RND function behavior: now it should return the same sequence
+    on every interpreter start
+  * embedding.md document started
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Mon, 04 May 2020 17:05:00 +0300
+
+b1i (1.0.0-28) unstable; urgency=low
+
+  * move b1i interpreter version constant to a separate file
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Fri, 01 May 2020 20:21:00 +0300
+
+b1i (1.0.0-27) unstable; urgency=low
+
+  * updated language reference and some minor changes in batch files
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Thu, 30 Apr 2020 18:36:00 +0300
+
+b1i (1.0.0-26) unstable; urgency=low
+
+  * Created deb package for amd64 platform
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Tue, 28 Apr 2020 20:20:00 +0300
+
+b1i (1.0.0-25) unstable; urgency=low
+
+  * updated language reference
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Mon, 27 Apr 2020 20:20:00 +0300
+
+b1i (1.0.0-24) unstable; urgency=low
+
+  * updated language reference
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Sun, 26 Apr 2020 20:20:00 +0300
+
+b1i (1.0.0-23) unstable; urgency=low
+
+  * Initial release.
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Wed, 24 Apr 2020 20:20:00 +0300

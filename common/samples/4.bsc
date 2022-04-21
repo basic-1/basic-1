@@ -1,0 +1,11 @@
+' Solving quadratic equation
+' Copyright (c) 2020 Nikolay Pletnev
+' MIT license
+
+PRINT "Solving quadratic equation a*x^2 + b*x + c = 0"
+INPUT "Enter a: ", a
+INPUT "Enter b: ", b
+INPUT "Enter c: ", c
+D = b*b - 4*a*c
+PRINT IIF$(a = 0, "Not a quadratic equation", IIF$(D < 0, "No real roots", "Roots: x1 = " + STR$((-b + SQR(D)) / (2*a)) + ", x2 = " + STR$((-b - SQR(D)) / (2*a))))
+END
