@@ -2,7 +2,7 @@
   
 *just one more BASIC interpreter*  
   
-![b1ig program on Windows](./common/docs/images/b1win.png "b1ig program on Windows")  
+![b1ig program on Windows](https://github.com/basic-1/basic-1/common/docs/images/b1win.png "b1ig program on Windows")  
   
 # Brief  
   
@@ -74,6 +74,13 @@
   
 Use CMake 3.1 tools to build **b1i** or **b1iu** simple command-line interpreter or **b1ig** interpreter with graphical IDE. **b1iu** interpreter uses Unicode for characters representation. wxWidgets GUI library is needed to build **b1ig** interpreter with graphical IDE. Use one of the next C/C++ toolchains: MinGW-W64 (x86 and x64) under Windows, MSVC 2010 (x86 and x64) under Windows, MSVC 2019 (x86 and x64) under Windows, gcc/g++ (x86, x64 and armhf) under Linux. Other compilers/toolchains are probably compatible too.  
   
+First get the interpreter source files copy to your local computer from [GitHub](https://github.com/basic-1/basic-1)  
+  
+Commands to get the source files:  
+`git clone https://github.com/basic-1/basic-1`  
+`cd basic-1`  
+`git submodule update --init`  
+  
 To build the interpreter under Windows go to `./b1i/build` or `./b1ig/build` directory and run corresponding batch file depending on your compiler and target platform: `b1i_win_x86_mingw_rel.bat` and `b1i_win_x64_mingw_rel.bat` for MinGW-W64, `b1i_win_x86_msvc10_rel.bat` and `b1i_win_x64_msvc10_rel.bat` for MSVC10, etc. Under Linux the procedure is the same but shell script names are `b1i_lnx_x86_gcc_rel.sh`, `b1i_lnx_x64_gcc_rel.sh` and `b1i_lnx_armhf_gcc_rel.sh`. Use scripts with `b1iu_` prefix to build Unicode version of the interpreter.  
   
 **Important note:** The batch files mentioned above run corresponding `<platform_toolchain_name>_env` scripts from `./env` directory if they exist to set compiler-specific environment variables(PATH, INCLUDE, LIB, etc.). So the file names are: `win_x86_mingw_env.bat`, `win_x64_mingw_env.bat`, `win_x86_msvc10_env.bat`, `lnx_x64_gcc_env.sh`, etc. Create them if necessary before building the project. CMake build and setup scripts for **b1ig** interpreter use `wx-config` utility to locate wxWidgets libraries and compiler settings. Specify the utility executable file name (with path if needed) by setting `WX_CONFIG` environment variable before running **b1ig** build or setup scripts (the mentioned above `<platform_toolchain_name>_env` scripts can be used for this purpose, the samples can be found in `./env` directory: they have `sample_` prefix).  
@@ -118,8 +125,8 @@ Examples:
 [BASIC1 language reference](https://github.com/basic-1/b1core/docs/reference.md)  
 [BASIC1 interpreter limitations](https://github.com/basic-1/b1core/docs/limits.md)  
 [BASIC1 interpreter core embedding](https://github.com/basic-1/b1core/docs/embedding.md)  
-[Change log](./common/docs/changelog)  
+[Change log](https://github.com/basic-1/basic-1/common/docs/changelog)  
   
-![b1ig program on Ubuntu 18.04](./common/docs/images/b1ub1804.png "b1ig program on Ubuntu 18.04")  
-![b1ig program on Kubuntu 20.10](./common/docs/images/b1kub2010.png "b1ig program on Kubuntu 20.10")  
+![b1ig program on Ubuntu 18.04](https://github.com/basic-1/basic-1/common/docs/images/b1ub1804.png "b1ig program on Ubuntu 18.04")  
+![b1ig program on Kubuntu 20.10](https://github.com/basic-1/basic-1/common/docs/images/b1kub2010.png "b1ig program on Kubuntu 20.10")  
   

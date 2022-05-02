@@ -50,7 +50,7 @@ else
   exit 1
 fi
 version=${version/"#define"/}
-version=${version/"B1_CORE_VERSION"/}
+version=${version/"B1_INT_VERSION"/}
 version=${version// /}
 version=${version//'"'/}
 

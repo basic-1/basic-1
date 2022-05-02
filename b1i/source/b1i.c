@@ -64,7 +64,7 @@ do { \
 extern B1_T_ERROR b1_ex_prg_set_prog_file(const char *prog_file);
 
 
-static const char *version = B1_CORE_VERSION;
+static const char *version = B1_INT_VERSION;
 
 static const char *err_msgs[] =
 {

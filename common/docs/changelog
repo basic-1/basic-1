@@ -1,3 +1,10 @@
+b1i (1.0.0-61) unstable; urgency=low
+
+  * updated README.md
+  * other minor changes
+
+ -- Nikolay Pletnev <b1justomore@gmail.com>  Sun, 24 Apr 2022 18:52:02 +0300
+
 b1i (1.0.0-57) unstable; urgency=low
 
   * interpreter core (https://github.com/basic-1/b1core) separated from

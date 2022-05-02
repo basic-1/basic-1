@@ -48,7 +48,7 @@ if not exist ..\..\common\source\version.h (
 )
 set /p version=<..\..\common\source\version.h
 set version=%version:#define=%
-set version=%version:B1_CORE_VERSION=%
+set version=%version:B1_INT_VERSION=%
 set version=%version:"=%
 set version=%version: =%
 

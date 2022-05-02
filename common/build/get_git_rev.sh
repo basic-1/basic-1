@@ -3,7 +3,7 @@
 unlink $1/gitrev.h
 touch $1/gitrev.h
 
-if git_rev=`git rev-list --count --first-parent HEAD`
+if git_rev=`git rev-list --count HEAD`
 then
   if [ "$2" == "next" ]
   then

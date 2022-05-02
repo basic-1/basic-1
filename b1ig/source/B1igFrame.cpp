@@ -1015,7 +1015,7 @@ void B1igFrame::OnAbout(wxCommandEvent &event)
     wxAboutDialogInfo adi;
     adi.SetName(_("BASIC1 interpreter"));
     adi.SetDescription(_("just one more BASIC interpreter"));
-    wxString version = B1_CORE_VERSION;
+    wxString version = B1_INT_VERSION;
 #ifdef B1_GIT_REVISION
     version += wxString(".") + B1_GIT_REVISION;
 #endif

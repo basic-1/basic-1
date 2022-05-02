@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 del "%~1\gitrev.tmp"
 del "%~1\gitrev.h"
 
-git rev-list --count --first-parent HEAD >>"%~1\gitrev.tmp"
+git rev-list --count HEAD >>"%~1\gitrev.tmp"
 if errorlevel 1 goto _fail
 
 set /p rev=<"%~1\gitrev.tmp"

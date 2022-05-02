@@ -1,1 +1,1 @@
-#define B1_CORE_VERSION "1.0.0"
+#define B1_INT_VERSION "1.0.0"
