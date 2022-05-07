@@ -2,7 +2,7 @@
   
 *just one more BASIC interpreter*  
   
-![b1ig program on Windows](https://github.com/basic-1/basic-1/common/docs/images/b1win.png "b1ig program on Windows")  
+![b1ig program on Windows](https://github.com/basic-1/basic-1/blob/master/common/docs/images/b1win.png "b1ig program on Windows")  
   
 # Brief  
   
@@ -122,11 +122,11 @@ Examples:
   
 # More documents  
   
-[BASIC1 language reference](https://github.com/basic-1/b1core/docs/reference.md)  
-[BASIC1 interpreter limitations](https://github.com/basic-1/b1core/docs/limits.md)  
-[BASIC1 interpreter core embedding](https://github.com/basic-1/b1core/docs/embedding.md)  
-[Change log](https://github.com/basic-1/basic-1/common/docs/changelog)  
+[BASIC1 language reference](https://github.com/basic-1/b1core/blob/master/docs/reference.md)  
+[BASIC1 interpreter limitations](https://github.com/basic-1/b1core/blob/master/docs/limits.md)  
+[BASIC1 interpreter core embedding](https://github.com/basic-1/b1core/blob/master/docs/embedding.md)  
+[Change log](https://github.com/basic-1/basic-1/blob/master/common/docs/changelog)  
   
-![b1ig program on Ubuntu 18.04](https://github.com/basic-1/basic-1/common/docs/images/b1ub1804.png "b1ig program on Ubuntu 18.04")  
-![b1ig program on Kubuntu 20.10](https://github.com/basic-1/basic-1/common/docs/images/b1kub2010.png "b1ig program on Kubuntu 20.10")  
+![b1ig program on Ubuntu 18.04](https://github.com/basic-1/basic-1/blob/master/common/docs/images/b1ub1804.png "b1ig program on Ubuntu 18.04")  
+![b1ig program on Kubuntu 20.10](https://github.com/basic-1/basic-1/blob/master/common/docs/images/b1kub2010.png "b1ig program on Kubuntu 20.10")  
   
